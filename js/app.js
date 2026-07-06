@@ -8,7 +8,7 @@
 /* ---------- HQ.units から QUESTIONS / STAGE_ORDER を構築 ---------- */
 const QUESTIONS = {};
 HQ.units.forEach(u => {
-  QUESTIONS[u.id] = { title: u.title, desc: u.desc, data: u.questions, subject: u.subject, group: u.group };
+  QUESTIONS[u.id] = { title: u.title, desc: u.desc, data: u.questions, subject: u.subject, group: u.group, page: u.page };
 });
 // order 昇順で並べたステージID一覧（ホーム表示・ボス戦・弱点マップ・SRSの対象範囲を決める）
 const STAGE_ORDER = HQ.units.slice().sort((a, b) => a.order - b.order).map(u => u.id);
@@ -196,7 +196,7 @@ function dueList(){
   STAGE_ORDER.forEach(sid=>{
     QUESTIONS[sid].data.forEach((q,idx)=>{
       const key=sid+'-'+idx, st=state.qStats[key];
-      if(st && st.due<=t)out.push({...q,_key:key});
+      if(st && st.due<=t)out.push({...q,_key:key,_page:QUESTIONS[sid].page});
     });
   });
   return out;
@@ -373,6 +373,7 @@ function renderSubjectHome(subject){
     const bossUnlocked = isStageUnlockedForBoss(sid);
     const bossDone = !!state.bossCleared[sid];
     const bossBtn = `<button class="bossBtn ${bossUnlocked?'':'locked'}" data-boss="${sid}">${bossDone?'👑 再挑戦':(bossUnlocked?'👹 ボス戦':'🔒 ボス戦')}</button>`;
+    const pageHtml = s.page ? `　｜　教科書 p.${s.page}` : "";
     const group = s.group || "";
     let headHtml = "";
     if(group && group!==lastGroup){
@@ -385,7 +386,7 @@ function renderSubjectHome(subject){
       <div class="no">${i+1}</div>
       <div style="flex:1;min-width:0">
         <div class="t">${s.title}</div>
-        <div class="d">${s.desc}　全${s.data.length}問</div>
+        <div class="d">${s.desc}　全${s.data.length}問${pageHtml}</div>
         <div class="mastery"><i style="width:${m.pct}%"></i></div>
         <div class="masteryTxt">習熟 ${m.pct}%（${m.mastered}/${m.total}問マスター）</div>
       </div>
@@ -466,7 +467,7 @@ function startStage(sid){
   const s=QUESTIONS[sid];
   state.cur={
     sid, mode:'stage', title:s.title,
-    list:s.data.map((q,idx)=>({...q,_key:sid+'-'+idx})),
+    list:s.data.map((q,idx)=>({...q,_key:sid+'-'+idx,_page:s.page})),
     i:0, correct:0, combo:0, maxCombo:0, score:0, wrongThisRun:[]
   };
   renderQuestion();
@@ -493,7 +494,7 @@ function startBoss(sid){
   const s=QUESTIONS[sid];
   state.cur={
     sid, mode:'boss', title:s.title,
-    list:shuffle(s.data.map((q,idx)=>({...q,_key:sid+'-'+idx}))),
+    list:shuffle(s.data.map((q,idx)=>({...q,_key:sid+'-'+idx,_page:s.page}))),
     i:0, correct:0, combo:0, maxCombo:0, score:0, wrongThisRun:[],
     lives:3, bossHP:s.data.length, bossMaxHP:s.data.length,
     bossName:s.title+' の主'
@@ -571,7 +572,8 @@ function renderQuestion(){
 
   const typeLabel={yon:"4択問題",maru:"○×問題",ana:"穴埋め問題",kumi:"組み合わせ問題",nenpyo:"年表並べ替え問題",
     suji:"数値入力問題",fill:"穴埋め問題",junban:"手順並べ替え問題"}[q.type];
-  const tags=`<div class="qtypebar"><span class="tag lv">${q.lv}</span><span class="tag">${typeLabel}</span></div>`;
+  const pageTag = q._page ? `<span class="tag">教科書 p.${q._page}</span>` : "";
+  const tags=`<div class="qtypebar"><span class="tag lv">${q.lv}</span><span class="tag">${typeLabel}</span>${pageTag}</div>`;
 
   // 追加機能：記述（入力）モードで ana を出題するか
   const useInputMode = q.type==="ana" && !!(state.settings&&state.settings.inputMode) && !c._forceChoice;
