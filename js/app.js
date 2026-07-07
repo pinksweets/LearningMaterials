@@ -38,13 +38,13 @@ const state = {
   lastStudyDate:"",      // "YYYY-MM-DD"
   cards:new Set(),       // 解放済み図鑑カードID
   title:"",              // 現在の称号
-  settings:{timeAttack:true, inputMode:false}, // 追加機能：眠気対策の設定
+  settings:{timeAttack:true, inputMode:false, sound:true, bgmUrl:""}, // 追加機能：眠気対策の設定
   bossCleared:{},        // 追加機能："s1":true など、ボス撃破済みステージ
   // 現在のプレイ
   cur:null
 };
 STAGE_ORDER.forEach(sid=>{ state.stageCleared[sid]=false; state.stageBest[sid]=0; });
-const DEFAULT_SETTINGS={timeAttack:true, inputMode:false};
+const DEFAULT_SETTINGS={timeAttack:true, inputMode:false, sound:true, bgmUrl:""};
 
 /* 称号（累積マスター数で昇格。下がらない成長指標）
    最上位の「学習マスター」は、全問題数に応じて動的に決まる（定数固定にしない）。
@@ -61,6 +61,202 @@ function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=
 function el(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1800);}
 const app=()=>document.getElementById('app');
+function escapeHtml(s){
+  return String(s==null?"":s).replace(/[&<>"']/g,ch=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[ch]));
+}
+const escapeAttr=escapeHtml;
+
+/* ---------- 追加機能：サウンド（外部音源なし・Web Audioで生成） ---------- */
+const AUDIO={ctx:null,boss:null};
+const BGM={playing:false,url:""};
+function soundEnabled(){
+  return !!(state.settings&&state.settings.sound);
+}
+function ensureAudio(){
+  if(!soundEnabled())return null;
+  if(typeof window==='undefined')return null;
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;
+  if(!AudioCtx)return null;
+  if(!AUDIO.ctx)AUDIO.ctx=new AudioCtx();
+  if(AUDIO.ctx.state==='suspended'){
+    AUDIO.ctx.resume().catch(()=>{});
+  }
+  return AUDIO.ctx;
+}
+function playTone(ctx,freq,start,duration,type,volume,dest){
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+  osc.type=type||'sine';
+  osc.frequency.setValueAtTime(freq,start);
+  gain.gain.setValueAtTime(0.0001,start);
+  gain.gain.linearRampToValueAtTime(volume,start+0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001,start+duration);
+  osc.connect(gain);
+  gain.connect(dest||ctx.destination);
+  osc.start(start);
+  osc.stop(start+duration+0.04);
+}
+function playAnswerSound(isCorrect){
+  const ctx=ensureAudio();
+  if(!ctx)return;
+  const t=ctx.currentTime+0.01;
+  if(isCorrect){
+    [[523.25,0,.16],[659.25,.07,.16],[783.99,.14,.22]].forEach(n=>playTone(ctx,n[0],t+n[1],n[2],'triangle',.09));
+  }else{
+    playTone(ctx,220,t,.2,'sawtooth',.065);
+    playTone(ctx,164.81,t+.09,.22,'square',.045);
+  }
+}
+function playBossResultSound(victory){
+  const ctx=ensureAudio();
+  if(!ctx)return;
+  const t=ctx.currentTime+0.02;
+  if(victory){
+    [[392,0,.16],[523.25,.08,.16],[659.25,.16,.18],[783.99,.27,.32]].forEach(n=>playTone(ctx,n[0],t+n[1],n[2],'triangle',.08));
+  }else{
+    playTone(ctx,146.83,t,.34,'sawtooth',.075);
+    playTone(ctx,98,t+.12,.44,'square',.055);
+  }
+}
+function startBossTension(){
+  const ctx=ensureAudio();
+  if(!ctx||AUDIO.boss)return;
+  const t=ctx.currentTime;
+  const oscA=ctx.createOscillator();
+  const oscB=ctx.createOscillator();
+  const lfo=ctx.createOscillator();
+  const lfoGain=ctx.createGain();
+  const filter=ctx.createBiquadFilter();
+  const gain=ctx.createGain();
+
+  oscA.type='sawtooth';
+  oscA.frequency.setValueAtTime(73.42,t);
+  oscB.type='triangle';
+  oscB.frequency.setValueAtTime(110,t);
+  lfo.type='sine';
+  lfo.frequency.setValueAtTime(5.2,t);
+  lfoGain.gain.setValueAtTime(180,t);
+  filter.type='lowpass';
+  filter.frequency.setValueAtTime(360,t);
+  filter.Q.setValueAtTime(8,t);
+  gain.gain.setValueAtTime(0.0001,t);
+  gain.gain.linearRampToValueAtTime(.03,t+.8);
+
+  lfo.connect(lfoGain);
+  lfoGain.connect(filter.frequency);
+  oscA.connect(filter);
+  oscB.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+  [oscA,oscB,lfo].forEach(node=>node.start(t));
+  AUDIO.boss={oscA,oscB,lfo,gain};
+}
+function stopBossTension(){
+  const boss=AUDIO.boss;
+  if(!boss)return;
+  const ctx=AUDIO.ctx;
+  const t=ctx?ctx.currentTime:0;
+  try{
+    boss.gain.gain.cancelScheduledValues(t);
+    boss.gain.gain.setTargetAtTime(0.0001,t,.08);
+    [boss.oscA,boss.oscB,boss.lfo].forEach(node=>node.stop(t+.35));
+  }catch(e){}
+  AUDIO.boss=null;
+}
+function syncBossTension(active){
+  if(active&&soundEnabled())startBossTension();
+  else stopBossTension();
+}
+function cleanYouTubeParam(v){
+  const m=String(v||"").match(/[A-Za-z0-9_-]+/);
+  return m?m[0]:"";
+}
+function cleanYouTubeVideoId(v){
+  const m=String(v||"").match(/[A-Za-z0-9_-]{11}/);
+  return m?m[0]:"";
+}
+function parseYouTubeBgmUrl(raw){
+  const text=String(raw||"").trim();
+  if(!text)return null;
+  if(/^[A-Za-z0-9_-]{11}$/.test(text))return {kind:"video",id:text,list:""};
+  try{
+    const source=/^[a-z][a-z0-9+.-]*:\/\//i.test(text) ? text :
+      (/^(www\.)?(youtube\.com|youtu\.be|m\.youtube\.com|music\.youtube\.com)\//i.test(text) ? "https://"+text : text);
+    const url=new URL(source);
+    const host=url.hostname.replace(/^www\./,"").toLowerCase();
+    let id="", list=cleanYouTubeParam(url.searchParams.get("list"));
+    if(host==="youtu.be"){
+      id=cleanYouTubeVideoId(url.pathname.split("/").filter(Boolean)[0]);
+    }else if(host==="youtube.com"||host.endsWith(".youtube.com")){
+      const parts=url.pathname.split("/").filter(Boolean);
+      id=cleanYouTubeVideoId(url.searchParams.get("v"));
+      if(!id&&(parts[0]==="embed"||parts[0]==="shorts"||parts[0]==="live")){
+        id=cleanYouTubeVideoId(parts[1]);
+      }
+      if(!id&&parts[0]==="playlist"&&list){
+        return {kind:"playlist",id:"",list};
+      }
+    }
+    if(id)return {kind:"video",id,list};
+    if(list)return {kind:"playlist",id:"",list};
+  }catch(e){}
+  return null;
+}
+function youtubeEmbedSrc(parsed){
+  const origin = (typeof location!=="undefined" && /^https?:$/.test(location.protocol))
+    ? "&origin="+encodeURIComponent(location.origin)
+    : "";
+  if(parsed.kind==="playlist"){
+    return "https://www.youtube.com/embed/videoseries?list="+encodeURIComponent(parsed.list)+"&autoplay=1&loop=1&rel=0&playsinline=1"+origin;
+  }
+  let q="autoplay=1&loop=1&playlist="+encodeURIComponent(parsed.id)+"&rel=0&playsinline=1";
+  if(parsed.list)q+="&list="+encodeURIComponent(parsed.list);
+  q+=origin;
+  return "https://www.youtube.com/embed/"+encodeURIComponent(parsed.id)+"?"+q;
+}
+function bgmDock(){
+  if(typeof document==="undefined")return null;
+  let dock=document.getElementById("bgmDock");
+  if(!dock){
+    dock=document.createElement("div");
+    dock.id="bgmDock";
+    dock.className="bgmDock";
+    document.body.appendChild(dock);
+  }
+  return dock;
+}
+function startYouTubeBgm(raw){
+  const parsed=parseYouTubeBgmUrl(raw);
+  if(!parsed){toast("YouTube URLを確認してね");return false;}
+  if(typeof location!=="undefined" && location.protocol==="file:"){
+    toast("YouTube BGMはGitHub Pagesで再生してね");
+  }
+  const dock=bgmDock();
+  if(!dock)return false;
+  const src=youtubeEmbedSrc(parsed);
+  BGM.playing=true;
+  BGM.url=String(raw||"").trim();
+  dock.className="bgmDock show";
+  dock.innerHTML=`<div class="bgmDockHead">
+      <span>🎵 BGM</span>
+      <button type="button" id="bgmDockStop">停止</button>
+    </div>
+    <iframe src="${escapeAttr(src)}" title="YouTube BGM" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+  const stop=document.getElementById("bgmDockStop");
+  if(stop)stop.addEventListener("click",stopYouTubeBgm);
+  return true;
+}
+function stopYouTubeBgm(){
+  const dock=bgmDock();
+  if(dock){
+    dock.className="bgmDock";
+    dock.innerHTML="";
+  }
+  BGM.playing=false;
+  BGM.url="";
+}
 
 /* ---------- 追加機能：文字列の正規化（記述モードの表記ゆらぎ吸収） ---------- */
 function normalizeAnswer(s){
@@ -280,6 +476,7 @@ let currentSubject = null;
 ============================================================ */
 function renderHome(){
   stopTimer(); // ホームに戻る全経路でタイマーを確実に止める（防御的）
+  stopBossTension();
   if(!state.title)evalTitle();   // 初回は現在の称号を確定
   currentSubject = null;   // 教科選択に戻ったので「直前の教科ホーム」は無し
 
@@ -303,12 +500,25 @@ function renderHome(){
   const badgesHtml = state.badges.size
     ? `<div class="badges">${[...state.badges].map(b=>`<div class="badge">🏅 ${b}</div>`).join("")}</div>` : "";
 
-  // 追加機能：眠気対策の設定トグル（タイムアタック／記述モード）
+  // 追加機能：眠気対策の設定トグル（タイムアタック／記述モード／サウンド）
   const ta = !!(state.settings&&state.settings.timeAttack);
   const im = !!(state.settings&&state.settings.inputMode);
+  const se = !!(state.settings&&state.settings.sound);
+  const bgmUrl = (state.settings&&state.settings.bgmUrl) || "";
+  const bgmStatus = BGM.playing ? "再生中" : (bgmUrl ? "設定済み" : "未設定");
   const settingsHtml = `<div class="settingsRow">
       <div class="toggleChip ${ta?'on':''}" id="toggleTimeAttack">⏱ タイムアタック<span class="st">${ta?'ON':'OFF'}</span></div>
       <div class="toggleChip ${im?'on':''}" id="toggleInputMode">✍️ 記述モード<span class="st">${im?'ON':'OFF'}</span></div>
+      <div class="toggleChip ${se?'on':''}" id="toggleSound">🔊 サウンド<span class="st">${se?'ON':'OFF'}</span></div>
+    </div>`;
+  const bgmHtml = `<div class="bgmSettings">
+      <div class="bgmTop"><span>🎵 YouTube BGM</span><span>${bgmStatus}</span></div>
+      <div class="bgmForm">
+        <input type="url" id="bgmUrlInput" value="${escapeAttr(bgmUrl)}" placeholder="YouTube URL">
+        <button class="btn secondary small" id="bgmSaveBtn" type="button">保存</button>
+        <button class="btn small" id="bgmPlayBtn" type="button">再生</button>
+        <button class="btn secondary small" id="bgmStopBtn" type="button">停止</button>
+      </div>
     </div>`;
 
   app().innerHTML = "";
@@ -324,6 +534,7 @@ function renderHome(){
       </div>
       <div class="muted">まずは教科を選んでね。1問ごとに解説が出るよ。まちがえた問題は「今日の復習」でちょうどよいタイミングにまた出るから大丈夫！</div>
       ${settingsHtml}
+      ${bgmHtml}
       ${cardsHtml}
       ${reviewBtn}
       ${collBtn}
@@ -352,6 +563,46 @@ function renderHome(){
     save();
     renderHome();
   });
+  const seBtn=document.getElementById('toggleSound');
+  if(seBtn) seBtn.addEventListener('click',()=>{
+    state.settings.sound=!state.settings.sound;
+    if(!state.settings.sound)stopBossTension();
+    else playAnswerSound(true);
+    save();
+    renderHome();
+  });
+  const bgmInput=document.getElementById('bgmUrlInput');
+  const saveBgmInput=()=>{
+    const value=bgmInput?bgmInput.value.trim():"";
+    state.settings.bgmUrl=value;
+    if(!value)stopYouTubeBgm();
+    save();
+    return value;
+  };
+  const bgmSaveBtn=document.getElementById('bgmSaveBtn');
+  if(bgmSaveBtn)bgmSaveBtn.addEventListener('click',()=>{
+    const value=saveBgmInput();
+    toast(value?'BGM URLを保存しました':'BGM URLをクリアしました');
+    renderHome();
+  });
+  const bgmPlayBtn=document.getElementById('bgmPlayBtn');
+  if(bgmPlayBtn)bgmPlayBtn.addEventListener('click',()=>{
+    const value=saveBgmInput();
+    if(!value){toast('YouTube URLを入力してね');return;}
+    if(startYouTubeBgm(value))renderHome();
+  });
+  const bgmStopBtn=document.getElementById('bgmStopBtn');
+  if(bgmStopBtn)bgmStopBtn.addEventListener('click',()=>{
+    stopYouTubeBgm();
+    renderHome();
+  });
+  if(bgmInput)bgmInput.addEventListener('keydown',(e)=>{
+    if(e.key==='Enter'){
+      e.preventDefault();
+      const value=saveBgmInput();
+      if(value&&startYouTubeBgm(value))renderHome();
+    }
+  });
 }
 
 /* ============================================================
@@ -359,6 +610,7 @@ function renderHome(){
 ============================================================ */
 function renderSubjectHome(subject){
   stopTimer(); // 教科ホームに戻る全経路でタイマーを確実に止める（防御的）
+  stopBossTension();
   currentSubject = subject;   // 結果画面・ボス勝敗画面からの「ホームへ」の戻り先として記憶
 
   const sids = stagesOfSubject(subject);
@@ -438,6 +690,7 @@ function renderSubjectHome(subject){
    コレクション図鑑
 ============================================================ */
 function renderCollection(){
+  stopBossTension();
   const cardsHtml = CARDS.map(c=>{
     const owned=state.cards.has(c.id);
     return owned
@@ -546,6 +799,7 @@ function renderQuestion(){
   const num=c.i+1, total=c.list.length;
   const pct=Math.round((c.i)/total*100);
   const isBoss = c.mode==='boss';
+  syncBossTension(isBoss);
   const timeAttackOn = isBoss ? true : !!(state.settings&&state.settings.timeAttack); // ボス戦は強制ON
 
   const hud=`<div class="hud">
@@ -675,6 +929,7 @@ function renderQuestion(){
   document.getElementById('quitBtn').addEventListener('click',()=>{
     if(confirm('ホームにもどる？（このステージの進みはリセットされます）')){
       stopTimer();
+      stopBossTension();
       // 追加機能（教科選択ファースト化）：stage/bossは直前の教科ホームへ、reviewは教科選択へ戻る
       const backSubject = c.mode!=='review' ? QUESTIONS[c.sid].subject : null;
       if(backSubject) renderSubjectHome(backSubject); else renderHome();
@@ -985,6 +1240,7 @@ function finishQuestion(isCorrect,q,opts){
   if(c._locked) return;   // 二重採点防止（スワイプ＋クリック等の二重発火対策）
   c._locked=true;
   stopTimer(); // 採点確定時点で必ずタイマー停止（時間切れ経路も含め二重に保証）
+  playAnswerSound(isCorrect);
   const fb=document.getElementById('fb');
 
   // 追加機能：速答ボーナス（タイムアタックONかつ正解時、残り時間に比例）
@@ -1058,6 +1314,8 @@ function finishQuestion(isCorrect,q,opts){
 ============================================================ */
 function renderBossDefeat(){
   stopTimer();
+  stopBossTension();
+  playBossResultSound(false);
   const c=state.cur;
   save();
   app().innerHTML="";
@@ -1077,6 +1335,8 @@ function renderBossDefeat(){
 }
 function renderBossVictory(){
   stopTimer();
+  stopBossTension();
+  playBossResultSound(true);
   const c=state.cur;
   state.totalScore += c.score;
   state.bossCleared[c.sid]=true;
@@ -1113,6 +1373,7 @@ function renderBossVictory(){
 ============================================================ */
 function renderResult(){
   stopTimer(); // 結果画面到達時にタイマーが残っていないことを保証（防御的）
+  stopBossTension();
   const c=state.cur;
   const total=c.list.length;
   const pctRaw=c.correct/total*100;

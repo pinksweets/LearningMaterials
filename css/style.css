@@ -133,6 +133,28 @@ a.link{color:var(--accent2);}
 .toggleChip.on{border-color:var(--ok);background:rgba(46,196,182,.16);}
 .toggleChip .st{display:block;font-size:.72rem;color:var(--muted);margin-top:2px;}
 .toggleChip.on .st{color:var(--ok);font-weight:800;}
+/* ==== 追加機能: YouTube BGM ==== */
+.bgmSettings{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0;}
+.bgmTop{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.82rem;font-weight:800;margin-bottom:8px;}
+.bgmTop span:last-child{color:var(--accent2);font-size:.74rem;}
+.bgmForm{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:8px;align-items:center;}
+.bgmForm input{min-width:0;width:100%;background:var(--panel);border:1px solid var(--line);color:var(--text);
+  border-radius:12px;padding:10px 12px;font-size:.9rem;}
+.bgmForm input:focus{outline:2px solid var(--accent2);}
+.bgmForm .btn{margin-top:0;white-space:nowrap;}
+.bgmDock{position:fixed;right:14px;bottom:14px;width:min(320px,calc(100vw - 28px));z-index:45;display:none;
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 36px rgba(0,0,0,.5);overflow:hidden;}
+.bgmDock.show{display:block;}
+.bgmDockHead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:var(--panel2);
+  font-size:.8rem;font-weight:800;}
+.bgmDockHead button{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;
+  padding:4px 8px;font-size:.72rem;font-weight:800;cursor:pointer;}
+.bgmDock iframe{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000;}
+@media (max-width:560px){
+  .bgmForm{grid-template-columns:1fr 1fr 1fr;}
+  .bgmForm input{grid-column:1/-1;}
+  .bgmDock{left:14px;right:14px;width:auto;}
+}
 /* ==== 追加機能: ボス戦 ==== */
 .stage .bossBtn{margin-left:8px;border:1px solid var(--ng);background:rgba(255,107,107,.14);color:var(--text);
   border-radius:10px;padding:6px 10px;font-size:.76rem;font-weight:800;cursor:pointer;white-space:nowrap;}
