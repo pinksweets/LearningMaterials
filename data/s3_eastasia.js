@@ -1,3 +1,5 @@
+import { createRegistry } from "./_registry.js";
+const HQ = createRegistry();
 /* ============================================================
    単元 s3: 東アジアの民族運動と日本
    中国・朝鮮の運動と、大正デモクラシー
@@ -84,3 +86,5 @@ HQ.registerUnit({
     {id:"c_kyowa",          name:"第一次国共合作",   emoji:"🤝", kind:"できごと", desc:"国民党と共産党の協力（1924）。"}
   ]
 });
+export const units = HQ.units;
+export const cards = HQ.cards;

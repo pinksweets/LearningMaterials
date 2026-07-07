@@ -1,3 +1,5 @@
+import { createRegistry } from "./_registry.js";
+const HQ = createRegistry();
 /* ============================================================
    大カテゴリ「集合と命題」（小カテゴリ4つ・各10問・計40問）
    集合の演算と命題の真偽・必要十分条件（移植元：高校数学Ⅰ/数学Iクエスト.html World2）
@@ -108,3 +110,5 @@ HQ.registerUnit({
     {id:"c_m_hitsuju", name:"必要条件・十分条件", emoji:"🧩", kind:"用語", desc:"p⇒qが真のとき、pはqの十分条件、qはpの必要条件。"}
   ]
 });
+export const units = HQ.units;
+export const cards = HQ.cards;

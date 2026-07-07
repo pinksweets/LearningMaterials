@@ -1,3 +1,5 @@
+import { createRegistry } from "./_registry.js";
+const HQ = createRegistry();
 /* ============================================================
    数学A（目次ベース）
    小カテゴリ46個・各10問。文章題2問・計算（式）問題8問で構成する。
@@ -415,3 +417,5 @@
     });
   });
 })();
+export const units = HQ.units;
+export const cards = HQ.cards;

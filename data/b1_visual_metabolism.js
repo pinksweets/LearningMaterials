@@ -1,3 +1,5 @@
+import { createRegistry } from "./_registry.js";
+const HQ = createRegistry();
 /* ============================================================
    生物基礎 visual：代謝とエネルギー
    小カテゴリ3つ・各10問・計30問
@@ -93,3 +95,5 @@ HQ.registerUnit({
   ],
   cards: []
 });
+export const units = HQ.units;
+export const cards = HQ.cards;

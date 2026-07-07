@@ -1,3 +1,5 @@
+import { createRegistry } from "./_registry.js";
+const HQ = createRegistry();
 /* ============================================================
    大カテゴリ「数と式」（小カテゴリ6つ・各10問・計60問）
    整式の計算から因数分解・不等式まで（移植元：高校数学Ⅰ/数学Iクエスト.html World1）
@@ -162,3 +164,5 @@ HQ.registerUnit({
     {id:"c_m_ineq", name:"一次不等式", emoji:"⚖️", kind:"用語", desc:"負の数で両辺を割ると不等号の向きが逆転する。"}
   ]
 });
+export const units = HQ.units;
+export const cards = HQ.cards;

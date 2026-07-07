@@ -1,3 +1,5 @@
+import { createRegistry } from "./_registry.js";
+const HQ = createRegistry();
 /* ============================================================
    単元 s1: ヴェルサイユ＝ワシントン体制
    第一次世界大戦後の新しい国際秩序
@@ -79,3 +81,5 @@ HQ.registerUnit({
     {id:"c_washingtonconf", name:"ワシントン会議",   emoji:"🏛️", kind:"できごと", desc:"東アジア・太平洋の秩序を定めた会議。"}
   ]
 });
+export const units = HQ.units;
+export const cards = HQ.cards;

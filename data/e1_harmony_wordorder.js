@@ -1,3 +1,5 @@
+import { createRegistry } from "./_registry.js";
+const HQ = createRegistry();
 /* ============================================================
    総合英語 Harmony：英語の語順（文型）
    小カテゴリ5つ・各10問・計50問
@@ -137,3 +139,5 @@ HQ.registerUnit({
   ],
   cards: []
 });
+export const units = HQ.units;
+export const cards = HQ.cards;

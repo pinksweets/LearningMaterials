@@ -1,3 +1,5 @@
+import { createRegistry } from "./_registry.js";
+const HQ = createRegistry();
 /* ============================================================
    総合英語 Harmony：時制
    小カテゴリ8つ・各10問・計80問
@@ -211,3 +213,5 @@ HQ.registerUnit({
   ],
   cards: []
 });
+export const units = HQ.units;
+export const cards = HQ.cards;

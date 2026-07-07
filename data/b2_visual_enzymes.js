@@ -1,3 +1,5 @@
+import { createRegistry } from "./_registry.js";
+const HQ = createRegistry();
 /* ============================================================
    生物基礎 visual：酵素と代謝・思考力問題
    小カテゴリ7つ・各10問・計70問
@@ -221,3 +223,5 @@ HQ.registerUnit({
   ],
   cards: []
 });
+export const units = HQ.units;
+export const cards = HQ.cards;

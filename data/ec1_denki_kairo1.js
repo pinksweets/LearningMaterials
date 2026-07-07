@@ -1,3 +1,5 @@
+import { createRegistry } from "./_registry.js";
+const HQ = createRegistry();
 /* ============================================================
    電気回路１（実教出版）：電気回路の要素・直流回路
    小単元13つ・各5問・計65問
@@ -515,3 +517,5 @@ HQ.registerUnit({
     if(Object.prototype.hasOwnProperty.call(TEXTBOOK_PAGES, u.id)) u.page = TEXTBOOK_PAGES[u.id];
   });
 })();
+export const units = HQ.units;
+export const cards = HQ.cards;

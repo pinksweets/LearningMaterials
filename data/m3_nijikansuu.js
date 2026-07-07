@@ -1,3 +1,5 @@
+import { createRegistry } from "./_registry.js";
+const HQ = createRegistry();
 /* ============================================================
    大カテゴリ「2次関数」（小カテゴリ5つ・各10問・計50問）
    平方完成・グラフ・最大最小（移植元：高校数学Ⅰ/数学Iクエスト.html World3）
@@ -132,3 +134,5 @@ HQ.registerUnit({
     {id:"c_m_saidaisaisho", name:"最大値・最小値", emoji:"⛰️", kind:"用語", desc:"下に凸なら頂点のyが最小値、上に凸なら頂点のyが最大値。"}
   ]
 });
+export const units = HQ.units;
+export const cards = HQ.cards;

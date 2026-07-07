@@ -1,3 +1,5 @@
+import { createRegistry } from "./_registry.js";
+const HQ = createRegistry();
 /* ============================================================
    単元 s2: アジア諸国の独立運動
    民族自決の波と、独立をめざす人々
@@ -78,3 +80,5 @@ HQ.registerUnit({
     {id:"c_saltmarch",      name:"塩の行進",         emoji:"🧂", kind:"できごと", desc:"ガンディーの非暴力の抗議行動。"}
   ]
 });
+export const units = HQ.units;
+export const cards = HQ.cards;
