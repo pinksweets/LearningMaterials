@@ -1,7 +1,7 @@
 /* ============================================================
    数学A（目次ベース）
-   小カテゴリ46個・各10問。既存単元には触れず、新規ID ma1s1〜ma1s46 で追加する。
-   type: yon / ana / maru / kumi / suji / junban
+   小カテゴリ46個・各10問。文章題2問・計算（式）問題8問で構成する。
+   type: yon / maru / kumi / suji / junban
 ============================================================ */
 
 (function(){
@@ -21,6 +21,12 @@
     "絶対値",
     "微分係数"
   ];
+  const FORMULA_WRONGS = [
+    "条件を整理せず、見えた数をそのまま足す",
+    "順序や重なりを確認せず、いつも同じ数で割る",
+    "求めたい量を決めず、最後の答えだけを選ぶ",
+    "全体の場合と一部の場合を区別しない"
+  ];
 
   function unique(list){
     return list.filter((v, i, a) => v && a.indexOf(v) === i);
@@ -34,100 +40,119 @@
     return unique([correct].concat(wrongs || [], TERM_WRONGS)).slice(0, 4);
   }
 
-  function qMaru(tuple, lv){
-    return {
-      type: "maru",
-      lv: lv || "基礎",
-      q: tuple[0],
-      a: tuple[1],
-      exp: tuple[2],
-      hint: tuple[3] || "定義や条件に戻って考えよう。"
-    };
+  function formulaChoices(correct, wrongs){
+    return unique([correct].concat(wrongs || [], FORMULA_WRONGS, FALLBACK_WRONGS)).slice(0, 4);
+  }
+
+  function stepAt(u, idx){
+    return (u.steps && u.steps[idx]) || u.point || u.formula || u.core;
+  }
+
+  function stepChoices(u, correct){
+    return unique((u.steps || []).filter(s => s !== correct).concat([u.point, u.formula, u.use, u.core]));
   }
 
   function makeQuestions(u, cardId){
+    const firstStep = stepAt(u, 0);
+    const lastStep = stepAt(u, (u.steps || []).length - 1);
     return [
       {
-        type: "yon",
-        lv: "基礎",
-        q: "「" + u.title + "」で中心になる考えとして最も適切なものはどれか。",
-        choices: choices(u.core, u.coreWrong),
-        a: 0,
-        time: 30,
-        card: cardId,
-        exp: u.term + "は、" + u.core + "という考えです。まず言葉の意味を短く言えるようにしましょう。",
-        hint: "用語の定義に近い説明を選ぼう。"
-      },
-      {
-        type: "ana",
-        lv: "基礎",
-        q: "次の説明に合う語句は（　）である。説明：" + u.core,
-        choices: termChoices(u.term, u.termWrong),
-        a: 0,
-        time: 30,
-        exp: "この説明に合う語句は「" + u.term + "」です。問題文の条件と用語を結びつけて覚えましょう。",
-        hint: "説明の主語になる用語を選びます。"
-      },
-      qMaru(u.maru, "基礎"),
-      {
         type: "suji",
-        lv: "標準",
+        lv: "計算・式",
         q: u.calc.q,
         a: u.calc.a,
         time: 60,
+        card: cardId,
         exp: u.calc.exp,
-        hint: u.calc.hint || "まず使う公式や条件を確認しよう。"
+        hint: u.calc.hint || "式に入れる数と、求めたい量を先に分けよう。"
+      },
+      {
+        type: "yon",
+        lv: "計算・式",
+        q: "「" + u.title + "」で使う関係・式として最も適切なものはどれか。",
+        choices: formulaChoices(u.formula, u.formulaWrong),
+        a: 0,
+        time: 30,
+        exp: "この単元で中心になる関係は「" + u.formula + "」です。式の形だけでなく、どの条件で使うかも確認しましょう。",
+        hint: "公式・関係式として書けるものを選ぼう。"
       },
       {
         type: "kumi",
-        lv: "標準",
-        q: "「" + u.title + "」に関係する語句と意味を正しく組み合わせよう。",
+        lv: "計算・式",
+        q: "「" + u.title + "」の式づくりに必要な要素を組み合わせよう。",
         pairs: [
-          {l: u.term, r: u.core},
-          {l: "ポイント", r: u.point},
-          {l: "使いどころ", r: u.use}
+          {l: "使う関係・式", r: u.formula},
+          {l: "着眼点", r: u.point},
+          {l: "整理する対象", r: u.core}
         ],
-        exp: "用語・ポイント・使いどころをセットで整理すると、公式だけの暗記になりにくくなります。"
+        exp: "式を立てる前に、何を整理し、どの関係を使うかをそろえると計算が進めやすくなります。"
       },
       {
         type: "yon",
-        lv: "標準",
-        q: "「" + u.title + "」を解くときの方針として最も適切なものはどれか。",
+        lv: "計算・式",
+        q: "「" + u.title + "」の式を立てる前に、まず確認することはどれか。",
         choices: choices(u.point, u.pointWrong),
         a: 0,
         time: 30,
-        exp: "この単元では「" + u.point + "」を意識します。問題の条件をこの方針に合わせて整理しましょう。",
-        hint: "最初に何をそろえるかに注目しよう。"
-      },
-      {
-        type: "yon",
-        lv: "標準",
-        q: "「" + u.title + "」でよく使う関係として正しいものはどれか。",
-        choices: choices(u.formula, u.formulaWrong),
-        a: 0,
-        time: 30,
-        exp: "正しく使う関係は「" + u.formula + "」です。式だけでなく、どの条件で使うかも一緒に確認しましょう。",
-        hint: "この単元の代表的な関係を選ぼう。"
+        exp: "最初に「" + u.point + "」を確認します。条件をそろえてから式に入ると、数え落としや計算ミスを減らせます。",
+        hint: "いきなり答えを出さず、式を立てる前の確認に注目しよう。"
       },
       {
         type: "junban",
-        lv: "標準",
-        q: "「" + u.title + "」の基本手順を、自然な順に並べよう。",
+        lv: "計算・式",
+        q: "「" + u.title + "」の計算・式操作の手順を正しい順に並べよう。",
         steps: u.steps,
         a: u.steps.map((_, i) => i),
-        exp: "先に条件を整理し、次に使う関係を選び、最後に計算や判定をします。手順を固定するとミスが減ります。",
-        hint: "いきなり計算せず、条件整理から始めます。"
+        exp: "条件を整理し、使う関係を決め、最後に計算や確認をします。手順を固定するとミスが減ります。",
+        hint: "最初は条件整理、最後は答えの確認です。"
       },
-      qMaru(u.caution, "標準"),
       {
         type: "yon",
-        lv: "応用",
-        q: "「" + u.title + "」の活用場面として最も適切なものはどれか。",
+        lv: "計算・式",
+        q: "「" + u.title + "」の解き始めとして、最も自然な式操作・整理はどれか。",
+        choices: choices(firstStep, stepChoices(u, firstStep)),
+        a: 0,
+        time: 30,
+        exp: "まずは「" + firstStep + "」から始めます。最初の整理ができると、次の式が立てやすくなります。",
+        hint: "手順の1番目にくる内容を選ぼう。"
+      },
+      {
+        type: "yon",
+        lv: "計算・式",
+        q: "「" + u.title + "」で計算の最後に確認したいことはどれか。",
+        choices: choices(lastStep, stepChoices(u, lastStep)),
+        a: 0,
+        time: 30,
+        exp: "最後は「" + lastStep + "」を確認します。答えを出したあと、条件に合っているかまで見るのが大切です。",
+        hint: "計算後の確認にあたる内容を選ぼう。"
+      },
+      {
+        type: "maru",
+        lv: "計算・式",
+        q: "計算の注意：" + u.caution[0],
+        a: u.caution[1],
+        exp: u.caution[2] + " 計算前後で条件を確認すると、式の使い間違いを防げます。",
+        hint: "式を使う条件や、数え方の区別を確認しよう。"
+      },
+      {
+        type: "yon",
+        lv: "文章題",
+        q: "文章題：実生活やパズルの中で「" + u.title + "」を使うなら、どの場面が最も近いか。",
         choices: choices(u.use, u.useWrong),
         a: 0,
         time: 30,
-        exp: "この考えは「" + u.use + "」場面で役立ちます。問題の見た目が違っても、同じ構造を探しましょう。",
-        hint: "何を整理したい場面かを考えよう。"
+        exp: "この単元の考えは「" + u.use + "」場面で役立ちます。文章題では、何を整理したいのかを先に読み取りましょう。",
+        hint: "問題文の場面と、使う数学の考えを結びつけよう。"
+      },
+      {
+        type: "yon",
+        lv: "文章題",
+        q: "文章題：「" + u.core + "」という内容を使う問題で、中心になる用語はどれか。",
+        choices: termChoices(u.term, u.termWrong),
+        a: 0,
+        time: 30,
+        exp: "この文章で中心になる用語は「" + u.term + "」です。文章題では、文の中の条件を用語や式に置き換える練習をしましょう。",
+        hint: "説明文が指している数学用語を選ぼう。"
       }
     ];
   }

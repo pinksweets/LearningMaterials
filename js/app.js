@@ -721,7 +721,8 @@ function startStage(sid){
   state.cur={
     sid, mode:'stage', title:s.title,
     list:s.data.map((q,idx)=>({...q,_key:sid+'-'+idx,_page:s.page})),
-    i:0, correct:0, combo:0, maxCombo:0, score:0, wrongThisRun:[]
+    i:0, correct:0, combo:0, maxCombo:0, score:0, wrongThisRun:[],
+    feverGauge:0, feverLeft:0, feverCount:0, weakHits:0
   };
   renderQuestion();
 }
@@ -731,7 +732,8 @@ function startReview(){
   state.cur={
     sid:'review', mode:'review', title:'今日の復習',
     list:shuffle(due),
-    i:0, correct:0, combo:0, maxCombo:0, score:0, wrongThisRun:[]
+    i:0, correct:0, combo:0, maxCombo:0, score:0, wrongThisRun:[],
+    feverGauge:0, feverLeft:0, feverCount:0, weakHits:0
   };
   renderQuestion();
 }
@@ -750,9 +752,69 @@ function startBoss(sid){
     list:shuffle(s.data.map((q,idx)=>({...q,_key:sid+'-'+idx,_page:s.page}))),
     i:0, correct:0, combo:0, maxCombo:0, score:0, wrongThisRun:[],
     lives:3, bossHP:s.data.length, bossMaxHP:s.data.length,
-    bossName:s.title+' の主'
+    bossName:s.title+' の主',
+    feverGauge:0, feverLeft:0, feverCount:0, weakHits:0
   };
   renderQuestion();
+}
+
+/* ============================================================
+   追加機能：連続正解フィーバー＋ボス弱点攻撃
+============================================================ */
+const FEVER_MAX=100;
+const FEVER_GAIN=20;
+const FEVER_MISS_LOSS=15;
+const FEVER_TURNS=3;
+const FEVER_BONUS=10;
+function initRewardProgress(c){
+  if(typeof c.feverGauge!=='number')c.feverGauge=0;
+  if(typeof c.feverLeft!=='number')c.feverLeft=0;
+  if(typeof c.feverCount!=='number')c.feverCount=0;
+  if(typeof c.weakHits!=='number')c.weakHits=0;
+}
+function bossWeakRemain(c){
+  const mod=(c.combo||0)%3;
+  return mod===0 ? 3 : 3-mod;
+}
+function applyFeverProgress(c,isCorrect,wasFeverActive){
+  const out={started:false,ended:false};
+  if(wasFeverActive){
+    c.feverLeft=Math.max(0,c.feverLeft-1);
+    out.ended=c.feverLeft===0;
+    return out;
+  }
+  if(isCorrect){
+    c.feverGauge=Math.min(FEVER_MAX,c.feverGauge+FEVER_GAIN);
+    if(c.feverGauge>=FEVER_MAX){
+      c.feverGauge=0;
+      c.feverLeft=FEVER_TURNS;
+      c.feverCount++;
+      out.started=true;
+    }
+  }else{
+    c.feverGauge=Math.max(0,c.feverGauge-FEVER_MISS_LOSS);
+  }
+  return out;
+}
+function rewardHudHtml(c,isBoss){
+  initRewardProgress(c);
+  const lampCount=5;
+  const lit=c.feverLeft>0 ? lampCount : Math.min(lampCount,c.combo||0);
+  const lamps=Array.from({length:lampCount},(_,i)=>`<i class="${i<lit?'on':''}"></i>`).join("");
+  const feverPct=Math.max(0,Math.min(100,c.feverGauge));
+  const feverText=c.feverLeft>0 ? `フィーバー中 あと${c.feverLeft}問` : `あと${Math.ceil((FEVER_MAX-feverPct)/FEVER_GAIN)}正解でフィーバー`;
+  const bossText=isBoss ? `<div class="rewardNote">弱点攻撃まであと${bossWeakRemain(c)}正解</div>` : "";
+  return `<div class="rewardHud ${c.feverLeft>0?'feverOn':''}">
+    <div class="rewardTop">
+      <div>
+        <div class="rewardLabel">連続正解ランプ</div>
+        <div class="rewardLamps">${lamps}</div>
+      </div>
+      <div class="rewardStatus">${feverText}</div>
+    </div>
+    <div class="feverBar"><i style="width:${c.feverLeft>0?100:feverPct}%"></i></div>
+    ${bossText}
+  </div>`;
 }
 
 /* ============================================================
@@ -799,6 +861,7 @@ function renderQuestion(){
   const num=c.i+1, total=c.list.length;
   const pct=Math.round((c.i)/total*100);
   const isBoss = c.mode==='boss';
+  initRewardProgress(c);
   syncBossTension(isBoss);
   const timeAttackOn = isBoss ? true : !!(state.settings&&state.settings.timeAttack); // ボス戦は強制ON
 
@@ -809,6 +872,7 @@ function renderQuestion(){
     <span class="chip combo">🔥 ${c.combo}</span>
   </div>
   <div class="progress"><div class="bar" style="width:${pct}%"></div></div>`;
+  const rewardHud = rewardHudHtml(c,isBoss);
 
   const bossHud = isBoss ? `<div class="bossHud">
       <div class="bossRow">
@@ -918,7 +982,7 @@ function renderQuestion(){
     <div class="muted" id="hintText" style="display:none;margin-top:6px"></div>` : "";
 
   app().innerHTML="";
-  app().appendChild(el(`<div><div class="card">${hud}${bossHud}${timerHtml}${tags}${body}
+  app().appendChild(el(`<div><div class="card">${hud}${rewardHud}${bossHud}${timerHtml}${tags}${body}
     ${hintHtml}
     <div class="fb" id="fb"></div>
     <div id="nextWrap"></div>
@@ -1241,6 +1305,8 @@ function finishQuestion(isCorrect,q,opts){
   c._locked=true;
   stopTimer(); // 採点確定時点で必ずタイマー停止（時間切れ経路も含め二重に保証）
   playAnswerSound(isCorrect);
+  initRewardProgress(c);
+  const feverWasActive=c.feverLeft>0;
   const fb=document.getElementById('fb');
 
   // 追加機能：速答ボーナス（タイムアタックONかつ正解時、残り時間に比例）
@@ -1254,23 +1320,38 @@ function finishQuestion(isCorrect,q,opts){
     c.correct++; c.combo++; c.maxCombo=Math.max(c.maxCombo,c.combo);
     let pts = q.lv==="標準"?15:10;
     let bonus = c.combo>=3 ? (c.combo>=5?10:5) : 0;
-    c.score += pts+bonus+speedBonus;
-    fb.className="fb good show";
-    fb.innerHTML=`<div class="head">⭕ 正解！ +${pts}点${bonus?` <span class="combo">コンボ+${bonus}</span>`:''}${speedBonus?` <span class="combo">⏱速答+${speedBonus}</span>`:''}</div>
-      <div class="exp">${q.exp}</div>`;
-    if(c.combo===3)toast('🔥 3連続正解！コンボボーナス！');
-    if(c.combo===5)toast('🔥🔥 5連続！絶好調！');
+    let feverBonus = feverWasActive ? FEVER_BONUS : 0;
+    let bossDamage = 0;
     if(c.mode==='boss'){
-      c.bossHP=Math.max(0,c.bossHP-1);
-      toast('⚔️ こうげき！ ボスに1ダメージ！');
+      bossDamage = (c.combo>0 && c.combo%3===0) ? 2 : 1;
+      c.bossHP=Math.max(0,c.bossHP-bossDamage);
+      if(bossDamage>1)c.weakHits++;
     }
+    const feverEvent=applyFeverProgress(c,true,feverWasActive);
+    c.score += pts+bonus+speedBonus+feverBonus;
+    const rewardBits=[];
+    if(feverBonus)rewardBits.push(`✨ フィーバー+${feverBonus}`);
+    if(feverEvent.started)rewardBits.push('🎰 フィーバー突入！次の3問がボーナス');
+    if(bossDamage>1)rewardBits.push('🎯 弱点攻撃！ボスに2ダメージ');
+    fb.className="fb good show";
+    fb.innerHTML=`<div class="head">⭕ 正解！ +${pts}点${bonus?` <span class="combo">コンボ+${bonus}</span>`:''}${speedBonus?` <span class="combo">⏱速答+${speedBonus}</span>`:''}${feverBonus?` <span class="combo">FEVER+${feverBonus}</span>`:''}</div>
+      <div class="exp">${q.exp}</div>
+      ${rewardBits.length?`<div class="rewardMsg">${rewardBits.join('　')}</div>`:''}`;
+    if(feverEvent.started)toast('✨ フィーバー突入！次の3問はボーナス！');
+    else if(bossDamage>1)toast('🎯 弱点攻撃！ ボスに2ダメージ！');
+    else if(c.combo===10)toast('🔥🔥🔥 10連続正解！すごい集中力！');
+    else if(c.combo===5)toast('🔥🔥 5連続！絶好調！');
+    else if(c.combo===3)toast('🔥 3連続正解！コンボボーナス！');
+    else if(c.mode==='boss')toast('⚔️ こうげき！ ボスに1ダメージ！');
   } else {
     c.combo=0;
+    const feverEvent=applyFeverProgress(c,false,feverWasActive);
     let feedbackHead = opts.timeUp ? '⏰ 時間切れ… もう一度チェック' : '❌ おしい！ もう一度チェック';
     let extra = opts.correctText ? `<div class="muted" style="margin-top:6px">正解：${opts.correctText}</div>` : "";
+    let rewardMsg = feverEvent.ended ? `<div class="rewardMsg">フィーバー終了。次の正解からまたゲージをためよう。</div>` : "";
     fb.className="fb bad show";
     fb.innerHTML=`<div class="head">${feedbackHead}</div>
-      <div class="exp">${q.exp}</div>${extra}`;
+      <div class="exp">${q.exp}</div>${extra}${rewardMsg}`;
     c.wrongThisRun.push(q);
     if(c.mode==='boss'){
       c.lives=Math.max(0,c.lives-1);
@@ -1323,6 +1404,7 @@ function renderBossDefeat(){
     <div class="bossResult">💀</div>
     <div style="font-size:1.3rem;font-weight:800">ボスにやられた…</div>
     <div class="muted">${c.bossName}　｜　与えたダメージ ${c.bossMaxHP-c.bossHP}/${c.bossMaxHP}</div>
+    <div class="muted">弱点攻撃 ${c.weakHits||0}回　｜　フィーバー ${c.feverCount||0}回</div>
     <div style="margin:10px 0;font-weight:700">大丈夫、復習してから再挑戦しよう！</div>
     <div class="row" style="margin-top:16px">
       <button class="btn secondary" id="retryBtn">もう一度挑む</button>
@@ -1355,6 +1437,7 @@ function renderBossVictory(){
     <div class="bossResult">🏆</div>
     <div style="font-size:1.3rem;font-weight:800">ボス討伐！</div>
     <div class="muted">${c.bossName}　｜　残りライフ ${'❤'.repeat(c.lives)}　｜　獲得 ${c.score}点</div>
+    <div class="muted">弱点攻撃 ${c.weakHits||0}回　｜　フィーバー ${c.feverCount||0}回</div>
     ${badgeHtml}
     <div style="margin:10px 0;font-weight:700">おめでとう！このステージの理解はもう完璧だね！</div>
     <div class="row" style="margin-top:16px">
@@ -1426,6 +1509,7 @@ function renderResult(){
     <div class="rankbig">${rank}</div>
     <div style="font-size:1.3rem;font-weight:800">正答率 ${pct}%</div>
     <div class="muted">${c.correct} / ${total} 問正解　｜　最大コンボ ${c.maxCombo}　｜　獲得 ${c.score}点</div>
+    <div class="muted">フィーバー ${c.feverCount||0}回</div>
     <div style="margin:10px 0;font-weight:700">${msg}</div>
     ${badgeHtml}
     ${wrongList}
