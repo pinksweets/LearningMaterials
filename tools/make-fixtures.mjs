@@ -15,7 +15,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
@@ -27,7 +27,7 @@ function digestOf(q) {
   return createHash("sha256").update(JSON.stringify(q)).digest("hex").slice(0, 8);
 }
 
-const { units } = await import(path.join(ROOT, "data", "index.js"));
+const { units } = await import(pathToFileURL(path.join(ROOT, "data", "index.js")).href);
 
 const current = {};
 for (const u of units) {
