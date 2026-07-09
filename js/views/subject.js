@@ -1,7 +1,17 @@
-import { el, app } from "../utils.js";
+import { el, app, escapeAttr, escapeHtml } from "../utils.js";
 import { stopTimer } from "../timer.js";
 import { stopBossTension } from "../audio.js";
-import { state, stageMastery, isStageUnlockedForBoss, subjectClearedCount, weakestStage, stagesOfSubject } from "../state.js";
+import {
+  state,
+  stageMastery,
+  isStageUnlockedForBoss,
+  subjectClearedCount,
+  weakestStage,
+  stagesOfSubject,
+  isSubjectGroupCollapsed,
+  setSubjectGroupCollapsed,
+  setSubjectGroupsCollapsed
+} from "../state.js";
 import { QUESTIONS } from "../content.js";
 import { renderHome } from "./home.js";
 import { startStage, startBoss } from "./quiz.js";
@@ -15,30 +25,34 @@ export function renderSubjectHome(subject){
 
   const sids = stagesOfSubject(subject);
 
-  // 数学のような大カテゴリ（group）を持つ教科は見出しを挟む。歴史のようにgroupが無い教科は見出し無しのまま。
-  let lastGroup=null;
-  const stagesHtml = sids.map((sid,i)=>{
+  const sections=[];
+  sids.forEach(sid=>{
+    const group = QUESTIONS[sid].group || "";
+    const last = sections[sections.length-1];
+    if(last && last.group===group)last.sids.push(sid);
+    else sections.push({group,sids:[sid]});
+  });
+  const groupNames=[...new Set(sections.filter(section=>section.group).map(section=>section.group))];
+  const groupControlsHtml = groupNames.length
+    ? `<div class="subjectTools">
+        <button class="btn secondary small" id="expandAllGroups" type="button">全部開く</button>
+        <button class="btn secondary small" id="collapseAllGroups" type="button">全部閉じる</button>
+      </div>` : "";
+
+  function stageHtml(sid,index){
     const s=QUESTIONS[sid];
     const best = state.stageBest[sid];
     const cleared = state.stageCleared[sid];
     const m=stageMastery(sid);
     const bossUnlocked = isStageUnlockedForBoss(sid);
     const bossDone = !!state.bossCleared[sid];
-    const bossBtn = `<button class="bossBtn ${bossUnlocked?'':'locked'}" data-boss="${sid}">${bossDone?'👑 再挑戦':(bossUnlocked?'👹 ボス戦':'🔒 ボス戦')}</button>`;
-    const pageHtml = s.page ? `　｜　教科書 p.${s.page}` : "";
-    const group = s.group || "";
-    let headHtml = "";
-    if(group && group!==lastGroup){
-      headHtml += `<div class="groupHead">${group}</div>`;
-      lastGroup = group;
-    } else if(!group){
-      lastGroup = null;   // groupの無い単元が続く場合は次にgroup付き単元が来たら必ず見出しを出す
-    }
-    return `${headHtml}<div class="stage" data-stage="${sid}">
-      <div class="no">${i+1}</div>
+    const bossBtn = `<button class="bossBtn ${bossUnlocked?'':'locked'}" data-boss="${escapeAttr(sid)}">${bossDone?'👑 再挑戦':(bossUnlocked?'👹 ボス戦':'🔒 ボス戦')}</button>`;
+    const pageHtml = s.page ? `　｜　教科書 p.${escapeHtml(s.page)}` : "";
+    return `<div class="stage" data-stage="${escapeAttr(sid)}">
+      <div class="no">${index}</div>
       <div style="flex:1;min-width:0">
-        <div class="t">${s.title}</div>
-        <div class="d">${s.desc}　全${s.data.length}問${pageHtml}</div>
+        <div class="t">${escapeHtml(s.title)}</div>
+        <div class="d">${escapeHtml(s.desc)}　全${s.data.length}問${pageHtml}</div>
         <div class="mastery"><i style="width:${m.pct}%"></i></div>
         <div class="masteryTxt">習熟 ${m.pct}%（${m.mastered}/${m.total}問マスター）</div>
       </div>
@@ -47,28 +61,61 @@ export function renderSubjectHome(subject){
         ${bossBtn}
       </div>
     </div>`;
+  }
+
+  let stageIndex=0;
+  const stagesHtml = sections.map((section,sectionIndex)=>{
+    const body=section.sids.map(sid=>stageHtml(sid,++stageIndex)).join("");
+    if(!section.group)return body;
+    const collapsed=isSubjectGroupCollapsed(subject,section.group);
+    const bodyId='stageGroupBody'+sectionIndex;
+    return `<section class="stageGroup ${collapsed?'collapsed':''}">
+      <button class="groupToggle" type="button" data-group-toggle="${escapeAttr(section.group)}" aria-expanded="${collapsed?'false':'true'}" aria-controls="${bodyId}">
+        <span>${escapeHtml(section.group)}</span>
+        <span class="groupToggleState">${collapsed?'開く':'閉じる'}</span>
+      </button>
+      <div class="stageGroupBody" id="${bodyId}">${body}</div>
+    </section>`;
   }).join("");
 
   const {cleared,total} = subjectClearedCount(subject);
   const weak=weakestStage(subject);
   const weakHtml = weak
-    ? `<div class="weakspot" data-stage="${weak.sid}">📉 いま伸びしろNo.1：${QUESTIONS[weak.sid].title}（習熟 ${weak.pct}%）　タップで挑戦！</div>` : "";
+    ? `<div class="weakspot" data-stage="${escapeAttr(weak.sid)}">📉 いま伸びしろNo.1：${escapeHtml(QUESTIONS[weak.sid].title)}（習熟 ${weak.pct}%）　タップで挑戦！</div>` : "";
 
   app().innerHTML = "";
   app().appendChild(el(`<div>
-    <h1>${subject}</h1>
+    <h1>${escapeHtml(subject)}</h1>
     <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">← 教科選択へ</button>
     <div class="card">
       <div class="hud">
         <span class="chip">クリア <span class="em">${cleared}/${total}</span></span>
       </div>
       <div class="muted">好きなステージからいつでも始められるよ。1問ごとに解説が出るよ。</div>
+      ${groupControlsHtml}
       ${stagesHtml}
       ${weakHtml}
     </div>
   </div>`));
 
   document.getElementById('subjectBackBtn').addEventListener('click',renderHome);
+  const expandAll=document.getElementById('expandAllGroups');
+  if(expandAll)expandAll.addEventListener('click',()=>{
+    setSubjectGroupsCollapsed(subject,groupNames,false);
+    renderSubjectHome(subject);
+  });
+  const collapseAll=document.getElementById('collapseAllGroups');
+  if(collapseAll)collapseAll.addEventListener('click',()=>{
+    setSubjectGroupsCollapsed(subject,groupNames,true);
+    renderSubjectHome(subject);
+  });
+  document.querySelectorAll('[data-group-toggle]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const group=btn.dataset.groupToggle;
+      setSubjectGroupCollapsed(subject,group,!isSubjectGroupCollapsed(subject,group));
+      renderSubjectHome(subject);
+    });
+  });
 
   document.querySelectorAll('.stage').forEach(node=>{
     node.addEventListener('click',(e)=>{

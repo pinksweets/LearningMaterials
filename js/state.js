@@ -13,15 +13,18 @@ export const state = {
   qStats:{},             // "s1-0":{seen,correct,box,due}  1問ごとの成績＋間隔反復
   streak:0,              // 連続学習日数
   lastStudyDate:"",      // "YYYY-MM-DD"
+  studyLog:{},            // "YYYY-MM-DD":{answered,correct,subjects:{},modes:{}}
   cards:new Set(),       // 解放済み図鑑カードID
   title:"",              // 現在の称号
-  settings:{timeAttack:true, inputMode:false, sound:true, bgmUrl:""}, // 追加機能：眠気対策の設定
+  settings:{timeAttack:true, inputMode:false, sound:true, bgmUrl:"", dailyGoal:10}, // 追加機能：眠気対策の設定
   bossCleared:{},        // 追加機能："s1":true など、ボス撃破済みステージ
+  subjectGroupCollapsed:{}, // "教科\u001fグループ":true
   // 現在のプレイ
   cur:null
 };
 STAGE_ORDER.forEach(sid=>{ state.stageCleared[sid]=false; state.stageBest[sid]=0; });
-export const DEFAULT_SETTINGS={timeAttack:true, inputMode:false, sound:true, bgmUrl:""};
+export const DAILY_GOAL_OPTIONS=[5,10,20];
+export const DEFAULT_SETTINGS={timeAttack:true, inputMode:false, sound:true, bgmUrl:"", dailyGoal:10};
 
 /* 称号（累積マスター数で昇格。下がらない成長指標）
    最上位の「学習マスター」は、全問題数に応じて動的に決まる（定数固定にしない）。
@@ -45,10 +48,12 @@ export function save(){
       qStats:state.qStats,
       streak:state.streak,
       lastStudyDate:state.lastStudyDate,
+      studyLog:state.studyLog,
       cards:[...state.cards],
       title:state.title,
       settings:state.settings,
-      bossCleared:state.bossCleared
+      bossCleared:state.bossCleared,
+      subjectGroupCollapsed:state.subjectGroupCollapsed
     }));
   }catch(e){/* 保存できなくても学習は続けられるので握りつぶす */}
 }
@@ -65,13 +70,128 @@ export function load(){
     state.qStats=d.qStats||{};
     state.streak=d.streak||0;
     state.lastStudyDate=d.lastStudyDate||"";
+    state.studyLog=normalizeStudyLog(d.studyLog);
     state.cards=new Set(d.cards||[]);
     state.title=d.title||"";
     // 追加機能：settingsは旧データ（無し）でも壊れないようデフォルトとマージ
     state.settings=Object.assign({},DEFAULT_SETTINGS,(d.settings&&typeof d.settings==='object')?d.settings:{});
+    state.settings.dailyGoal=normalizeDailyGoal(state.settings.dailyGoal);
     state.bossCleared=(d.bossCleared&&typeof d.bossCleared==='object')?d.bossCleared:{};
+    state.subjectGroupCollapsed=(d.subjectGroupCollapsed&&typeof d.subjectGroupCollapsed==='object')?d.subjectGroupCollapsed:{};
   }catch(e){/* 壊れたデータ・別バージョンは初期stateで開始 */}
   cleanupStaleQStats();  // 追加機能（数学カテゴリ細分化）：存在しない単元IDのqStatsキーが習熟度/称号を汚染しないよう掃除
+}
+
+/* ---------- 日別学習ログ（草グラフ・今日の目標・週間ふりかえり） ---------- */
+export function normalizeDailyGoal(value){
+  const n=Number(value);
+  return DAILY_GOAL_OPTIONS.includes(n)?n:10;
+}
+export function emptyStudyDay(){
+  return {answered:0, correct:0, subjects:{}, modes:{}};
+}
+function normalizeCount(value){
+  const n=Number(value);
+  return Number.isFinite(n)&&n>0 ? Math.floor(n) : 0;
+}
+function normalizeCountMap(raw){
+  const out={};
+  if(!raw||typeof raw!=='object')return out;
+  Object.keys(raw).forEach(key=>{
+    const n=normalizeCount(raw[key]);
+    if(n>0)out[key]=n;
+  });
+  return out;
+}
+function normalizeStudyDay(raw){
+  if(!raw||typeof raw!=='object')return emptyStudyDay();
+  const answered=normalizeCount(raw.answered);
+  const correct=Math.min(answered,normalizeCount(raw.correct));
+  return {
+    answered,
+    correct,
+    subjects:normalizeCountMap(raw.subjects),
+    modes:normalizeCountMap(raw.modes)
+  };
+}
+export function normalizeStudyLog(raw){
+  const out={};
+  if(!raw||typeof raw!=='object')return out;
+  Object.keys(raw).forEach(date=>{
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+    const day=normalizeStudyDay(raw[date]);
+    if(day.answered>0)out[date]=day;
+  });
+  return out;
+}
+function ensureStudyDay(date){
+  if(!state.studyLog||typeof state.studyLog!=='object')state.studyLog={};
+  state.studyLog[date]=normalizeStudyDay(state.studyLog[date]);
+  return state.studyLog[date];
+}
+export function getStudyDay(date){
+  return normalizeStudyDay(state.studyLog&&state.studyLog[date]);
+}
+export function recordStudyAnswer(isCorrect, subject, mode){
+  const day=ensureStudyDay(todayStr());
+  day.answered++;
+  if(isCorrect)day.correct++;
+  const subjectName=subject||"その他";
+  const modeName=mode||"stage";
+  day.subjects[subjectName]=(day.subjects[subjectName]||0)+1;
+  day.modes[modeName]=(day.modes[modeName]||0)+1;
+}
+export function recentStudyDays(days,endDate){
+  const end=endDate||todayStr();
+  const out=[];
+  for(let i=days-1;i>=0;i--){
+    const date=addDays(end,-i);
+    out.push({date, ...getStudyDay(date)});
+  }
+  return out;
+}
+export function weeklyStudySummary(endDate){
+  const days=recentStudyDays(7,endDate);
+  const answered=days.reduce((sum,d)=>sum+d.answered,0);
+  const correct=days.reduce((sum,d)=>sum+d.correct,0);
+  const activeDays=days.filter(d=>d.answered>0).length;
+  return {
+    answered,
+    correct,
+    activeDays,
+    accuracy:answered?Math.round(correct/answered*100):0
+  };
+}
+export function studyVolumeLevel(answered){
+  if(answered>=20)return 4;
+  if(answered>=10)return 3;
+  if(answered>=5)return 2;
+  if(answered>=1)return 1;
+  return 0;
+}
+
+/* ---------- 教科ホームのグループ折りたたみ状態 ---------- */
+export function subjectGroupKey(subject,group){
+  return String(subject||"その他")+"\u001f"+String(group||"");
+}
+export function isSubjectGroupCollapsed(subject,group){
+  return !!(state.subjectGroupCollapsed&&state.subjectGroupCollapsed[subjectGroupKey(subject,group)]);
+}
+export function setSubjectGroupCollapsed(subject,group,collapsed){
+  if(!state.subjectGroupCollapsed||typeof state.subjectGroupCollapsed!=='object')state.subjectGroupCollapsed={};
+  const key=subjectGroupKey(subject,group);
+  if(collapsed)state.subjectGroupCollapsed[key]=true;
+  else delete state.subjectGroupCollapsed[key];
+  save();
+}
+export function setSubjectGroupsCollapsed(subject,groups,collapsed){
+  if(!state.subjectGroupCollapsed||typeof state.subjectGroupCollapsed!=='object')state.subjectGroupCollapsed={};
+  groups.forEach(group=>{
+    const key=subjectGroupKey(subject,group);
+    if(collapsed)state.subjectGroupCollapsed[key]=true;
+    else delete state.subjectGroupCollapsed[key];
+  });
+  save();
 }
 
 /* ---------- 追加機能（数学カテゴリ細分化）：qStatsの整合確認 ----------

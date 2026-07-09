@@ -3,7 +3,7 @@ import { normalizeAnswer, isAnswerMatch, isAnyAnswerMatch } from "../answers.js"
 import { stopTimer, startTimer, timeLimitFor } from "../timer.js";
 import { FEVER_BONUS, initRewardProgress, applyFeverProgress, rewardHudHtml } from "../fever.js";
 import { QUESTIONS } from "../content.js";
-import { state, save, dueList, updateQStat, unlockCard, isStageUnlockedForBoss } from "../state.js";
+import { state, save, dueList, updateQStat, unlockCard, isStageUnlockedForBoss, recordStudyAnswer } from "../state.js";
 import { playAnswerSound, syncBossTension, stopBossTension } from "../audio.js";
 import { renderHome } from "./home.js";
 import { renderSubjectHome } from "./subject.js";
@@ -563,6 +563,8 @@ export function finishQuestion(isCorrect,q,opts){
 
   // 1問ごとの成績＋間隔反復スケジュールを更新（復習・ボス戦でも共通）
   if(q._key)updateQStat(q._key,isCorrect);
+  const logSid = c.mode==='review' && q._key ? q._key.split('-')[0] : c.sid;
+  recordStudyAnswer(isCorrect, QUESTIONS[logSid]&&QUESTIONS[logSid].subject, c.mode);
   // 図鑑カードの解放（正解時。card は文字列または配列）
   if(isCorrect && q.card){
     (Array.isArray(q.card)?q.card:[q.card]).forEach(unlockCard);
