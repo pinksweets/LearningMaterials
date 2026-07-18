@@ -153,7 +153,7 @@ export function renderHome(){
   app().appendChild(el(`<div>
     <h1>🏰 学習クエスト</h1>
     <div class="titleWrap"><span class="titleBadge">🎖 ${state.title}</span></div>
-    <div class="sub">歴史総合・数学Ⅰをゲーム感覚で攻略<br>全${totalQuestionCount()}問／基礎多め＋標準　解説つき</div>
+    <div class="sub">高校6教科＋英単語をゲーム感覚で攻略<br>全${totalQuestionCount()}問／基礎から発展まで　解説つき</div>
     <div class="card">
       <div class="hud">
         <span class="chip">合計スコア <span class="em">${state.totalScore}</span></span>

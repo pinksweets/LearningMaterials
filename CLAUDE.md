@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-「学習クエスト」— 高校生向けのゲーミフィケーション・クイズ教材（歴史総合・数学Ⅰ・総合英語 Harmony・生物基礎 visual・電気回路１・数学A の6教科）。**GitHub Pages（https://pinksweets.github.io/LearningMaterials/）での公開が前提**の純フロントエンド ESM アプリで、ビルドステップ・サーバーサイド処理・npm 依存・外部CDNは一切ない。PWA 化されており、一度開けばオフラインでも学習できる。ローカルで確認する場合は ES Modules（`import`）を使っているため `file://` の直開きは不可で、簡易HTTPサーバー（`python3 -m http.server` など）経由で開く必要がある。
+「学習クエスト」— 高校生向けのゲーミフィケーション・クイズ教材（歴史総合・数学Ⅰ・総合英語 Harmony・生物基礎 visual・電気回路１・数学A・LEAP Basic 必携英単語の7教科カード）。**GitHub Pages（https://pinksweets.github.io/LearningMaterials/）での公開が前提**の純フロントエンド ESM アプリで、ビルドステップ・サーバーサイド処理・npm 依存・外部CDNは一切ない。PWA 化されており、一度開けばオフラインでも学習できる。ローカルで確認する場合は ES Modules（`import`）を使っているため `file://` の直開きは不可で、簡易HTTPサーバー（`python3 -m http.server` など）経由で開く必要がある。
 
 ## 実行・検証コマンド
 

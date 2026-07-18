@@ -1,6 +1,8 @@
 import { STAGE_ORDER, QUESTIONS, totalQuestionCount, CARD_BY_ID } from "./content.js";
 import { todayStr, addDays, toast } from "./utils.js";
 
+const LEAP_BASIC_SUBJECT="📘 LEAP Basic 必携英単語";
+
 /* ============================================================
    ゲーム状態
 ============================================================ */
@@ -175,12 +177,17 @@ export function subjectGroupKey(subject,group){
   return String(subject||"その他")+"\u001f"+String(group||"");
 }
 export function isSubjectGroupCollapsed(subject,group){
-  return !!(state.subjectGroupCollapsed&&state.subjectGroupCollapsed[subjectGroupKey(subject,group)]);
+  const key=subjectGroupKey(subject,group);
+  if(state.subjectGroupCollapsed&&Object.prototype.hasOwnProperty.call(state.subjectGroupCollapsed,key)){
+    return !!state.subjectGroupCollapsed[key];
+  }
+  return subject===LEAP_BASIC_SUBJECT;
 }
 export function setSubjectGroupCollapsed(subject,group,collapsed){
   if(!state.subjectGroupCollapsed||typeof state.subjectGroupCollapsed!=='object')state.subjectGroupCollapsed={};
   const key=subjectGroupKey(subject,group);
-  if(collapsed)state.subjectGroupCollapsed[key]=true;
+  if(subject===LEAP_BASIC_SUBJECT)state.subjectGroupCollapsed[key]=!!collapsed;
+  else if(collapsed)state.subjectGroupCollapsed[key]=true;
   else delete state.subjectGroupCollapsed[key];
   save();
 }
@@ -188,7 +195,8 @@ export function setSubjectGroupsCollapsed(subject,groups,collapsed){
   if(!state.subjectGroupCollapsed||typeof state.subjectGroupCollapsed!=='object')state.subjectGroupCollapsed={};
   groups.forEach(group=>{
     const key=subjectGroupKey(subject,group);
-    if(collapsed)state.subjectGroupCollapsed[key]=true;
+    if(subject===LEAP_BASIC_SUBJECT)state.subjectGroupCollapsed[key]=!!collapsed;
+    else if(collapsed)state.subjectGroupCollapsed[key]=true;
     else delete state.subjectGroupCollapsed[key];
   });
   save();

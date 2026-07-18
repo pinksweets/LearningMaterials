@@ -15,7 +15,7 @@
      （バンプを忘れると古いキャッシュがいつまでも残り続ける）。
 ============================================================ */
 
-const CACHE_NAME = 'gakushu-quest-v1';
+const CACHE_NAME = 'gakushu-quest-v2';
 
 const ASSETS = [
   './',
@@ -53,6 +53,11 @@ const ASSETS = [
   './data/b2_visual_enzymes.js',
   './data/ec1_denki_kairo1.js',
   './data/ma1_suugaku_a.js',
+  './data/lb1_leap_basic.js',
+  './data/lb2_leap_basic.js',
+  './data/lb3_leap_basic.js',
+  './data/lb4_leap_basic.js',
+  './data/lb5_leap_basic.js',
 ];
 
 self.addEventListener('install', (event) => {
