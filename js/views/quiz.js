@@ -1,10 +1,11 @@
-import { shuffle, el, app, toast } from "../utils.js";
+import { shuffle, el, app, toast, escapeHtml } from "../utils.js";
 import { normalizeAnswer, isAnswerMatch, isAnyAnswerMatch } from "../answers.js";
 import { stopTimer, startTimer, timeLimitFor } from "../timer.js";
 import { FEVER_BONUS, initRewardProgress, applyFeverProgress, rewardHudHtml } from "../fever.js";
 import { QUESTIONS } from "../content.js";
+import { extractLeapEntry, isLeapSubject, shouldShowLeapWordBeforeAnswer } from "../leap-study.js";
 import { state, save, dueList, updateQStat, unlockCard, isStageUnlockedForBoss, recordStudyAnswer } from "../state.js";
-import { playAnswerSound, syncBossTension, stopBossTension } from "../audio.js";
+import { playAnswerSound, speakEnglish, syncBossTension, stopBossTension, stopSpeech } from "../audio.js";
 import { renderHome } from "./home.js";
 import { renderSubjectHome } from "./subject.js";
 import { renderResult, renderBossDefeat, renderBossVictory } from "./results.js";
@@ -56,10 +57,14 @@ export function startBoss(sid){
 ============================================================ */
 export function renderQuestion(){
   stopTimer(); // 再描画時は必ず前のタイマーを止める（多重起動防止）
+  stopSpeech();
   const c=state.cur;
   if(c.i>=c.list.length){ renderResult(); return; }  // 範囲外の防御
   c._locked=false;   // 新しい問題を描画するのでロック解除
   const q=c.list[c.i];
+  const sourceSid = c.mode==='review' && q._key ? q._key.split('-')[0] : c.sid;
+  const leapEntry = QUESTIONS[sourceSid] && isLeapSubject(QUESTIONS[sourceSid].subject) ? extractLeapEntry(q) : null;
+  const preAnswerLeapEntry = leapEntry && shouldShowLeapWordBeforeAnswer(q) ? leapEntry : null;
   const num=c.i+1, total=c.list.length;
   const pct=Math.round((c.i)/total*100);
   const isBoss = c.mode==='boss';
@@ -94,6 +99,8 @@ export function renderQuestion(){
     suji:"数値入力問題",fill:"穴埋め問題",junban:"手順並べ替え問題"}[q.type];
   const pageTag = q._page ? `<span class="tag">教科書 p.${q._page}</span>` : "";
   const tags=`<div class="qtypebar"><span class="tag lv">${q.lv}</span><span class="tag">${typeLabel}</span>${pageTag}</div>`;
+  const speechPrompt = preAnswerLeapEntry
+    ? `<div class="quizSpeechPrompt" aria-live="polite">🔊 声に出して読もう：<strong lang="en">${escapeHtml(preAnswerLeapEntry.headword)}</strong></div>` : "";
 
   // 追加機能：記述（入力）モードで ana を出題するか
   const useInputMode = q.type==="ana" && !!(state.settings&&state.settings.inputMode) && !c._forceChoice;
@@ -184,7 +191,7 @@ export function renderQuestion(){
     <div class="muted" id="hintText" style="display:none;margin-top:6px"></div>` : "";
 
   app().innerHTML="";
-  app().appendChild(el(`<div><div class="card">${hud}${rewardHud}${bossHud}${timerHtml}${tags}${body}
+  app().appendChild(el(`<div><div class="card">${hud}${rewardHud}${bossHud}${timerHtml}${tags}${speechPrompt}${body}
     ${hintHtml}
     <div class="fb" id="fb"></div>
     <div id="nextWrap"></div>
@@ -196,6 +203,7 @@ export function renderQuestion(){
     if(confirm('ホームにもどる？（このステージの進みはリセットされます）')){
       stopTimer();
       stopBossTension();
+      stopSpeech();
       // 追加機能（教科選択ファースト化）：stage/bossは直前の教科ホームへ、reviewは教科選択へ戻る
       const backSubject = c.mode!=='review' ? QUESTIONS[c.sid].subject : null;
       if(backSubject) renderSubjectHome(backSubject); else renderHome();
@@ -254,6 +262,7 @@ export function renderQuestion(){
   }
 
   // 追加機能：タイムアタック（時間切れ→自動不正解）
+  if(preAnswerLeapEntry)speakEnglish(preAnswerLeapEntry.headword);
   if(timeAttackOn){
     const limit=timeLimitFor(q);
     c._timeLimit=limit;
@@ -507,6 +516,11 @@ export function finishQuestion(isCorrect,q,opts){
   c._locked=true;
   stopTimer(); // 採点確定時点で必ずタイマー停止（時間切れ経路も含め二重に保証）
   playAnswerSound(isCorrect);
+  const sourceSid = c.mode==='review' && q._key ? q._key.split('-')[0] : c.sid;
+  const leapFeedbackEntry = QUESTIONS[sourceSid] && isLeapSubject(QUESTIONS[sourceSid].subject) ? extractLeapEntry(q) : null;
+  const leapSpeechFeedback = leapFeedbackEntry && leapFeedbackEntry.headword
+    ? `<div class="quizSpeechPrompt" aria-live="polite">🔊 声に出して読もう：<strong lang="en">${escapeHtml(leapFeedbackEntry.headword)}</strong></div>` : "";
+  if(leapFeedbackEntry)speakEnglish(leapFeedbackEntry.headword);
   initRewardProgress(c);
   const feverWasActive=c.feverLeft>0;
   const fb=document.getElementById('fb');
@@ -537,7 +551,7 @@ export function finishQuestion(isCorrect,q,opts){
     if(bossDamage>1)rewardBits.push('🎯 弱点攻撃！ボスに2ダメージ');
     fb.className="fb good show";
     fb.innerHTML=`<div class="head">⭕ 正解！ +${pts}点${bonus?` <span class="combo">コンボ+${bonus}</span>`:''}${speedBonus?` <span class="combo">⏱速答+${speedBonus}</span>`:''}${feverBonus?` <span class="combo">FEVER+${feverBonus}</span>`:''}</div>
-      <div class="exp">${q.exp}</div>
+      ${leapSpeechFeedback}<div class="exp">${q.exp}</div>
       ${rewardBits.length?`<div class="rewardMsg">${rewardBits.join('　')}</div>`:''}`;
     if(feverEvent.started)toast('✨ フィーバー突入！次の3問はボーナス！');
     else if(bossDamage>1)toast('🎯 弱点攻撃！ ボスに2ダメージ！');
@@ -553,7 +567,7 @@ export function finishQuestion(isCorrect,q,opts){
     let rewardMsg = feverEvent.ended ? `<div class="rewardMsg">フィーバー終了。次の正解からまたゲージをためよう。</div>` : "";
     fb.className="fb bad show";
     fb.innerHTML=`<div class="head">${feedbackHead}</div>
-      <div class="exp">${q.exp}</div>${extra}${rewardMsg}`;
+      ${leapSpeechFeedback}<div class="exp">${q.exp}</div>${extra}${rewardMsg}`;
     c.wrongThisRun.push(q);
     if(c.mode==='boss'){
       c.lives=Math.max(0,c.lives-1);

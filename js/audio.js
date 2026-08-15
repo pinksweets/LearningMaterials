@@ -7,6 +7,39 @@ export const BGM={playing:false,url:""};
 export function soundEnabled(){
   return !!(state.settings&&state.settings.sound);
 }
+/* ---------- 英語の自動発音（効果音とは別設定・Web Speech APIのみ） ---------- */
+export function speechEnabled(){
+  return !!(state.settings&&state.settings.englishSpeech);
+}
+export function stopSpeech(){
+  if(typeof window==='undefined'||!window.speechSynthesis)return;
+  try{window.speechSynthesis.cancel();}catch(e){}
+}
+export function normalizeSpeechText(text){
+  let value=String(text||'');
+  // 語法表記のプレースホルダー（～・(人)・（程度）・［are］など）は読まない。
+  value=value.replace(/[～〜]/g,' ')
+    .replace(/（[^）]*）|\([^)]*\)|［[^］]*］|\[[^\]]*\]/g,' ')
+    .replace(/[^A-Za-z' -]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+  return /[A-Za-z]/.test(value) ? value : '';
+}
+export function speakEnglish(text){
+  const word=normalizeSpeechText(text);
+  if(!word||!speechEnabled()||typeof window==='undefined'||!window.speechSynthesis)return false;
+  const Utterance=window.SpeechSynthesisUtterance||globalThis.SpeechSynthesisUtterance;
+  if(typeof Utterance!=='function')return false;
+  try{
+    stopSpeech();
+    const utterance=new Utterance(word);
+    utterance.lang='en-US';
+    utterance.rate=.9;
+    utterance.pitch=1;
+    window.speechSynthesis.speak(utterance);
+    return true;
+  }catch(e){return false;}
+}
 export function ensureAudio(){
   if(!soundEnabled())return null;
   if(typeof window==='undefined')return null;

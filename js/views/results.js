@@ -1,6 +1,6 @@
 import { el, app, toast } from "../utils.js";
 import { stopTimer } from "../timer.js";
-import { stopBossTension, playBossResultSound } from "../audio.js";
+import { stopBossTension, stopSpeech, playBossResultSound } from "../audio.js";
 import { state, save, evalTitle, masteredCount } from "../state.js";
 import { QUESTIONS, STAGE_ORDER, CARDS } from "../content.js";
 import { renderHome } from "./home.js";
@@ -13,6 +13,7 @@ import { startStage, startReview, startBoss } from "./quiz.js";
 export function renderBossDefeat(){
   stopTimer();
   stopBossTension();
+  stopSpeech();
   playBossResultSound(false);
   const c=state.cur;
   save();
@@ -35,6 +36,7 @@ export function renderBossDefeat(){
 export function renderBossVictory(){
   stopTimer();
   stopBossTension();
+  stopSpeech();
   playBossResultSound(true);
   const c=state.cur;
   state.totalScore += c.score;
@@ -74,6 +76,7 @@ export function renderBossVictory(){
 export function renderResult(){
   stopTimer(); // 結果画面到達時にタイマーが残っていないことを保証（防御的）
   stopBossTension();
+  stopSpeech();
   const c=state.cur;
   const total=c.list.length;
   const pctRaw=c.correct/total*100;

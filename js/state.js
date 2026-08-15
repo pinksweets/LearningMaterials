@@ -16,9 +16,10 @@ export const state = {
   streak:0,              // 連続学習日数
   lastStudyDate:"",      // "YYYY-MM-DD"
   studyLog:{},            // "YYYY-MM-DD":{answered,correct,subjects:{},modes:{}}
+  leapDailySessions:{},   // "YYYY-MM-DD": 完了したLEAP高速周回セッション数
   cards:new Set(),       // 解放済み図鑑カードID
   title:"",              // 現在の称号
-  settings:{timeAttack:true, inputMode:false, sound:true, bgmUrl:"", dailyGoal:10}, // 追加機能：眠気対策の設定
+  settings:{timeAttack:true, inputMode:false, sound:true, englishSpeech:true, bgmUrl:"", dailyGoal:10}, // 追加機能：眠気対策の設定
   bossCleared:{},        // 追加機能："s1":true など、ボス撃破済みステージ
   subjectGroupCollapsed:{}, // "教科\u001fグループ":true
   // 現在のプレイ
@@ -26,7 +27,7 @@ export const state = {
 };
 STAGE_ORDER.forEach(sid=>{ state.stageCleared[sid]=false; state.stageBest[sid]=0; });
 export const DAILY_GOAL_OPTIONS=[5,10,20];
-export const DEFAULT_SETTINGS={timeAttack:true, inputMode:false, sound:true, bgmUrl:"", dailyGoal:10};
+export const DEFAULT_SETTINGS={timeAttack:true, inputMode:false, sound:true, englishSpeech:true, bgmUrl:"", dailyGoal:10};
 
 /* 称号（累積マスター数で昇格。下がらない成長指標）
    最上位の「学習マスター」は、全問題数に応じて動的に決まる（定数固定にしない）。
@@ -51,6 +52,7 @@ export function save(){
       streak:state.streak,
       lastStudyDate:state.lastStudyDate,
       studyLog:state.studyLog,
+      leapDailySessions:state.leapDailySessions,
       cards:[...state.cards],
       title:state.title,
       settings:state.settings,
@@ -73,6 +75,7 @@ export function load(){
     state.streak=d.streak||0;
     state.lastStudyDate=d.lastStudyDate||"";
     state.studyLog=normalizeStudyLog(d.studyLog);
+    state.leapDailySessions=normalizeLeapDailySessions(d.leapDailySessions);
     state.cards=new Set(d.cards||[]);
     state.title=d.title||"";
     // 追加機能：settingsは旧データ（無し）でも壊れないようデフォルトとマージ
@@ -125,6 +128,28 @@ export function normalizeStudyLog(raw){
     if(day.answered>0)out[date]=day;
   });
   return out;
+}
+
+export function normalizeLeapDailySessions(raw){
+  const out={};
+  if(!raw||typeof raw!=='object')return out;
+  Object.keys(raw).forEach(date=>{
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+    const n=Number(raw[date]);
+    if(Number.isFinite(n)&&n>0)out[date]=Math.min(99,Math.floor(n));
+  });
+  return out;
+}
+export function leapSessionsOn(date=todayStr()){
+  const n=Number(state.leapDailySessions&&state.leapDailySessions[date]);
+  return Number.isFinite(n)&&n>0 ? Math.floor(n) : 0;
+}
+export function recordLeapSession(date=todayStr()){
+  if(!state.leapDailySessions||typeof state.leapDailySessions!=='object')state.leapDailySessions={};
+  state.leapDailySessions[date]=Math.min(99,leapSessionsOn(date)+1);
+  touchStreak();
+  save();
+  return state.leapDailySessions[date];
 }
 function ensureStudyDay(date){
   if(!state.studyLog||typeof state.studyLog!=='object')state.studyLog={};

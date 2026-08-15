@@ -35,6 +35,7 @@ test("save(): localStorage に書き込む JSON のキー集合が仕様どお�
       "streak",
       "lastStudyDate",
       "studyLog",
+      "leapDailySessions",
       "cards",
       "title",
       "settings",
@@ -53,6 +54,7 @@ test("save→load 往復で totalScore/badges(Set)/cards(Set)/settings が復元
   state.studyLog = {
     "2026-07-09": { answered: 3, correct: 2, subjects: { "数学Ⅰ": 3 }, modes: { stage: 3 } },
   };
+  state.leapDailySessions = { "2026-07-09": 2 };
   state.subjectGroupCollapsed = { "数学Ⅰ\u001f二次関数": true };
   save();
 
@@ -62,6 +64,7 @@ test("save→load 往復で totalScore/badges(Set)/cards(Set)/settings が復元
   state.cards = new Set();
   state.settings = { ...DEFAULT_SETTINGS };
   state.studyLog = {};
+  state.leapDailySessions = {};
   state.subjectGroupCollapsed = {};
 
   load();
@@ -74,6 +77,7 @@ test("save→load 往復で totalScore/badges(Set)/cards(Set)/settings が復元
   assert.deepEqual(state.studyLog, {
     "2026-07-09": { answered: 3, correct: 2, subjects: { "数学Ⅰ": 3 }, modes: { stage: 3 } },
   });
+  assert.deepEqual(state.leapDailySessions, { "2026-07-09": 2 });
   assert.deepEqual(state.subjectGroupCollapsed, { "数学Ⅰ\u001f二次関数": true });
 });
 
@@ -98,6 +102,7 @@ test("旧データ互換: settings/bossCleared/studyLog/subjectGroupCollapsed �
   assert.deepEqual(state.settings, DEFAULT_SETTINGS);
   assert.deepEqual(state.bossCleared, {});
   assert.deepEqual(state.studyLog, {});
+  assert.deepEqual(state.leapDailySessions, {});
   assert.deepEqual(state.subjectGroupCollapsed, {});
 });
 

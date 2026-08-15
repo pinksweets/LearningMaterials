@@ -1,6 +1,6 @@
 import { el, app, toast, escapeAttr, escapeHtml, todayStr, addDays } from "../utils.js";
 import { stopTimer } from "../timer.js";
-import { stopBossTension, playAnswerSound, BGM, startYouTubeBgm, stopYouTubeBgm } from "../audio.js";
+import { stopBossTension, stopSpeech, playAnswerSound, BGM, startYouTubeBgm, stopYouTubeBgm } from "../audio.js";
 import {
   DAILY_GOAL_OPTIONS,
   state,
@@ -13,9 +13,11 @@ import {
   getStudyDay,
   normalizeDailyGoal,
   studyVolumeLevel,
-  weeklyStudySummary
+  weeklyStudySummary,
+  leapSessionsOn
 } from "../state.js";
 import { CARDS, totalQuestionCount } from "../content.js";
+import { LEAP_DAILY_TARGET } from "../leap-study.js";
 import { renderSubjectHome } from "./subject.js";
 import { renderCollection } from "./collection.js";
 import { startReview } from "./quiz.js";
@@ -105,6 +107,7 @@ export function renderStudyPanel(){
 export function renderHome(){
   stopTimer(); // ホームに戻る全経路でタイマーを確実に止める（防御的）
   stopBossTension();
+  stopSpeech();
   if(!state.title)evalTitle();   // 初回は現在の称号を確定
 
   // 追加機能（教科選択ファースト化）：教科カードをorder順・重複除去で動的生成
@@ -127,17 +130,26 @@ export function renderHome(){
   const badgesHtml = state.badges.size
     ? `<div class="badges">${[...state.badges].map(b=>`<div class="badge">🏅 ${b}</div>`).join("")}</div>` : "";
   const studyPanelHtml = renderStudyPanel();
+  const leapToday=leapSessionsOn();
+  const leapComplete=leapToday>=LEAP_DAILY_TARGET;
+  const leapGoalHtml=`<section class="leapDailyPanel" aria-label="LEAP Basic 今日の高速周回ノルマ">
+    <div class="leapDailyTop"><div><strong>⚡ LEAP Basic 3分×3</strong><span>毎日短時間で、思い出す練習を積もう</span></div><b>${Math.min(leapToday,LEAP_DAILY_TARGET)}/${LEAP_DAILY_TARGET}回</b></div>
+    <div class="leapDailyBar"><i style="width:${Math.min(100,Math.round(leapToday/LEAP_DAILY_TARGET*100))}%"></i></div>
+    <div class="leapDailyMessage">${leapComplete?'🎊 今日の3回達成！すごい継続力だね。':'LEAP Basicの教科ホームで、Weekごとの「⚡ 高速」から始められるよ。'}</div>
+  </section>`;
 
   // 追加機能：眠気対策の設定トグル（タイムアタック／記述モード／サウンド）
   const ta = !!(state.settings&&state.settings.timeAttack);
   const im = !!(state.settings&&state.settings.inputMode);
   const se = !!(state.settings&&state.settings.sound);
+  const speech = !!(state.settings&&state.settings.englishSpeech);
   const bgmUrl = (state.settings&&state.settings.bgmUrl) || "";
   const bgmStatus = BGM.playing ? "再生中" : (bgmUrl ? "設定済み" : "未設定");
   const settingsHtml = `<div class="settingsRow">
       <div class="toggleChip ${ta?'on':''}" id="toggleTimeAttack">⏱ タイムアタック<span class="st">${ta?'ON':'OFF'}</span></div>
       <div class="toggleChip ${im?'on':''}" id="toggleInputMode">✍️ 記述モード<span class="st">${im?'ON':'OFF'}</span></div>
       <div class="toggleChip ${se?'on':''}" id="toggleSound">🔊 サウンド<span class="st">${se?'ON':'OFF'}</span></div>
+      <div class="toggleChip ${speech?'on':''}" id="toggleSpeech">🗣️ 英語の自動発音<span class="st">${speech?'ON':'OFF'}</span></div>
     </div>`;
   const bgmHtml = `<div class="bgmSettings">
       <div class="bgmTop"><span>🎵 YouTube BGM</span><span>${bgmStatus}</span></div>
@@ -162,6 +174,7 @@ export function renderHome(){
       </div>
       <div class="muted">まずは教科を選んでね。1問ごとに解説が出るよ。まちがえた問題は「今日の復習」でちょうどよいタイミングにまた出るから大丈夫！</div>
       ${studyPanelHtml}
+      ${leapGoalHtml}
       ${settingsHtml}
       ${bgmHtml}
       ${cardsHtml}
@@ -213,6 +226,13 @@ export function renderHome(){
     state.settings.sound=!state.settings.sound;
     if(!state.settings.sound)stopBossTension();
     else playAnswerSound(true);
+    save();
+    renderHome();
+  });
+  const speechBtn=document.getElementById('toggleSpeech');
+  if(speechBtn) speechBtn.addEventListener('click',()=>{
+    state.settings.englishSpeech=!state.settings.englishSpeech;
+    if(!state.settings.englishSpeech)stopSpeech();
     save();
     renderHome();
   });
