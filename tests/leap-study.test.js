@@ -35,7 +35,7 @@ test("LEAP 3コースの実データから英語見出語と第1義を抽出で�
   assert.notEqual(first.nuance,first.hint);
 });
 
-test("LEAP全4800問は抽出欠落がなく、同じWeekの3コースで見出語と第1義が一致する", () => {
+test("LEAP全6954問は抽出欠落がなく、同じステージの3コースで見出語と第1義が一致する", () => {
   const leapUnits=units.filter((unit)=>unit.subject==="📘 LEAP Basic 必携英単語");
   const byWeek=new Map();
   leapUnits.forEach((unit)=>{
@@ -63,7 +63,17 @@ test("LEAP全4800問は抽出欠落がなく、同じWeekの3コースで見出�
       assert.equal(entries[0].firstMeaning,entries[2].firstMeaning);
     });
   });
-  assert.equal(questions,4800);
+  assert.equal(questions,6954);
+});
+
+test("英単語クエスト由来の追加教材は既存LEAPと重複せず、3コースで718語を収録する", () => {
+  const additions=units.filter((unit)=>unit.id.startsWith("lbq"));
+  assert.equal(additions.length,222);
+  const course1=additions.filter((unit)=>unit.group.includes("Course 1"));
+  const headwords=course1.flatMap((unit)=>unit.questions.map((question)=>question.q.match(/「([^」]+)」/)?.[1]||""));
+  assert.equal(headwords.length,718);
+  assert.equal(new Set(headwords).size,718);
+  assert.ok(additions.some((unit)=>unit.questions.some((question)=>question.exp.includes("🔧")&&question.exp.includes("⭐ Tip:"))));
 });
 
 test("通常クイズで回答前に見出語を出せるのはCourse 1だけ", () => {

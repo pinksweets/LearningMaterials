@@ -19,8 +19,9 @@ import * as lb2 from "./lb2_leap_basic.js";
 import * as lb3 from "./lb3_leap_basic.js";
 import * as lb4 from "./lb4_leap_basic.js";
 import * as lb5 from "./lb5_leap_basic.js";
+import * as lbq from "./lbq_leap_basic.js";
 
-const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5];
+const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5, lbq];
 
 /* 全単元（登録順） */
 export const units = MODULES.flatMap(m => m.units);
