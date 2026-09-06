@@ -9,6 +9,7 @@ import { playAnswerSound, speakEnglish, syncBossTension, stopBossTension, stopSp
 import { renderHome } from "./home.js";
 import { renderSubjectHome } from "./subject.js";
 import { renderResult, renderBossDefeat, renderBossVictory } from "./results.js";
+import { renderSeptemberHome } from "./september.js";
 
 /* ============================================================
    ステージ開始
@@ -70,7 +71,7 @@ export function renderQuestion(){
   const isBoss = c.mode==='boss';
   initRewardProgress(c);
   syncBossTension(isBoss);
-  const timeAttackOn = isBoss ? true : !!(state.settings&&state.settings.timeAttack); // ボス戦は強制ON
+  const timeAttackOn = isBoss ? true : !q.examPractice && !!(state.settings&&state.settings.timeAttack); // ボス戦は強制ON
 
   const hud=`<div class="hud">
     <span class="chip">${c.title}</span>
@@ -103,7 +104,7 @@ export function renderQuestion(){
     ? `<div class="quizSpeechPrompt" aria-live="polite">🔊 声に出して読もう：<strong lang="en">${escapeHtml(preAnswerLeapEntry.headword)}</strong></div>` : "";
 
   // 追加機能：記述（入力）モードで ana を出題するか
-  const useInputMode = q.type==="ana" && !!(state.settings&&state.settings.inputMode) && !c._forceChoice;
+  const useInputMode = q.type==="ana" && (q.forceInput || (!!(state.settings&&state.settings.inputMode) && !c._forceChoice));
 
   let body="";
   if(q.type==="maru"){
@@ -146,7 +147,7 @@ export function renderQuestion(){
         <input type="text" id="inputAns" placeholder="こたえを入力…" autocomplete="off">
       </div>
       <button class="btn" id="inputCheck">こたえる</button>
-      <button class="fallbackLink" id="fallbackToChoice">選択肢を見る</button>`;
+      ${q.forceInput?'':'<button class="fallbackLink" id="fallbackToChoice">選択肢を見る</button>'}`;
   } else if(q.type==="suji"){
     // 追加機能（数学統合）：数値入力（常時テキスト入力、選択肢なし）
     body=`<div class="qtext">${q.q}</div>
@@ -192,18 +193,32 @@ export function renderQuestion(){
 
   app().innerHTML="";
   app().appendChild(el(`<div><div class="card">${hud}${rewardHud}${bossHud}${timerHtml}${tags}${speechPrompt}${body}
+    ${q.speech?`<button class="btn secondary" id="examSpeak" type="button">🔊 英語を聞く</button>${q.reading?`<details class="sepReading"><summary>読み方のヒント</summary>${escapeHtml(q.reading)}<p class="muted">カタカナは目安。音声をまねしてみよう。</p></details>`:''}`:''}
     ${hintHtml}
+    ${q.examPractice?'<button class="fallbackLink" id="examUnknown" type="button">わからない・答えを確認する</button>':''}
     <div class="fb" id="fb"></div>
     <div id="nextWrap"></div>
   </div>
   <button class="btn secondary small" id="quitBtn" style="margin-top:12px">← ホームにもどる</button>
   </div>`));
 
+  const examSpeak=document.getElementById('examSpeak');
+  if(examSpeak)examSpeak.addEventListener('click',()=>{
+    if(!speakEnglish(q.speech,{manual:true}))toast('音声を再生できないよ。端末の音声設定を確認してね。');
+  });
+  const examUnknown=document.getElementById('examUnknown');
+  if(examUnknown)examUnknown.addEventListener('click',()=>{
+    if(c._locked)return;
+    examUnknown.disabled=true;
+    finishQuestion(false,q,{correctText:q.choices[q.a]});
+  });
+
   document.getElementById('quitBtn').addEventListener('click',()=>{
     if(confirm('ホームにもどる？（このステージの進みはリセットされます）')){
       stopTimer();
       stopBossTension();
       stopSpeech();
+      if(c.septemberReview){renderSeptemberHome(true);return;}
       // 追加機能（教科選択ファースト化）：stage/bossは直前の教科ホームへ、reviewは教科選択へ戻る
       const backSubject = c.mode!=='review' ? QUESTIONS[c.sid].subject : null;
       if(backSubject) renderSubjectHome(backSubject); else renderHome();
@@ -234,7 +249,7 @@ export function renderQuestion(){
     const doCheck=()=>checkInput(q);
     document.getElementById('inputCheck').addEventListener('click',doCheck);
     inputEl.addEventListener('keydown',(e)=>{if(e.key==='Enter'){e.preventDefault();doCheck();}});
-    document.getElementById('fallbackToChoice').addEventListener('click',()=>{
+    document.getElementById('fallbackToChoice')?.addEventListener('click',()=>{
       c._forceChoice=true;
       renderQuestion();
     });
@@ -353,12 +368,16 @@ export function answer(isCorrect, clickedBtn, chosenIdx){
 /* ---------- 追加機能：記述（入力）モードの採点 ---------- */
 export function checkInput(q){
   const c=state.cur;
+  if(c._locked)return;
   const inputEl=document.getElementById('inputAns');
   const val=inputEl.value;
   if(normalizeAnswer(val)===""){toast('こたえを入力してね！');return;}
   stopTimer();
   const correctText=q.choices[q.a];
-  const isCorrect=isAnswerMatch(val,correctText);
+  const accepted=[correctText,...(q.accept||[])];
+  const isCorrect=q.forceInput
+    ? accepted.some(answer=>normalizeAnswer(val)===normalizeAnswer(answer))
+    : isAnyAnswerMatch(val,accepted);
   inputEl.disabled=true;
   inputEl.classList.add(isCorrect?'correct':'wrong');
   document.getElementById('inputCheck').disabled=true;

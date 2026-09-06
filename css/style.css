@@ -339,3 +339,14 @@ a.link{color:var(--accent2);}
 .nenpyoItem.correctRow{border-color:var(--ok);background:rgba(46,196,182,.14);}
 .nenpyoItem.wrongRow{border-color:var(--ng);background:rgba(255,107,107,.12);}
 .nenpyoItem .yearHint{font-size:.78rem;color:var(--muted);min-width:3.6em;text-align:right;}
+/* September exam: touch-friendly short sessions. */
+.sepMenu { line-height: 1.7; }
+.sepMenu h1 { overflow-wrap: anywhere; }
+.sepMenu h3 { margin-top: 28px; }
+.sepMenu .btn { min-height: 48px; white-space: normal; margin: 6px 0; }
+.sepGrid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.sepGrid .btn { width: 100%; }
+.sepPlan, .sepReading, .sepMeaning { padding: 14px; margin: 14px 0; border: 1px solid var(--muted); border-radius: 12px; }
+.sepReading summary, .sepMeaning summary { cursor: pointer; min-height: 44px; }
+.sepMeaning p { font-size: 1.5rem; font-weight: bold; }
+@media (max-width: 480px) { .sepGrid { grid-template-columns: 1fr; } }

@@ -6,6 +6,7 @@ import { QUESTIONS, STAGE_ORDER, CARDS } from "../content.js";
 import { renderHome } from "./home.js";
 import { renderSubjectHome } from "./subject.js";
 import { startStage, startReview, startBoss } from "./quiz.js";
+import { renderSeptemberHome, startSeptemberReview } from "./september.js";
 
 /* ============================================================
    追加機能：ボス戦の勝敗画面
@@ -141,10 +142,12 @@ export function renderResult(){
 
   // 追加機能（教科選択ファースト化）：stageモードは直前の教科ホームへ、reviewモード（教科横断）は教科選択へ戻る
   document.getElementById('homeBtn').addEventListener('click',()=>{
+    if(c.septemberReview){renderSeptemberHome(true);return;}
     if(c.mode==='review') renderHome();
     else renderSubjectHome(QUESTIONS[c.sid].subject);
   });
   document.getElementById('retryBtn').addEventListener('click',()=>{
+    if(c.septemberReview){startSeptemberReview();return;}
     if(c.mode==='review')startReview();else startStage(c.sid);
   });
 

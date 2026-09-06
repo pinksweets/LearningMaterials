@@ -48,7 +48,8 @@ test("units: 問題タイプ別の形状（yon/ana=choices+a範囲内, maru=bool
       switch (q.type) {
         case "yon":
         case "ana": {
-          assert.ok(Array.isArray(q.choices) && q.choices.length >= 2, `${where}: choices が2択以上の配列でない`);
+          const minChoices=q.type==='ana' && q.forceInput===true ? 1 : 2;
+          assert.ok(Array.isArray(q.choices) && q.choices.length >= minChoices, `${where}: choices の数が不足`);
           assert.ok(
             Number.isInteger(q.a) && q.a >= 0 && q.a < q.choices.length,
             `${where}: a(${q.a}) が choices の範囲内の整数でない`
@@ -121,9 +122,9 @@ test("units: q.card（文字列 or 配列）と単元 cards の id が CARD_BY_I
   }
 });
 
-test("合計件数の固定スナップショット（単元531・問題8396・カード93）— 意図的な増減ならこの数値を更新すること", () => {
-  assert.equal(units.length, 531, "単元数が想定と異なる");
+test("合計件数の固定スナップショット（単元545・問題8476・カード93）— 意図的な増減ならこの数値を更新すること", () => {
+  assert.equal(units.length, 545, "単元数が想定と異なる");
   const totalQuestions = units.reduce((n, u) => n + u.questions.length, 0);
-  assert.equal(totalQuestions, 8396, "問題総数が想定と異なる");
+  assert.equal(totalQuestions, 8476, "問題総数が想定と異なる");
   assert.equal(Object.keys(CARD_BY_ID).length, 93, "カード総数（重複除去後）が想定と異なる");
 });

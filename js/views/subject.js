@@ -18,11 +18,13 @@ import { renderHome } from "./home.js";
 import { startStage, startBoss } from "./quiz.js";
 import { startLeapSpeed } from "./leap.js";
 import { LEAP_BASIC_SUBJECT, LEAP_DAILY_TARGET } from "../leap-study.js";
+import { renderSeptemberHome } from "./september.js";
 
 /* ============================================================
    教科ホーム（新設）：指定した教科のステージ一覧のみ表示
 ============================================================ */
 export function renderSubjectHome(subject){
+  if(subject==='📅 9月 実力テスト対策'){renderSeptemberHome();return;}
   stopTimer(); // 教科ホームに戻る全経路でタイマーを確実に止める（防御的）
   stopBossTension();
   stopSpeech();
@@ -50,7 +52,7 @@ export function renderSubjectHome(subject){
     const m=stageMastery(sid);
     const bossUnlocked = isStageUnlockedForBoss(sid);
     const bossDone = !!state.bossCleared[sid];
-    const bossBtn = `<button class="bossBtn ${bossUnlocked?'':'locked'}" data-boss="${escapeAttr(sid)}" type="button">${bossDone?'👑 再挑戦':(bossUnlocked?'👹 ボス戦':'🔒 ボス戦')}</button>`;
+    const bossBtn = s.data[0]?.examPractice ? '' : `<button class="bossBtn ${bossUnlocked?'':'locked'}" data-boss="${escapeAttr(sid)}" type="button">${bossDone?'👑 再挑戦':(bossUnlocked?'👹 ボス戦':'🔒 ボス戦')}</button>`;
     const leapBtn = subject===LEAP_BASIC_SUBJECT
       ? `<button class="leapFastBtn" data-leap-fast="${escapeAttr(sid)}" type="button">⚡ 高速</button>` : '';
     const pageHtml = s.page ? `　｜　教科書 p.${escapeHtml(s.page)}` : "";

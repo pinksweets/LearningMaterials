@@ -25,9 +25,9 @@ export function normalizeSpeechText(text){
     .trim();
   return /[A-Za-z]/.test(value) ? value : '';
 }
-export function speakEnglish(text){
+export function speakEnglish(text, {manual=false}={}){
   const word=normalizeSpeechText(text);
-  if(!word||!speechEnabled()||typeof window==='undefined'||!window.speechSynthesis)return false;
+  if(!word||(!manual&&!speechEnabled())||typeof window==='undefined'||!window.speechSynthesis)return false;
   const Utterance=window.SpeechSynthesisUtterance||globalThis.SpeechSynthesisUtterance;
   if(typeof Utterance!=='function')return false;
   try{
