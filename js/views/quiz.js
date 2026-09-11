@@ -9,6 +9,7 @@ import { playAnswerSound, speakEnglish, syncBossTension, stopBossTension, stopSp
 import { renderHome } from "./home.js";
 import { renderSubjectHome } from "./subject.js";
 import { renderResult, renderBossDefeat, renderBossVictory } from "./results.js";
+import { renderSeptember15Home } from "./september15.js";
 import { renderSeptemberHome } from "./september.js";
 
 /* ============================================================
@@ -218,6 +219,7 @@ export function renderQuestion(){
       stopTimer();
       stopBossTension();
       stopSpeech();
+      if(c.september15Review){renderSeptember15Home(true);return;}
       if(c.septemberReview){renderSeptemberHome(true);return;}
       // 追加機能（教科選択ファースト化）：stage/bossは直前の教科ホームへ、reviewは教科選択へ戻る
       const backSubject = c.mode!=='review' ? QUESTIONS[c.sid].subject : null;

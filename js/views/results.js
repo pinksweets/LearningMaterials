@@ -6,6 +6,7 @@ import { QUESTIONS, STAGE_ORDER, CARDS } from "../content.js";
 import { renderHome } from "./home.js";
 import { renderSubjectHome } from "./subject.js";
 import { startStage, startReview, startBoss } from "./quiz.js";
+import { renderSeptember15Home, startSeptember15Review } from "./september15.js";
 import { renderSeptemberHome, startSeptemberReview } from "./september.js";
 
 /* ============================================================
@@ -142,11 +143,13 @@ export function renderResult(){
 
   // 追加機能（教科選択ファースト化）：stageモードは直前の教科ホームへ、reviewモード（教科横断）は教科選択へ戻る
   document.getElementById('homeBtn').addEventListener('click',()=>{
+    if(c.september15Review){renderSeptember15Home(true);return;}
     if(c.septemberReview){renderSeptemberHome(true);return;}
     if(c.mode==='review') renderHome();
     else renderSubjectHome(QUESTIONS[c.sid].subject);
   });
   document.getElementById('retryBtn').addEventListener('click',()=>{
+    if(c.september15Review){startSeptember15Review();return;}
     if(c.septemberReview){startSeptemberReview();return;}
     if(c.mode==='review')startReview();else startStage(c.sid);
   });

@@ -18,12 +18,14 @@ import { renderHome } from "./home.js";
 import { startStage, startBoss } from "./quiz.js";
 import { startLeapSpeed } from "./leap.js";
 import { LEAP_BASIC_SUBJECT, LEAP_DAILY_TARGET } from "../leap-study.js";
+import { renderSeptember15Home } from "./september15.js";
 import { renderSeptemberHome } from "./september.js";
 
 /* ============================================================
    教科ホーム（新設）：指定した教科のステージ一覧のみ表示
 ============================================================ */
 export function renderSubjectHome(subject){
+  if(subject==='📅 9/15 英語小テスト対策'){renderSeptember15Home(true);return;}
   if(subject==='📅 9月 実力テスト対策'){renderSeptemberHome();return;}
   stopTimer(); // 教科ホームに戻る全経路でタイマーを確実に止める（防御的）
   stopBossTension();
