@@ -19,7 +19,7 @@ export function syncScreenHash(hash){
   window.history.pushState(null,'',hash);
 }
 export function testPrepRoute(hash){
-  return ({'#test/2026-09-15':'september15','#test/2026-09-11':'september'})[hash] || 'home';
+  return ({'#test/2026-09-16':'september16','#test/2026-09-15':'september15','#test/2026-09-11':'september'})[hash] || 'home';
 }
 
 /* ---------- 日付（ローカル基準。toISOStringはUTCずれするので使わない） ---------- */

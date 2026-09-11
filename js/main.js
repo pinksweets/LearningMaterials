@@ -5,11 +5,13 @@ import { load, touchStreak } from "./state.js";
 import { renderHome } from "./views/home.js";
 import { renderSeptemberHome } from "./views/september.js";
 import { renderSeptember15Home } from "./views/september15.js";
+import { renderSubjectHome } from "./views/subject.js";
 import { testPrepRoute } from "./utils.js";
 
 export function renderUrlScreen(){
   const route=testPrepRoute(window.location.hash);
-  if(route==='september15')renderSeptember15Home(true);
+  if(route==='september16')renderSubjectHome('📅 9/16 実力テスト対策');
+  else if(route==='september15')renderSeptember15Home(true);
   else if(route==='september')renderSeptemberHome(true);
   else renderHome();
 }

@@ -1,4 +1,4 @@
-import { el, app, escapeAttr, escapeHtml } from "../utils.js";
+import { el, app, escapeAttr, escapeHtml, syncScreenHash } from "../utils.js";
 import { stopTimer } from "../timer.js";
 import { stopBossTension, stopSpeech } from "../audio.js";
 import {
@@ -27,6 +27,8 @@ import { renderSeptemberHome } from "./september.js";
 export function renderSubjectHome(subject){
   if(subject==='📅 9/15 英語小テスト対策'){renderSeptember15Home(true);return;}
   if(subject==='📅 9/11 小テスト対策'){renderSeptemberHome(true);return;}
+  const september16=subject==='📅 9/16 実力テスト対策';
+  if(september16)syncScreenHash('#test/2026-09-16');
   stopTimer(); // 教科ホームに戻る全経路でタイマーを確実に止める（防御的）
   stopBossTension();
   stopSpeech();
@@ -104,7 +106,11 @@ export function renderSubjectHome(subject){
   app().innerHTML = "";
   app().appendChild(el(`<div>
     <h1>${escapeHtml(subject)}</h1>
-    <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">← 教科選択へ</button>
+    <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">${september16?'← テスト対策へ':'← 教科選択へ'}</button>
+    ${september16?`<div class="sepPlan"><strong>9月16日｜国語・数学・英語の実力テスト</strong>
+      <p>本番はBenesseの問題。ここでは、もらった写真の学習範囲に沿うオリジナル問題を練習するよ。Benesseの公式問題・本番の予想問題ではないよ。</p>
+      <p>各教科5ステージ×10問。まずは①から、苦手なところは解説を読んでもう一度。国語・英語の読解本文もここで読めるよ。</p>
+      <p>9/11〜13：基礎を確認 → 9/14〜15：苦手を解き直す → 9/16：間違えた考え方を見直す。英語①は音声でも確かめよう（本番のリスニング音源ではないよ）。</p></div>`:''}
     <div class="card">
       <div class="hud">
         <span class="chip">クリア <span class="em">${cleared}/${total}</span></span>
