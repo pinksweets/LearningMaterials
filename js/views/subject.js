@@ -26,7 +26,7 @@ import { renderSeptemberHome } from "./september.js";
 ============================================================ */
 export function renderSubjectHome(subject){
   if(subject==='📅 9/15 英語小テスト対策'){renderSeptember15Home(true);return;}
-  if(subject==='📅 9月 実力テスト対策'){renderSeptemberHome();return;}
+  if(subject==='📅 9/11 小テスト対策'){renderSeptemberHome(true);return;}
   stopTimer(); // 教科ホームに戻る全経路でタイマーを確実に止める（防御的）
   stopBossTension();
   stopSpeech();

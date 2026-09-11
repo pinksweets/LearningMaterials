@@ -21,6 +21,26 @@ import { LEAP_DAILY_TARGET } from "../leap-study.js";
 import { renderSubjectHome } from "./subject.js";
 import { renderCollection } from "./collection.js";
 import { startReview } from "./quiz.js";
+import { septemberSubject } from "./september.js";
+import { september15Subject } from "./september15.js";
+
+export function testPrepCategories(today=todayStr()){
+  // 追加順を明示し、新しく追加した対策から表示する。日付は年も固定する。
+  return [
+    {subject:septemberSubject(),title:'9/11 小テスト対策',date:'2026-09-11',added:1,range:'英語｜p.42〜47・No.103〜122'},
+    {subject:september15Subject(),title:'9/15 英語小テスト対策',date:'2026-09-15',added:2,range:'英語｜p.48〜53・No.123〜142'}
+  ].sort((a,b)=>b.added-a.added).map(item=>({...item,past:item.date<today,status:item.date<today?'過去のテスト':item.date===today?'今日のテスト':'これからのテスト'}));
+}
+export function renderTestPrepPanel(today=todayStr()){
+  return `<section class="testPrepPanel" aria-labelledby="testPrepHeading"><h2 id="testPrepHeading">📅 テスト対策</h2>
+    <p class="muted">受けるテストを選んでね。新しく追加した対策から並んでいるよ。</p>
+    <div class="testPrepCategories">${testPrepCategories(today).map(item=>{
+      const {cleared,total}=subjectClearedCount(item.subject);
+      return `<button type="button" class="testPrepCard${item.past?' isPast':''}" data-test-subject="${escapeAttr(item.subject)}">
+        <span class="testPrepStatus">${item.status}</span><strong>${item.title}</strong>
+        <span>${item.range}</span><small>クリア ${cleared}/${total}　→</small></button>`;
+    }).join('')}</div></section>`;
+}
 
 export function dateParts(dateStr){
   return dateStr.split('-').map(Number);
@@ -111,7 +131,8 @@ export function renderHome(){
   if(!state.title)evalTitle();   // 初回は現在の称号を確定
 
   // 追加機能（教科選択ファースト化）：教科カードをorder順・重複除去で動的生成
-  const cardsHtml = subjectList().map(subject=>{
+  const testSubjects=new Set(testPrepCategories().map(item=>item.subject));
+  const cardsHtml = subjectList().filter(subject=>!testSubjects.has(subject)).map(subject=>{
     const {cleared,total} = subjectClearedCount(subject);
     const m = subjectMastery(subject);
     return `<div class="subjectCard" data-subject="${subject}">
@@ -177,6 +198,7 @@ export function renderHome(){
       ${leapGoalHtml}
       ${settingsHtml}
       ${bgmHtml}
+      ${renderTestPrepPanel()}
       ${cardsHtml}
       ${reviewBtn}
       ${collBtn}
@@ -197,6 +219,9 @@ export function renderHome(){
       save();
       renderHome();
     });
+  });
+  document.querySelectorAll('[data-test-subject]').forEach(node=>{
+    node.addEventListener('click',()=>renderSubjectHome(node.dataset.testSubject));
   });
   document.querySelectorAll('[data-study-date]').forEach(btn=>{
     btn.addEventListener('click',()=>{

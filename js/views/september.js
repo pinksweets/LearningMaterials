@@ -7,7 +7,7 @@ import { renderHome } from "./home.js";
 import { startStage, renderQuestion } from "./quiz.js";
 
 export function septemberSubject(){
-  return '📅 9月 実力テスト対策';
+  return '📅 9/11 小テスト対策';
 }
 export function septemberMistakes(){
   return stagesOfSubject(septemberSubject()).flatMap(sid=>QUESTIONS[sid].data.flatMap((q,idx)=>{
@@ -18,18 +18,18 @@ export function septemberMistakes(){
 export function renderSeptemberHome(english=false){
   stopTimer();stopSpeech();stopBossTension();
   const mistakes=septemberMistakes();
-  app().innerHTML=`<section class="card sepMenu"><span class="tag">9月8日 テスト対策</span><h1>9月 実力テスト対策</h1>
+  app().innerHTML=`<section class="card sepMenu"><span class="tag">9月11日 小テスト対策</span><h1>9/11 小テスト対策</h1>
     <p>1回5分。まずは音を聞いて、意味を思い出そう。</p>
     ${english?`<h2>英語｜LEAP p.42〜47</h2><p>No.103〜122の20項目。本番は英文を見て、日本語訳の空欄を埋める想定だよ。</p>
-      <div class="sepPlan"><strong>2日間の進め方</strong><p>9/6：①音と意味 → ②意味チェック<br>9/7：③空欄練習 → ④10問で仕上げ<br>9/8：間違えた問題をもう一度</p></div>
+      <div class="sepPlan"><strong>2日間の進め方</strong><p>9/9：①音と意味 → ②意味チェック<br>9/10：③空欄練習 → ④10問で仕上げ<br>9/11：間違えた問題をもう一度</p></div>
       <h3>① 音と意味を覚える</h3><p class="muted">聞く → 声に出す → 意味を隠して思い出す。カタカナは読み方の目安だよ。</p>
       <div class="sepGrid">${[0,1,2,3].map(i=>`<button class="btn secondary" data-learn="${i}">5語ずつ覚える ${i+1}<br>No.${103+i*5}〜${107+i*5}</button>`).join('')}</div>
       ${['Choose','Write','Mock','Extra'].map((kind,n)=>`<h3>${['② 意味を選ぶ','③ 日本語の空欄を埋める','④ 10問で仕上げる','⑤ 余裕があれば：別の意味・関連表現'][n]}</h3>${n===2?'<p class="muted">A・Bで20項目を確認。1問ごとに答えと解説が出る練習だよ。</p>':''}<div class="sepGrid">${stagesOfSubject(septemberSubject()).filter(s=>s.startsWith('sepEn'+kind)).map(sid=>`<button class="btn secondary" data-sep-stage="${sid}">${escapeHtml(QUESTIONS[sid].title)}<br><small>${!QUESTIONS[sid].data.some((q,i)=>state.qStats[sid+'-'+i]?.seen)?'未挑戦':`最高 ${state.stageBest[sid]}%`}</small></button>`).join('')}</div>`).join('')}
       <button class="btn" id="sepReview" ${mistakes.length?'':'disabled'}>間違えた問題を復習（${mistakes.length}問）</button>
       <p class="muted">最後に間違えた問題から最大5問。正解すると復習リストから外れるよ。</p>`:
       '<button class="btn" id="sepEnglish">英語 →<br><small>音声から始める・基本20項目</small></button>'}
-    <button class="btn secondary" id="sepBack">← ${english?'テスト対策メニュー':'教科選択'}へ</button></section>`;
-  document.getElementById('sepBack').addEventListener('click',()=>english?renderSeptemberHome():renderHome());
+    <button class="btn secondary" id="sepBack">← テスト対策へ</button></section>`;
+  document.getElementById('sepBack').addEventListener('click',()=>renderHome());
   document.getElementById('sepEnglish')?.addEventListener('click',()=>renderSeptemberHome(true));
   document.querySelectorAll('[data-learn]').forEach(b=>b.addEventListener('click',()=>renderSeptemberLearn(Number(b.dataset.learn))));
   document.querySelectorAll('[data-sep-stage]').forEach(b=>b.addEventListener('click',()=>startStage(b.dataset.sepStage)));

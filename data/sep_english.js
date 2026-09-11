@@ -52,7 +52,7 @@ function question(e, mode){
   return {type:mode==='choice'?'yon':'ana',lv:mode==='choice'?'基礎':'本番形式',q:mode==='choice'?`<span lang="en">${word}</span><br>日本語の意味を選ぼう。`:`<span lang="en">${en}</span><br>${ja}`,choices,a:0,accept:aliases,forceInput:mode!=='choice',examPractice:true,speech:mode==='choice'?word:en,reading:mode==='choice'?reading:'',learn:{no,word,reading,meaning},exp:`${word}：${meaning}。${note}`,hint:mode==='choice'?'先に声に出してから、意味を思い出してみよう。':note};
 }
 function unit(id,group,title,questions){
-  HQ.registerUnit({id,subject:'📅 9月 実力テスト対策',group,title,desc:'英語｜p.42〜47・No.103〜122',page:'42〜47',order:10000+HQ.units.length,questions,cards:[]});
+  HQ.registerUnit({id,subject:'📅 9/11 小テスト対策',group,title,desc:'英語｜p.42〜47・No.103〜122',page:'42〜47',order:10000+HQ.units.length,questions,cards:[]});
 }
 for(let i=0;i<4;i++)unit(`sepEnChoose${i+1}`,'英語① 意味を選ぶ（5問ずつ）',`意味チェック ${i+1}｜No.${103+i*5}〜${107+i*5}`,entries.slice(i*5,i*5+5).map(e=>question(e,'choice')));
 for(let i=0;i<4;i++)unit(`sepEnWrite${i+1}`,'英語② 日本語の空欄を埋める（5問ずつ）',`空欄練習 ${i+1}｜No.${103+i*5}〜${107+i*5}`,entries.slice(i*5,i*5+5).map(e=>question(e,'write')));

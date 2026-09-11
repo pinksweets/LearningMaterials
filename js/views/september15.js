@@ -28,8 +28,8 @@ export function renderSeptember15Home(english=false){
       <button class="btn" id="sepReview" ${mistakes.length?'':'disabled'}>間違えた問題を復習（${mistakes.length}問）</button>
       <p class="muted">最後に間違えた問題から最大5問。正解すると復習リストから外れるよ。</p>`:
       '<button class="btn" id="sep15English">英語 →<br><small>音声から始める・基本20項目</small></button>'}
-    <button class="btn secondary" id="sepBack">← ${english?'テスト対策メニュー':'教科選択'}へ</button></section>`;
-  document.getElementById('sepBack').addEventListener('click',()=>english?renderSeptember15Home():renderHome());
+    <button class="btn secondary" id="sepBack">← テスト対策へ</button></section>`;
+  document.getElementById('sepBack').addEventListener('click',()=>renderHome());
   document.getElementById('sep15English')?.addEventListener('click',()=>renderSeptember15Home(true));
   document.querySelectorAll('[data-learn]').forEach(b=>b.addEventListener('click',()=>renderSeptember15Learn(Number(b.dataset.learn))));
   document.querySelectorAll('[data-sep-stage]').forEach(b=>b.addEventListener('click',()=>startStage(b.dataset.sepStage)));
