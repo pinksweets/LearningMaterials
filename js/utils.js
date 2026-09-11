@@ -12,6 +12,16 @@ export function escapeHtml(s){
 }
 export const escapeAttr=escapeHtml;
 
+// ハッシュだけを更新し、Pagesの配信サブパス・クエリ文字列を保つ。
+export function syncScreenHash(hash){
+  if(typeof window==='undefined' || !window.location || !window.history)return;
+  if(window.location.hash===hash || (!window.location.hash && hash==='#home'))return;
+  window.history.pushState(null,'',hash);
+}
+export function testPrepRoute(hash){
+  return ({'#test/2026-09-15':'september15','#test/2026-09-11':'september'})[hash] || 'home';
+}
+
 /* ---------- 日付（ローカル基準。toISOStringはUTCずれするので使わない） ---------- */
 export function pad2(n){return (n<10?'0':'')+n;}
 export function todayStr(){const d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}

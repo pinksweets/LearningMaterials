@@ -1,4 +1,4 @@
-import { app, escapeHtml, toast } from "../utils.js";
+import { app, escapeHtml, toast, syncScreenHash } from "../utils.js";
 import { QUESTIONS } from "../content.js";
 import { state, stagesOfSubject } from "../state.js";
 import { stopTimer } from "../timer.js";
@@ -16,6 +16,7 @@ export function september15Mistakes(){
   }));
 }
 export function renderSeptember15Home(english=false){
+  syncScreenHash('#test/2026-09-15');
   stopTimer();stopSpeech();stopBossTension();
   const mistakes=september15Mistakes();
   app().innerHTML=`<section class="card sepMenu"><span class="tag">9月15日 小テスト対策</span><h1>9/15 英語小テスト対策</h1>

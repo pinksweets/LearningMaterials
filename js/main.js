@@ -3,11 +3,22 @@
 ============================================================ */
 import { load, touchStreak } from "./state.js";
 import { renderHome } from "./views/home.js";
+import { renderSeptemberHome } from "./views/september.js";
+import { renderSeptember15Home } from "./views/september15.js";
+import { testPrepRoute } from "./utils.js";
+
+export function renderUrlScreen(){
+  const route=testPrepRoute(window.location.hash);
+  if(route==='september15')renderSeptember15Home(true);
+  else if(route==='september')renderSeptemberHome(true);
+  else renderHome();
+}
 
 document.addEventListener('DOMContentLoaded', function () {
   load();
   touchStreak();
-  renderHome();
+  renderUrlScreen();
+  window.addEventListener('hashchange',renderUrlScreen);
 });
 
 /* Service Worker 登録（https または localhost のみ。GitHub Pages のサブパス配信でも

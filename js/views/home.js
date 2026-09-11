@@ -1,4 +1,4 @@
-import { el, app, toast, escapeAttr, escapeHtml, todayStr, addDays } from "../utils.js";
+import { el, app, toast, escapeAttr, escapeHtml, todayStr, addDays, syncScreenHash } from "../utils.js";
 import { stopTimer } from "../timer.js";
 import { stopBossTension, stopSpeech, playAnswerSound, BGM, startYouTubeBgm, stopYouTubeBgm } from "../audio.js";
 import {
@@ -36,9 +36,9 @@ export function renderTestPrepPanel(today=todayStr()){
     <p class="muted">受けるテストを選んでね。新しく追加した対策から並んでいるよ。</p>
     <div class="testPrepCategories">${testPrepCategories(today).map(item=>{
       const {cleared,total}=subjectClearedCount(item.subject);
-      return `<button type="button" class="testPrepCard${item.past?' isPast':''}" data-test-subject="${escapeAttr(item.subject)}">
+      return `<a class="testPrepCard${item.past?' isPast':''}" href="#test/${item.date}">
         <span class="testPrepStatus">${item.status}</span><strong>${item.title}</strong>
-        <span>${item.range}</span><small>クリア ${cleared}/${total}　→</small></button>`;
+        <span>${item.range}</span><small>クリア ${cleared}/${total}　→</small></a>`;
     }).join('')}</div></section>`;
 }
 
@@ -125,6 +125,7 @@ export function renderStudyPanel(){
    教科選択画面（新トップ）
 ============================================================ */
 export function renderHome(){
+  syncScreenHash('#home');
   stopTimer(); // ホームに戻る全経路でタイマーを確実に止める（防御的）
   stopBossTension();
   stopSpeech();
@@ -219,9 +220,6 @@ export function renderHome(){
       save();
       renderHome();
     });
-  });
-  document.querySelectorAll('[data-test-subject]').forEach(node=>{
-    node.addEventListener('click',()=>renderSubjectHome(node.dataset.testSubject));
   });
   document.querySelectorAll('[data-study-date]').forEach(btn=>{
     btn.addEventListener('click',()=>{

@@ -345,6 +345,7 @@ a.link{color:var(--accent2);}
 .testPrepCategories { display: grid; gap: 12px; margin-top: 14px; }
 .testPrepCard { display: grid; gap: 6px; width: 100%; padding: 20px; text-align: left; font: inherit; color: var(--text); background: var(--panel2); border: 2px solid var(--accent2); border-radius: 14px; cursor: pointer; }
 .testPrepCard strong { font-size: 1.2rem; overflow-wrap: anywhere; }
+.testPrepCard { text-decoration: none; }
 .testPrepCard small, .testPrepCard > span:not(.testPrepStatus) { color: var(--muted); }
 .testPrepStatus { color: var(--accent2); font-size: .8rem; font-weight: 700; }
 .testPrepCard.isPast { border: 1px solid var(--line); background: transparent; }
