@@ -3,6 +3,33 @@
   --accent2:#8ecae6; --ok:#2ec4b6; --ng:#ff6b6b; --text:#f4f6ff;
   --muted:#a9b0d6; --line:#2f356a;
 }
+.quizBreadcrumb{display:flex;flex-wrap:wrap;gap:6px 10px;margin:4px 0 14px;font-size:.88rem;overflow-wrap:anywhere}
+.quizBreadcrumb a{color:var(--accent2)}
+.quizTools{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.resumePanel{padding:14px;margin:12px 0;border:1px solid var(--accent2);border-radius:12px;background:var(--panel)}
+.resumePanel a{text-decoration:none;text-align:center;white-space:normal}
+.qtext math,.opt math,.exp math,.mathSlots math{font-size:1.15em;margin:4px 2px;max-width:100%}
+.qtext,.opt,.exp{overflow-wrap:anywhere}
+.mathFigure{margin:14px 0;background:var(--panel2);padding:10px;border-radius:12px}
+.mathFigure svg,.mathNumberLine{display:block;width:100%;max-width:520px;margin:auto;height:auto}
+.mathFigure svg text,.mathNumberLine text{fill:var(--text);font:14px sans-serif}
+.mathFigure figcaption{font-size:.9rem;margin-top:8px}
+.graphFrame{fill:none;stroke:var(--muted);stroke-width:1}
+.graphAxis{fill:none;stroke:var(--muted);stroke-width:1.5}
+.graphCurve{fill:none;stroke:var(--accent2);stroke-width:2.5}
+.graphDomain{fill:none;stroke:var(--accent);stroke-width:5}
+.graphSymmetry{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 5}
+.graphPoint{fill:var(--accent);stroke:var(--text);stroke-width:1}
+.graphOpen{fill:var(--panel);stroke:var(--accent);stroke-width:2}
+.mathExplanation{border-top:1px solid var(--line);margin-top:16px;padding-top:10px}
+.mathExplanation h3{font-size:1rem}.mathExplanation summary{padding:12px 0;cursor:pointer}
+.mathExplanation input[type=range]{width:100%;min-height:44px}
+.graphSteps{display:flex;flex-wrap:wrap;gap:6px}.graphSteps .btn{min-height:44px}
+.graphSteps [aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
+.mathSlots{display:flex;flex-wrap:wrap;gap:12px;padding-left:24px}
+.mathSlots li{background:var(--panel2);padding:10px 14px;border-radius:8px}
+#shareUrl{width:100%;font-size:16px;padding:10px;background:var(--panel2);color:var(--text)}
+@media(max-width:420px){.quizTools .btn{width:100%}.mathFigure{padding:5px}.mathFigure svg text,.mathNumberLine text{font-size:20px}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{
   margin:0;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;

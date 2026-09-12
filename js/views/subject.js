@@ -15,11 +15,12 @@ import {
 } from "../state.js";
 import { QUESTIONS } from "../content.js";
 import { renderHome } from "./home.js";
-import { startStage, startBoss } from "./quiz.js";
+import { startStage, startBoss, resumePanel } from "./quiz.js";
 import { startLeapSpeed } from "./leap.js";
 import { LEAP_BASIC_SUBJECT, LEAP_DAILY_TARGET } from "../leap-study.js";
 import { renderSeptember15Home } from "./september15.js";
 import { renderSeptemberHome } from "./september.js";
+import { subjectHash } from '../utils.js';
 
 /* ============================================================
    教科ホーム（新設）：指定した教科のステージ一覧のみ表示
@@ -29,6 +30,7 @@ export function renderSubjectHome(subject){
   if(subject==='📅 9/11 小テスト対策'){renderSeptemberHome(true);return;}
   const september16=subject==='📅 9/16 実力テスト対策';
   if(september16)syncScreenHash('#test/2026-09-16');
+  else syncScreenHash(subjectHash(subject));
   stopTimer(); // 教科ホームに戻る全経路でタイマーを確実に止める（防御的）
   stopBossTension();
   stopSpeech();
@@ -106,6 +108,7 @@ export function renderSubjectHome(subject){
   app().innerHTML = "";
   app().appendChild(el(`<div>
     <h1>${escapeHtml(subject)}</h1>
+    ${resumePanel(subject)}
     <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">${september16?'← テスト対策へ':'← 教科選択へ'}</button>
     ${september16?`<div class="sepPlan"><strong>9月16日｜国語・数学・英語の実力テスト</strong>
       <p>本番はBenesseの問題。ここでは、もらった写真の学習範囲に沿うオリジナル問題を練習するよ。Benesseの公式問題・本番の予想問題ではないよ。</p>

@@ -41,6 +41,7 @@ test("save(): localStorage に書き込む JSON のキー集合が仕様どお�
       "settings",
       "bossCleared",
       "subjectGroupCollapsed",
+      "currentSession",
     ])
   );
 });

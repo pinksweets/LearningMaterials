@@ -20,7 +20,7 @@ import { CARDS, totalQuestionCount } from "../content.js";
 import { LEAP_DAILY_TARGET } from "../leap-study.js";
 import { renderSubjectHome } from "./subject.js";
 import { renderCollection } from "./collection.js";
-import { startReview } from "./quiz.js";
+import { startReview, resumePanel } from "./quiz.js";
 import { septemberSubject } from "./september.js";
 import { september15Subject } from "./september15.js";
 
@@ -187,6 +187,7 @@ export function renderHome(){
   app().innerHTML = "";
   app().appendChild(el(`<div>
     <h1>🏰 学習クエスト</h1>
+    ${resumePanel()}
     <div class="titleWrap"><span class="titleBadge">🎖 ${state.title}</span></div>
     <div class="sub">高校6教科＋英単語をゲーム感覚で攻略<br>全${totalQuestionCount()}問／基礎から発展まで　解説つき</div>
     <div class="card">

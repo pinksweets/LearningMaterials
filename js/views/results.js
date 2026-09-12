@@ -8,6 +8,8 @@ import { renderSubjectHome } from "./subject.js";
 import { startStage, startReview, startBoss } from "./quiz.js";
 import { renderSeptember15Home, startSeptember15Review } from "./september15.js";
 import { renderSeptemberHome, startSeptemberReview } from "./september.js";
+import { syncScreenHash } from '../utils.js';
+import { sessionHash } from '../session.js';
 
 /* ============================================================
    追加機能：ボス戦の勝敗画面
@@ -18,6 +20,8 @@ export function renderBossDefeat(){
   stopSpeech();
   playBossResultSound(false);
   const c=state.cur;
+  c.result='defeat';
+  syncScreenHash(sessionHash(c),true);
   save();
   app().innerHTML="";
   app().appendChild(el(`<div class="card center">
@@ -41,7 +45,10 @@ export function renderBossVictory(){
   stopSpeech();
   playBossResultSound(true);
   const c=state.cur;
-  state.totalScore += c.score;
+  c.result='victory';
+  syncScreenHash(sessionHash(c),true);
+  if(!c.resultApplied)state.totalScore += c.score;
+  c.resultApplied=true;
   state.bossCleared[c.sid]=true;
   const badgeName = QUESTIONS[c.sid].title+' 討伐';
   const newBadges=[];
@@ -80,7 +87,9 @@ export function renderResult(){
   stopBossTension();
   stopSpeech();
   const c=state.cur;
-  const total=c.list.length;
+  c.result='normal';
+  syncScreenHash(sessionHash(c),true);
+  const total=c.list.length-(c.startIndex||0);
   const pctRaw=c.correct/total*100;
   const pct=Math.round(pctRaw);
   let rank,msg;
@@ -92,18 +101,19 @@ export function renderResult(){
 
   // ステージクリア＆ベスト更新（復習はSRSで管理するのでプール操作は不要）
   let newlyCleared=false;
-  if(c.mode==='stage'){
+  if(c.mode==='stage' && !c.partial){
     if(!state.stageCleared[c.sid]){state.stageCleared[c.sid]=true;newlyCleared=true;}
     if(pct>state.stageBest[c.sid])state.stageBest[c.sid]=pct;
-    state.totalScore += c.score;
+    if(!c.resultApplied)state.totalScore += c.score;
   } else {
-    state.totalScore += c.score;
+    if(!c.resultApplied)state.totalScore += c.score;
   }
+  c.resultApplied=true;
 
   // バッジ判定
   const newBadges=[];
   const addBadge=(name)=>{if(!state.badges.has(name)){state.badges.add(name);newBadges.push(name);}};
-  if(pct===100)addBadge(c.title+' 全問正解');
+  if(pct===100 && c.mode!=='practice' && !c.partial)addBadge(c.title+' 全問正解');
   if(c.maxCombo>=5)addBadge('5コンボ達成');
   if(c.maxCombo>=10)addBadge('10コンボ達成');
   if(newlyCleared)addBadge(c.title+' クリア');
@@ -127,7 +137,7 @@ export function renderResult(){
 
   app().innerHTML="";
   app().appendChild(el(`<div class="card center">
-    <div class="muted">${c.title}　結果</div>
+    <div class="muted">${c.title}　${c.mode==='practice'?'共有された1問の結果':c.partial?'途中から練習した問題の結果':'結果'}</div>
     <div class="rankbig">${rank}</div>
     <div style="font-size:1.3rem;font-weight:800">正答率 ${pct}%</div>
     <div class="muted">${c.correct} / ${total} 問正解　｜　最大コンボ ${c.maxCombo}　｜　獲得 ${c.score}点</div>
@@ -151,7 +161,9 @@ export function renderResult(){
   document.getElementById('retryBtn').addEventListener('click',()=>{
     if(c.september15Review){startSeptember15Review();return;}
     if(c.septemberReview){startSeptemberReview();return;}
-    if(c.mode==='review')startReview();else startStage(c.sid);
+    if(c.mode==='review')startReview();
+    else if(c.mode==='practice')startStage(c.sid,Number(c.list[0]._key.split('-')[1]),true);
+    else startStage(c.sid);
   });
 
   if(newlyCleared) setTimeout(()=>toast('🎉 ステージクリア！おつかれさま！'),400);

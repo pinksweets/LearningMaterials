@@ -11,18 +11,25 @@ import { renderSubjectHome } from "./subject.js";
 import { renderResult, renderBossDefeat, renderBossVictory } from "./results.js";
 import { renderSeptember15Home } from "./september15.js";
 import { renderSeptemberHome } from "./september.js";
+import { syncScreenHash, subjectHash } from '../utils.js';
+import { sessionHash, restoreSession } from '../session.js';
+import { isVisualMath, mathText, mathVisual, quadraticSpec, graphSvg, numberLine } from '../math-display.js';
 
 /* ============================================================
    ステージ開始
 ============================================================ */
-export function startStage(sid){
+export function startStage(sid,index=0,single=false){
   const s=QUESTIONS[sid];
+  if(!s || !s.data[index])return;
   state.cur={
     sid, mode:'stage', title:s.title,
     list:s.data.map((q,idx)=>({...q,_key:sid+'-'+idx,_page:s.page})),
     i:0, correct:0, combo:0, maxCombo:0, score:0, wrongThisRun:[],
     feverGauge:0, feverLeft:0, feverCount:0, weakHits:0
   };
+  if(single){state.cur.list=[state.cur.list[index]];state.cur.mode='practice';}
+  else {state.cur.i=index;state.cur.startIndex=index;state.cur.partial=index>0;}
+  syncScreenHash(sessionHash(state.cur));
   renderQuestion();
 }
 export function startReview(){
@@ -34,6 +41,7 @@ export function startReview(){
     i:0, correct:0, combo:0, maxCombo:0, score:0, wrongThisRun:[],
     feverGauge:0, feverLeft:0, feverCount:0, weakHits:0
   };
+  syncScreenHash('#/session');
   renderQuestion();
 }
 
@@ -51,6 +59,7 @@ export function startBoss(sid){
     bossName:s.title+' の主',
     feverGauge:0, feverLeft:0, feverCount:0, weakHits:0
   };
+  syncScreenHash('#/session');
   renderQuestion();
 }
 
@@ -62,8 +71,10 @@ export function renderQuestion(){
   stopSpeech();
   const c=state.cur;
   if(c.i>=c.list.length){ renderResult(); return; }  // 範囲外の防御
-  c._locked=false;   // 新しい問題を描画するのでロック解除
+  c._locked=!!c.answer;
+  syncScreenHash(sessionHash(c),true);
   const q=c.list[c.i];
+  const text=value=>isVisualMath(q._key)?mathText(value):value;
   const sourceSid = c.mode==='review' && q._key ? q._key.split('-')[0] : c.sid;
   const leapEntry = QUESTIONS[sourceSid] && isLeapSubject(QUESTIONS[sourceSid].subject) ? extractLeapEntry(q) : null;
   const preAnswerLeapEntry = leapEntry && shouldShowLeapWordBeforeAnswer(q) ? leapEntry : null;
@@ -77,8 +88,8 @@ export function renderQuestion(){
   const hud=`<div class="hud">
     <span class="chip">${c.title}</span>
     <span class="chip">Q <span class="em">${num}</span>/${total}</span>
-    <span class="chip">スコア <span class="em">${c.score}</span></span>
-    <span class="chip combo">🔥 ${c.combo}</span>
+    <span class="chip">スコア <span class="em" id="quizScore">${c.score}</span></span>
+    <span class="chip combo" id="quizCombo">🔥 ${c.combo}</span>
   </div>
   <div class="progress"><div class="bar" style="width:${pct}%"></div></div>`;
   const rewardHud = rewardHudHtml(c,isBoss);
@@ -182,9 +193,10 @@ export function renderQuestion(){
       <div class="nenpyoList" id="nenpyoList">${rows}</div>
       <button class="btn" id="junbanCheck">こたえ合わせ</button>`;
   } else { // yon / ana(選択)
-    const order=shuffle(q.choices.map((ch,idx)=>({ch,idx})));
+    c.choiceOrder ||= shuffle(q.choices.map((ch,idx)=>idx));
+    const order=c.choiceOrder.map(idx=>({ch:q.choices[idx],idx}));
     c.shuffledCorrect=order.findIndex(o=>o.idx===q.a);
-    const opts=order.map((o,pos)=>`<button class="opt" data-i="${pos}">${o.ch}</button>`).join("");
+    const opts=order.map((o,pos)=>`<button class="opt" data-i="${pos}">${text(o.ch)}</button>`).join("");
     body=`<div class="qtext">${q.q}</div>${opts}`;
   }
 
@@ -192,15 +204,19 @@ export function renderQuestion(){
   const hintHtml = q.hint ? `<button class="fallbackLink" id="hintBtn" type="button">💡 ヒント</button>
     <div class="muted" id="hintText" style="display:none;margin-top:6px"></div>` : "";
 
+  body=body.replaceAll(`<div class="qtext">${q.q}</div>`,`<div class="qtext">${text(q.q)}</div>${mathVisual(q._key)}`);
+  const subject=QUESTIONS[sourceSid]?.subject;
+  const nav=subject?`<nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">教科選択</a><span>›</span><a href="${subjectHash(subject)}">${escapeHtml(subject)}</a><span>› ${escapeHtml(c.title)}</span></nav>`:'';
   app().innerHTML="";
-  app().appendChild(el(`<div><div class="card">${hud}${rewardHud}${bossHud}${timerHtml}${tags}${speechPrompt}${body}
+  app().appendChild(el(`<div>${nav}<div class="card">${hud}${rewardHud}${bossHud}${timerHtml}${tags}${speechPrompt}${body}
     ${q.speech?`<button class="btn secondary" id="examSpeak" type="button">🔊 英語を聞く</button>${q.reading?`<details class="sepReading"><summary>読み方のヒント</summary>${escapeHtml(q.reading)}<p class="muted">カタカナは目安。音声をまねしてみよう。</p></details>`:''}`:''}
     ${hintHtml}
     ${q.examPractice?'<button class="fallbackLink" id="examUnknown" type="button">わからない・答えを確認する</button>':''}
     <div class="fb" id="fb"></div>
     <div id="nextWrap"></div>
   </div>
-  <button class="btn secondary small" id="quitBtn" style="margin-top:12px">← ホームにもどる</button>
+  <div class="quizTools"><button class="btn secondary small" id="quitBtn">← 単元一覧へ（途中保存）</button><button class="btn secondary small" id="shareQuestion">この問題を共有</button></div>
+  <div id="shareFallback" hidden><label>問題のリンク<input id="shareUrl" readonly></label></div>
   </div>`));
 
   const examSpeak=document.getElementById('examSpeak');
@@ -211,11 +227,12 @@ export function renderQuestion(){
   if(examUnknown)examUnknown.addEventListener('click',()=>{
     if(c._locked)return;
     examUnknown.disabled=true;
-    finishQuestion(false,q,{correctText:q.choices[q.a]});
+    finishQuestion(false,q,{correctText:q.choices?.[q.a] || (Array.isArray(q.a)?q.a.join(' / '):String(q.a))});
   });
 
   document.getElementById('quitBtn').addEventListener('click',()=>{
-    if(confirm('ホームにもどる？（このステージの進みはリセットされます）')){
+    {
+      saveQuestionDraft();
       stopTimer();
       stopBossTension();
       stopSpeech();
@@ -225,6 +242,13 @@ export function renderQuestion(){
       const backSubject = c.mode!=='review' ? QUESTIONS[c.sid].subject : null;
       if(backSubject) renderSubjectHome(backSubject); else renderHome();
     }
+  });
+  document.getElementById('shareQuestion').addEventListener('click',async()=>{
+    const url=new URL(window.location.href);
+    const [sid,index]=q._key.split('-');
+    url.hash=`/question/${encodeURIComponent(sid)}/${Number(index)+1}`;
+    try{await navigator.clipboard.writeText(url.href);toast('問題のリンクをコピーしたよ。開くと未回答から始まるよ。');}
+    catch{document.getElementById('shareFallback').hidden=false;const input=document.getElementById('shareUrl');input.value=url.href;input.select();}
   });
 
   // 追加機能（数学統合）：ヒントボタン（表示のみ・減点なし）
@@ -279,13 +303,19 @@ export function renderQuestion(){
   }
 
   // 追加機能：タイムアタック（時間切れ→自動不正解）
+  const inputs=[...app().querySelectorAll('#inputAns,.fillInput,select[data-sel]')];
+  inputs.forEach((input,index)=>{input.value=c.draft?.[index]??input.value;input.addEventListener('input',saveQuestionDraft);input.addEventListener('change',saveQuestionDraft);});
+  if(c.answer){renderSavedAnswer(q);return;}
+  save();
   if(preAnswerLeapEntry)speakEnglish(preAnswerLeapEntry.headword);
   if(timeAttackOn){
-    const limit=timeLimitFor(q);
-    c._timeLimit=limit;
+    const limit=Number.isFinite(c._timeLeft)?Math.max(0,c._timeLeft):timeLimitFor(q);
+    c._timeLimit ||= timeLimitFor(q);
     c._timeLeft=limit;
+    if(limit===0){onTimeUp(q);return;}
     startTimer(limit,(remain,total)=>{
       c._timeLeft=remain;
+      save();
       const bar=document.getElementById('timerBarInner');
       const wrap=document.getElementById('timerBar');
       const txt=document.getElementById('timerTxt');
@@ -535,6 +565,8 @@ export function finishQuestion(isCorrect,q,opts){
   const c=state.cur;
   if(c._locked) return;   // 二重採点防止（スワイプ＋クリック等の二重発火対策）
   c._locked=true;
+  c.answer={correct:isCorrect,timeUp:!!opts.timeUp,correctText:opts.correctText||''};
+  c.draft=[...document.querySelectorAll('#inputAns,.fillInput,select[data-sel]')].map(input=>input.value);
   stopTimer(); // 採点確定時点で必ずタイマー停止（時間切れ経路も含め二重に保証）
   playAnswerSound(isCorrect);
   const sourceSid = c.mode==='review' && q._key ? q._key.split('-')[0] : c.sid;
@@ -612,6 +644,46 @@ export function finishQuestion(isCorrect,q,opts){
     if(c.bossHP<=0){ renderBossVictory(); return; }
   }
 
+  renderSavedAnswer(q,true);
+}
+
+export function saveQuestionDraft(){
+  const c=state.cur;
+  if(!c || c.result || !document.getElementById('fb'))return;
+  c.draft=[...app().querySelectorAll('#inputAns,.fillInput,select[data-sel]')].map(input=>input.value);
+  save();
+}
+
+export function resumePanel(subject){
+  const c=state.cur?.mode==='practice'?restoreSession(state.resumeSession):state.cur;
+  if(!c || !Array.isArray(c.list) || c.result || (subject && QUESTIONS[c.sid]?.subject!==subject))return '';
+  return `<aside class="resumePanel"><strong>続きから学習できるよ</strong><a class="btn secondary" href="${sessionHash(c)}">${escapeHtml(c.title)} · ${c.i+1}問目から再開</a></aside>`;
+}
+
+export function renderSavedAnswer(q,keepFeedback=false){
+  const c=state.cur;
+  c._locked=true;
+  stopTimer();
+  const fb=document.getElementById('fb');
+  fb.className='fb show '+(c.answer.correct?'good':'bad');
+  const explanation=isVisualMath(q._key)?q.exp.split('。').filter(Boolean).map(line=>`<p>${mathText(line)}。</p>`).join(''):q.exp;
+  if(keepFeedback && !isVisualMath(q._key)){
+    // The original speech prompt and reward detail stay visible on first grading.
+  }else fb.innerHTML=`<div class="head">${c.answer.correct?'⭕ 正解！':c.answer.timeUp?'⏰ 時間切れ。解説を確認しよう':'もう一度、考え方を確認しよう'}</div><div class="exp">${explanation}</div>${c.answer.correctText?`<p>正解：${isVisualMath(q._key)?mathText(c.answer.correctText):escapeHtml(c.answer.correctText)}</p>`:''}${mathVisual(q._key,true)}`;
+  const score=document.getElementById('quizScore'),combo=document.getElementById('quizCombo');
+  if(score)score.textContent=c.score;
+  if(combo)combo.textContent='🔥 '+c.combo;
+  const reward=document.querySelector?.('.rewardHud');
+  if(reward)reward.outerHTML=rewardHudHtml(c,c.mode==='boss');
+  document.querySelectorAll('.opt,#inputAns,.fillInput,select[data-sel],#inputCheck,#sujiCheck,#fillCheck,#kumiCheck,#nenpyoCheck,#junbanCheck,#examUnknown,#fallbackToChoice,.arrows button').forEach(node=>node.disabled=true);
+  document.querySelectorAll('[data-i]').forEach(node=>{if(Number(node.dataset.i)===c.shuffledCorrect)node.classList.add('correct');});
+  const slider=document.getElementById('mathParameter');
+  if(slider)slider.addEventListener('input',()=>{document.getElementById('mathParameterValue').value=slider.value;document.getElementById('mathExplore').innerHTML=graphSvg(quadraticSpec(q._key,Number(slider.value)));});
+  document.querySelectorAll('[data-graph-step]').forEach(button=>button.addEventListener('click',()=>{
+    const step=Number(button.dataset.graphStep),s=quadraticSpec(q._key);
+    document.querySelector('[data-math-graph]').innerHTML=graphSvg(s,step)+(step===3&&s.intervals?numberLine(s.intervals):'');
+    document.querySelectorAll('[data-graph-step]').forEach(node=>node.setAttribute('aria-pressed',String(node===button)));
+  }));
   const nw=document.getElementById('nextWrap');
   nw.innerHTML='';                       // 二重生成防止
   const last = c.i>=c.list.length-1;
@@ -622,6 +694,11 @@ export function finishQuestion(isCorrect,q,opts){
     if(last)renderResult();
     else{
       c.i++;
+      delete c.answer;
+      delete c.choiceOrder;
+      delete c.draft;
+      delete c._timeLeft;
+      delete c._timeLimit;
       delete c._nenpyoOrder;   // 前問の並べ替え状態を持ち越さない
       delete c._forceChoice;   // 前問の「選択肢を見る」状態を持ち越さない
       renderQuestion();

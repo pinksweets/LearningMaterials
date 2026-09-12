@@ -1,5 +1,6 @@
 import { STAGE_ORDER, QUESTIONS, totalQuestionCount, CARD_BY_ID } from "./content.js";
 import { todayStr, addDays, toast } from "./utils.js";
+import { snapshotSession, restoreSession } from './session.js';
 
 const LEAP_BASIC_SUBJECT="📘 LEAP Basic 必携英単語";
 
@@ -23,7 +24,8 @@ export const state = {
   bossCleared:{},        // 追加機能："s1":true など、ボス撃破済みステージ
   subjectGroupCollapsed:{}, // "教科\u001fグループ":true
   // 現在のプレイ
-  cur:null
+  cur:null,
+  resumeSession:null
 };
 STAGE_ORDER.forEach(sid=>{ state.stageCleared[sid]=false; state.stageBest[sid]=0; });
 export const DAILY_GOAL_OPTIONS=[5,10,20];
@@ -43,6 +45,9 @@ export const TITLES = [
 export const SAVE_KEY='rekishi-quest-v1';
 export function save(){
   try{
+    if(state.cur?.mode==='practice'){
+      try{if(typeof sessionStorage!=='undefined')sessionStorage.setItem('learning-quest-shared-practice',JSON.stringify(snapshotSession(state.cur)));}catch{/* Keep saving long-term learning progress when tab storage is full. */}
+    }else if(!state.cur || Array.isArray(state.cur.list))state.resumeSession=snapshotSession(state.cur);
     localStorage.setItem(SAVE_KEY, JSON.stringify({
       totalScore:state.totalScore,
       stageCleared:state.stageCleared,
@@ -57,7 +62,8 @@ export function save(){
       title:state.title,
       settings:state.settings,
       bossCleared:state.bossCleared,
-      subjectGroupCollapsed:state.subjectGroupCollapsed
+      subjectGroupCollapsed:state.subjectGroupCollapsed,
+      currentSession:state.resumeSession
     }));
   }catch(e){/* 保存できなくても学習は続けられるので握りつぶす */}
 }
@@ -67,6 +73,8 @@ export function load(){
     if(!raw)return;                 // 旧データ無し＝初期stateのまま
     const d=JSON.parse(raw);
     if(!d||typeof d!=='object')return;
+    state.cur=restoreSession(d.currentSession);
+    state.resumeSession=snapshotSession(state.cur);
     if(typeof d.totalScore==='number')state.totalScore=d.totalScore;
     if(d.stageCleared)Object.assign(state.stageCleared,d.stageCleared);
     if(d.stageBest)Object.assign(state.stageBest,d.stageBest);

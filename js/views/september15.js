@@ -40,9 +40,11 @@ export function startSeptember15Review(){
   const list=september15Mistakes().slice(0,5);
   if(!list.length){toast('復習する問題はないよ。よくがんばったね！');renderSeptember15Home(true);return;}
   state.cur={sid:'review',mode:'review',september15Review:true,title:'英語｜間違えた問題を復習',list,i:0,correct:0,combo:0,maxCombo:0,score:0,wrongThisRun:[],feverGauge:0,feverLeft:0,feverCount:0,weakHits:0};
+  syncScreenHash('#/session');
   renderQuestion();
 }
 export function renderSeptember15Learn(group,index=0){
+  syncScreenHash(`#/learn/2026-09-15/${group}/${index}`,typeof window!=='undefined' && window.location?.hash.startsWith(`#/learn/2026-09-15/${group}/`));
   stopTimer();stopSpeech();stopBossTension();
   const sid='sep15EnChoose'+(group+1), words=QUESTIONS[sid].data;
   const w=words[index].learn;

@@ -3,11 +3,13 @@ import { stopBossTension } from "../audio.js";
 import { CARDS } from "../content.js";
 import { state } from "../state.js";
 import { renderHome } from "./home.js";
+import { syncScreenHash } from '../utils.js';
 
 /* ============================================================
    コレクション図鑑
 ============================================================ */
 export function renderCollection(){
+  syncScreenHash('#/collection');
   stopBossTension();
   const cardsHtml = CARDS.map(c=>{
     const owned=state.cards.has(c.id);

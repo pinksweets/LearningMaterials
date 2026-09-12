@@ -76,9 +76,9 @@ test("js/content.js は ../data/index.js のみを import する", () => {
   assert.deepEqual(imports, ["../data/index.js"]);
 });
 
-test("js/state.js は ./content.js と ./utils.js のみを import する", () => {
+test("js/state.js は content/utils とセッション復元モジュールのみを import する", () => {
   const imports = new Set(extractImports(readSrc("js/state.js")));
-  assert.deepEqual(imports, new Set(["./content.js", "./utils.js"]));
+  assert.deepEqual(imports, new Set(["./content.js", "./utils.js", "./session.js"]));
 });
 
 test("js/audio.js は ./state.js と ./utils.js のみを import する", () => {

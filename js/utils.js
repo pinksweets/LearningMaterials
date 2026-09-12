@@ -13,10 +13,29 @@ export function escapeHtml(s){
 export const escapeAttr=escapeHtml;
 
 // ハッシュだけを更新し、Pagesの配信サブパス・クエリ文字列を保つ。
-export function syncScreenHash(hash){
+export const NAV={restoring:false,scroll:{},current:''};
+export function syncScreenHash(hash,replace=false){
   if(typeof window==='undefined' || !window.location || !window.history)return;
+  if(NAV.restoring)return;
   if(window.location.hash===hash || (!window.location.hash && hash==='#home'))return;
-  window.history.pushState(null,'',hash);
+  NAV.scroll[window.location.hash]=window.scrollY || 0;
+  window.history[replace?'replaceState':'pushState'](null,'',hash);
+  NAV.current=hash;
+  window.scrollTo?.(0,NAV.scroll[hash]||0);
+}
+export function subjectHash(subject){return '#/subject/'+encodeURIComponent(subject);}
+export function parseRoute(hash){
+  if(!hash || hash==='#home')return {type:'home'};
+  const old={'#test/2026-09-16':'september16','#test/2026-09-15':'september15','#test/2026-09-11':'september'};
+  if(old[hash])return {type:old[hash]};
+  try{
+    const parts=hash.split('/');
+    if(parts.length===3 && parts[1]==='subject')return {type:'subject',subject:decodeURIComponent(parts[2])};
+    if(parts.length===4 && ['question','stage'].includes(parts[1]) && /^[1-9]\d*$/.test(parts[3]))return {type:parts[1],sid:decodeURIComponent(parts[2]),index:Number(parts[3])-1};
+    if(parts.length===5 && parts[1]==='learn' && ['2026-09-11','2026-09-15'].includes(parts[2]) && /^[0-3]$/.test(parts[3]) && /^[0-4]$/.test(parts[4]))return {type:'learn',date:parts[2],group:Number(parts[3]),index:Number(parts[4])};
+    if(['#/collection','#/session','#/result','#/practice-result'].includes(hash))return {type:hash.slice(2)};
+  }catch{/* Malformed percent encoding is an invalid link. */}
+  return {type:'invalid'};
 }
 export function testPrepRoute(hash){
   return ({'#test/2026-09-16':'september16','#test/2026-09-15':'september15','#test/2026-09-11':'september'})[hash] || 'home';

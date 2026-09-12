@@ -15,7 +15,8 @@
      （バンプを忘れると古いキャッシュがいつまでも残り続ける）。
 ============================================================ */
 
-const CACHE_NAME = 'gakushu-quest-v9';
+const CACHE_NAME = 'gakushu-quest-v11';
+let cacheFallbackUntil = 0;
 
 const ASSETS = [
   './',
@@ -31,6 +32,8 @@ const ASSETS = [
   './js/utils.js',
   './js/answers.js',
   './js/state.js',
+  './js/session.js',
+  './js/math-display.js',
   './js/audio.js',
   './js/timer.js',
   './js/fever.js',
@@ -98,20 +101,30 @@ self.addEventListener('fetch', (event) => {
   if (new URL(request.url).origin !== self.location.origin) return;
 
   event.respondWith(
-    fetch(request)
-      .then((response) => {
+    (async()=>{
+      const cache=await caches.open(CACHE_NAME).catch(()=>null);
+      if(Date.now()<cacheFallbackUntil){
+        const cached=await cache?.match(request);
+        if(cached)return cached;
+      }
+      // Some mobile/proxied connections stall instead of rejecting offline.
+      // Bound network-first waiting so a cached lesson can still open promptly.
+      const controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),3000);
+      try{
+        const response=await fetch(request,{signal:controller.signal});
         if (response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          try{await cache?.put(request,response.clone());}catch{/* Full storage must not block online learning. */}
         }
         return response;
-      })
-      .catch(() =>
-        caches.match(request).then((cached) => {
-          if (cached) return cached;
-          if (request.mode === 'navigate') return caches.match('./');
-          return undefined;
-        })
-      )
+      }catch{
+        // Avoid paying the timeout again at every level of the ESM import graph.
+        cacheFallbackUntil=Date.now()+10000;
+        const cached=await cache?.match(request);
+        if(cached)return cached;
+        if(request.mode==='navigate')return await cache?.match('./') || Response.error();
+        return Response.error();
+      }finally{clearTimeout(timeout);}
+    })()
   );
 });
