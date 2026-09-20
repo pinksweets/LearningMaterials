@@ -34,14 +34,16 @@ export function testPrepCategories(today=todayStr()){
   ].sort((a,b)=>b.added-a.added).map(item=>({...item,past:item.date<today,status:item.date<today?'過去のテスト':item.date===today?'今日のテスト':'これからのテスト'}));
 }
 export function renderTestPrepPanel(today=todayStr()){
-  return `<section class="testPrepPanel" aria-labelledby="testPrepHeading"><h2 id="testPrepHeading">📅 テスト対策</h2>
+  // 既定は閉じた状態（<details>）。クリックで開く。開閉状態は保存しない（毎回閉じて始まる）。
+  const items=testPrepCategories(today);
+  return `<details class="testPrepPanel"><summary id="testPrepHeading"><span>📅 テスト対策</span><span class="testPrepToggle">${items.length}件　</span></summary>
     <p class="muted">受けるテストを選んでね。新しく追加した対策から並んでいるよ。</p>
-    <div class="testPrepCategories">${testPrepCategories(today).map(item=>{
+    <div class="testPrepCategories">${items.map(item=>{
       const {cleared,total}=subjectClearedCount(item.subject);
       return `<a class="testPrepCard${item.past?' isPast':''}" href="#test/${item.date}">
         <span class="testPrepStatus">${item.status}</span><strong>${item.title}</strong>
         <span>${item.range}</span><small>クリア ${cleared}/${total}　→</small></a>`;
-    }).join('')}</div></section>`;
+    }).join('')}</div></details>`;
 }
 
 export function dateParts(dateStr){

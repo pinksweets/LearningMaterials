@@ -368,7 +368,13 @@ a.link{color:var(--accent2);}
 .nenpyoItem .yearHint{font-size:.78rem;color:var(--muted);min-width:3.6em;text-align:right;}
 /* September exam: touch-friendly short sessions. */
 .testPrepPanel { margin: 22px 0; padding: 18px; border: 1px solid var(--line); border-radius: 18px; }
-.testPrepPanel h2 { margin: 0 0 8px; font-size: 1.2rem; }
+.testPrepPanel summary { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0; font-size: 1.2rem; font-weight: 800; cursor: pointer; list-style: none; }
+.testPrepPanel summary::-webkit-details-marker { display: none; }
+.testPrepPanel summary:focus-visible { outline: 3px solid var(--accent2); outline-offset: 3px; border-radius: 8px; }
+.testPrepToggle { font-size: .8rem; font-weight: 700; color: var(--accent2); white-space: nowrap; }
+.testPrepToggle::after { content: '▼ 開く'; }
+.testPrepPanel[open] .testPrepToggle::after { content: '▲ 閉じる'; }
+.testPrepPanel[open] > summary { margin-bottom: 8px; }
 .testPrepCategories { display: grid; gap: 12px; margin-top: 14px; }
 .testPrepCard { display: grid; gap: 6px; width: 100%; padding: 20px; text-align: left; font: inherit; color: var(--text); background: var(--panel2); border: 2px solid var(--accent2); border-radius: 14px; cursor: pointer; }
 .testPrepCard strong { font-size: 1.2rem; overflow-wrap: anywhere; }
