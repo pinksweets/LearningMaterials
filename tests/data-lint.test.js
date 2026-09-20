@@ -122,9 +122,9 @@ test("units: q.card（文字列 or 配列）と単元 cards の id が CARD_BY_I
   }
 });
 
-test("合計件数の固定スナップショット（単元584・問題8806・カード93）— 意図的な増減ならこの数値を更新すること", () => {
-  assert.equal(units.length, 584, "単元数が想定と異なる");
+test("合計件数の固定スナップショット（単元592・問題8886・カード93）— 意図的な増減ならこの数値を更新すること", () => {
+  assert.equal(units.length, 592, "単元数が想定と異なる");
   const totalQuestions = units.reduce((n, u) => n + u.questions.length, 0);
-  assert.equal(totalQuestions, 8806, "問題総数が想定と異なる");
+  assert.equal(totalQuestions, 8886, "問題総数が想定と異なる");
   assert.equal(Object.keys(CARD_BY_ID).length, 93, "カード総数（重複除去後）が想定と異なる");
 });
