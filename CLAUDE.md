@@ -23,9 +23,9 @@ node --check js/main.js
 node --check data/index.js
 # 他ファイルも同様に1本ずつ、または find/ForEach-Object でループしてチェックする。
 
-# data/ 移行・改修時の突合検証（旧アーキテクチャとの完全一致を検証。恒久スクリプト）
-node tools/verify-data-migration.mjs
-node tools/verify-data-migration.mjs <ベースgit ref>   # 省略時は origin/main
+# data/ 改修時の突合検証（既存問題の無改変・追加は末尾のみ、を git の ref と実データで突合。恒久スクリプト）
+node tools/verify-data-append-only.mjs
+node tools/verify-data-append-only.mjs <ベースgit ref>   # 省略時は origin/main。HEAD~1 なども可
 ```
 
 機能テストは `tests/`（`node:test`）に集約されている。DOM込みの検証は jsdom か Claude Preview（http 配信でも壊れない設計）を使う。
@@ -35,7 +35,7 @@ node tools/verify-data-migration.mjs <ベースgit ref>   # 省略時は origin/
 1. **ビルド不要・相対パスのみ**：ビルドステップ・npm依存・外部CDN・外部フォントは使用禁止。ソースファイルをそのまま配信する。**全参照は相対パス**にすること（GitHub Pages はサブパス `/LearningMaterials/` 配信のため、絶対パス `/js/...` 等は本番で壊れる。Service Worker のスコープや `manifest.webmanifest` の `start_url`/アイコンパスも同様に相対で書く）。
 2. **セーブデータ互換**：`SAVE_KEY = 'rekishi-quest-v1'`（`js/state.js`）は改名しない。`state` に新フィールドを足すときは `load()` で旧データ（フィールド欠落）をデフォルト値でマージする。
 3. **qStats キーは位置ベース**：学習履歴は `"単元ID-配列インデックス"`（例 `"m1s1-0"`）で保存される。**既存問題の並び替え・途中挿入は禁止、追加は必ず配列末尾**。単元IDにはハイフンを使わない。単元ID変更時は `cleanupStaleQStats()`（load 時に現存キーでフィルタ）が残留キーを掃除する。
-4. **既存の問題データ（問題文・選択肢・正解・解説）は改変しない**。移植・リファクタ時は元データとの全件突合で無改変を検証するのが慣行（`tools/verify-data-migration.mjs` 参照）。
+4. **既存の問題データ（問題文・選択肢・正解・解説）は改変しない**。移植・リファクタ時は元データとの全件突合で無改変を検証するのが慣行（`tools/verify-data-append-only.mjs`：ベース ref と突合し、改変・途中挿入・並べ替えを最初の差分パス付きで報告する。`tests/fixtures/question-digests.json` のハッシュ検証が失敗したときの診断にも使う）。
 5. **モジュール層規約**：依存は一方向 `data/*` → `js/content.js` → `js/state.js` → `js/audio.js` → `js/views/*` → `js/main.js`。`js/utils.js` / `js/answers.js` / `js/timer.js` / `js/fever.js` は他モジュールを import しない葉（leaf）モジュール。`js/views/*.js` は「import と `export function` 宣言のみ」で構成し、トップレベルの実行文・`const` は書かない（view 同士が循環 import し合う構造を、関数宣言の巻き上げで安全に成立させるための規約）。モジュール横断で共有する可変状態（`state`／`TIMER`／`AUDIO`／`BGM` など）は必ずコンテナオブジェクトの**プロパティ**を書き換える形にする（`import` した束縛そのものへの再代入はESM仕様上 `TypeError` になる）。
 
 ## アーキテクチャ

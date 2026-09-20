@@ -86,7 +86,7 @@ tools/import-leap-basic.mjs      … 許諾済み見出語一覧からLEAP Basic
 tools/leap-basic-runtime.js      … 各Partへ埋め込む独自問題・例文メモ・Tip生成テンプレート
 tools/import-english-quest.mjs   … 英単語クエスト.htmlから重複を除いて追加教材を再生成
 tools/english-quest-runtime.js   … 英単語クエスト追加教材の問題生成テンプレート
-tools/verify-data-migration.mjs … 旧アーキテクチャ（classic script）との完全一致を検証する恒久スクリプト
+tools/verify-data-append-only.mjs … git の任意 ref と data/ を突合し「既存問題は無改変・追加は末尾のみ」を検証する恒久スクリプト（旧 verify-data-migration.mjs は data/ ESM 移行の一回性検証だったため置き換えた）
 tests/                       … node:test による自動テスト一式
 ```
 
