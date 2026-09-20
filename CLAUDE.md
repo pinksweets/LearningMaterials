@@ -73,3 +73,4 @@ SRS は Leitner 方式（`box` 0–5、間隔 `[0,1,3,7,14,30]` 日、`box>=3` �
 - 数学Ⅰは「小カテゴリ＝1ステージ＝ちょうど10問」の運用（技術的制約ではなく運用ルール）。新規の数学問題は正答を機械検証（乱数代入・境界値チェック等）してから追加するのが慣行。
 - 単元ファイルを新規追加する手順：① `data/xxx.js` を新設（先頭2行のシム＋本体の `HQ.registerUnit` 呼び出し＋末尾2行の export、書式は既存ファイル参照）→ ② `data/index.js` に import を1行追加 → ③ `sw.js` の `ASSETS` に追加し `CACHE_NAME` をバンプ → ④ `tests/fixtures/question-digests.json` に**末尾追加のみ**で反映（既存エントリの並び替え・削除はしない）→ ⑤ `node --test tests/*.test.js` が緑になることを確認。
 - 進捗リセット：ブラウザコンソールで `localStorage.removeItem('rekishi-quest-v1')`。
+- 「まなぶ→とく」レッスン：単元に `lesson`（3枚固定：たとえ話／式と単位／よくある勘違い）を持たせると、初回はレッスン必読になる（`js/views/subject.js` の `openStage`）。`lessonMath`（MathML表示）・`focus`（重点バッジ）・カードの `graph`（`graphSvg` で放物線）は省略可。既読は `state.lessonSeen`。語り口は高校1年生への「です・ます」の語りかけで、たとえのレベルを下げる（ひらがな多用はしない）。詳細は README「まなぶ→とく」。
