@@ -6,6 +6,7 @@ import { renderHome } from "./views/home.js";
 import { renderSeptemberHome, renderSeptemberLearn } from "./views/september.js";
 import { renderSeptember15Home, renderSeptember15Learn } from "./views/september15.js";
 import { renderSubjectHome } from "./views/subject.js";
+import { renderLesson } from "./views/lesson.js";
 import { parseRoute, NAV, toast } from "./utils.js";
 import { QUESTIONS } from './content.js';
 import { sessionHash, restoreSession } from './session.js';
@@ -35,6 +36,7 @@ export function renderUrlScreen(initial=false){
     else if(route.type==='september')renderSeptemberHome(true);
     else if(route.type==='subject' && Object.values(QUESTIONS).some(s=>s.subject===route.subject))renderSubjectHome(route.subject);
     else if(route.type==='collection')renderCollection();
+    else if(route.type==='lesson'){ if(QUESTIONS[route.sid]?.lesson)renderLesson(route.sid); else {invalid=true;renderHome();} }
     else if(route.type==='learn'){
       if(route.date==='2026-09-15')renderSeptember15Learn(route.group,route.index);
       else renderSeptemberLearn(route.group,route.index);

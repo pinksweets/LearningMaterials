@@ -11,12 +11,15 @@ import {
   stagesOfSubject,
   isSubjectGroupCollapsed,
   setSubjectGroupCollapsed,
-  setSubjectGroupsCollapsed
+  setSubjectGroupsCollapsed,
+  isLessonSeen
 } from "../state.js";
 import { QUESTIONS } from "../content.js";
 import { renderHome } from "./home.js";
 import { startStage, startBoss, resumePanel } from "./quiz.js";
 import { startLeapSpeed } from "./leap.js";
+import { renderLesson } from "./lesson.js";
+import { hasLesson } from "../lesson.js";
 import { LEAP_BASIC_SUBJECT, LEAP_DAILY_TARGET } from "../leap-study.js";
 import { renderSeptember15Home } from "./september15.js";
 import { renderSeptemberHome } from "./september.js";
@@ -59,6 +62,8 @@ export function renderSubjectHome(subject){
     const bossUnlocked = isStageUnlockedForBoss(sid);
     const bossDone = !!state.bossCleared[sid];
     const bossBtn = s.data[0]?.examPractice ? '' : `<button class="bossBtn ${bossUnlocked?'':'locked'}" data-boss="${escapeAttr(sid)}" type="button">${bossDone?'👑 再挑戦':(bossUnlocked?'👹 ボス戦':'🔒 ボス戦')}</button>`;
+    const lessonBtn = hasLesson(s)
+      ? `<button class="lessonBtn ${isLessonSeen(sid)?'':'unread'}" data-lesson="${escapeAttr(sid)}" type="button">📖 ${isLessonSeen(sid)?'まなぶ':'まず まなぶ'}</button>` : '';
     const leapBtn = subject===LEAP_BASIC_SUBJECT
       ? `<button class="leapFastBtn" data-leap-fast="${escapeAttr(sid)}" type="button">⚡ 高速</button>` : '';
     const pageHtml = s.page ? `　｜　教科書 p.${escapeHtml(s.page)}` : "";
@@ -72,7 +77,7 @@ export function renderSubjectHome(subject){
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
         <div class="star">${cleared?('★ '+best+'%'):'▶'}</div>
-        ${leapBtn}${bossBtn}
+        ${lessonBtn}${leapBtn}${bossBtn}
       </div>
     </div>`;
   }
@@ -148,20 +153,26 @@ export function renderSubjectHome(subject){
 
   document.querySelectorAll('.stage').forEach(node=>{
     node.addEventListener('click',(e)=>{
-      if(e.target.closest('[data-boss],[data-leap-fast]'))return; // 補助ボタンのクリックはステージ通常開始と混同しない
-      startStage(node.dataset.stage);
+      if(e.target.closest('[data-boss],[data-leap-fast],[data-lesson]'))return; // 補助ボタンのクリックはステージ通常開始と混同しない
+      openStage(node.dataset.stage);
     });
     node.addEventListener('keydown',(e)=>{
-      if(e.target.closest('button,[data-boss],[data-leap-fast]'))return;
+      if(e.target.closest('button,[data-boss],[data-leap-fast],[data-lesson]'))return;
       if(e.key!=='Enter'&&e.key!==' ')return;
       e.preventDefault();
-      startStage(node.dataset.stage);
+      openStage(node.dataset.stage);
     });
   });
   document.querySelectorAll('[data-boss]').forEach(btn=>{
     btn.addEventListener('click',(e)=>{
       e.stopPropagation();
       startBoss(btn.dataset.boss);
+    });
+  });
+  document.querySelectorAll('[data-lesson]').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      renderLesson(btn.dataset.lesson);
     });
   });
   document.querySelectorAll('[data-leap-fast]').forEach(btn=>{
@@ -171,5 +182,12 @@ export function renderSubjectHome(subject){
     });
   });
   const ws=document.querySelector('.weakspot');
-  if(ws) ws.addEventListener('click',()=>startStage(ws.dataset.stage));
+  if(ws) ws.addEventListener('click',()=>openStage(ws.dataset.stage));
+}
+
+/* レッスン付き単元は、初回のみレッスン必読（まなぶ→とく）。既読なら通常どおり開始する。 */
+export function openStage(sid){
+  const s=QUESTIONS[sid];
+  if(hasLesson(s) && !isLessonSeen(sid)){ renderLesson(sid); return; }
+  startStage(sid);
 }

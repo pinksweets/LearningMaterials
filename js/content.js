@@ -12,7 +12,8 @@ const HQ = { units, cards: sharedCards };
 /* ---------- HQ.units から QUESTIONS / STAGE_ORDER を構築 ---------- */
 export const QUESTIONS = {};
 HQ.units.forEach(u => {
-  QUESTIONS[u.id] = { title: u.title, desc: u.desc, data: u.questions, subject: u.subject, group: u.group, page: u.page };
+  QUESTIONS[u.id] = { title: u.title, desc: u.desc, data: u.questions, subject: u.subject, group: u.group, page: u.page,
+    lesson: u.lesson, lessonMath: u.lessonMath, focus: u.focus }; // lesson/lessonMath/focus は「まなぶ→とく」機能と重点バッジ（省略可）
 });
 // order 昇順で並べたステージID一覧（ホーム表示・ボス戦・弱点マップ・SRSの対象範囲を決める）
 export const STAGE_ORDER = HQ.units.slice().sort((a, b) => a.order - b.order).map(u => u.id);

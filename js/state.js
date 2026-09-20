@@ -23,6 +23,7 @@ export const state = {
   settings:{timeAttack:true, inputMode:false, sound:true, englishSpeech:true, bgmUrl:"", dailyGoal:10}, // 追加機能：眠気対策の設定
   bossCleared:{},        // 追加機能："s1":true など、ボス撃破済みステージ
   subjectGroupCollapsed:{}, // "教科\u001fグループ":true
+  lessonSeen:{},         // "njz1":true など、レッスンを最後まで読んだ単元（まなぶ→とく）
   // 現在のプレイ
   cur:null,
   resumeSession:null
@@ -63,6 +64,7 @@ export function save(){
       settings:state.settings,
       bossCleared:state.bossCleared,
       subjectGroupCollapsed:state.subjectGroupCollapsed,
+      lessonSeen:state.lessonSeen,
       currentSession:state.resumeSession
     }));
   }catch(e){/* 保存できなくても学習は続けられるので握りつぶす */}
@@ -91,6 +93,7 @@ export function load(){
     state.settings.dailyGoal=normalizeDailyGoal(state.settings.dailyGoal);
     state.bossCleared=(d.bossCleared&&typeof d.bossCleared==='object')?d.bossCleared:{};
     state.subjectGroupCollapsed=(d.subjectGroupCollapsed&&typeof d.subjectGroupCollapsed==='object')?d.subjectGroupCollapsed:{};
+    state.lessonSeen=(d.lessonSeen&&typeof d.lessonSeen==='object')?d.lessonSeen:{}; // 旧データ（フィールド欠落）は未読扱い
   }catch(e){/* 壊れたデータ・別バージョンは初期stateで開始 */}
   cleanupStaleQStats();  // 追加機能（数学カテゴリ細分化）：存在しない単元IDのqStatsキーが習熟度/称号を汚染しないよう掃除
 }
@@ -366,4 +369,13 @@ export function evalTitle(){
 
 export function isStageUnlockedForBoss(sid){
   return !!state.stageCleared[sid];   // そのステージを通常クリア済みなら解放
+}
+
+/* ---------- レッスン既読（まなぶ→とく） ---------- */
+export function isLessonSeen(sid){ return !!(state.lessonSeen && state.lessonSeen[sid]); }
+export function markLessonSeen(sid){
+  if(!state.lessonSeen)state.lessonSeen={};
+  if(state.lessonSeen[sid])return;
+  state.lessonSeen[sid]=true;
+  save();
 }

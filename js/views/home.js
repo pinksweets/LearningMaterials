@@ -14,9 +14,10 @@ import {
   normalizeDailyGoal,
   studyVolumeLevel,
   weeklyStudySummary,
-  leapSessionsOn
+  leapSessionsOn,
+  stagesOfSubject
 } from "../state.js";
-import { CARDS, totalQuestionCount } from "../content.js";
+import { CARDS, QUESTIONS, totalQuestionCount } from "../content.js";
 import { LEAP_DAILY_TARGET } from "../leap-study.js";
 import { renderSubjectHome } from "./subject.js";
 import { renderCollection } from "./collection.js";
@@ -137,8 +138,9 @@ export function renderHome(){
   const cardsHtml = subjectList().filter(subject=>!testSubjects.has(subject)).map(subject=>{
     const {cleared,total} = subjectClearedCount(subject);
     const m = subjectMastery(subject);
-    return `<div class="subjectCard" data-subject="${subject}">
-      <div class="subjectCard-name">${subject}</div>
+    const focus = stagesOfSubject(subject).some(sid=>QUESTIONS[sid].focus);
+    return `<div class="subjectCard${focus?' focus':''}" data-subject="${subject}">
+      <div class="subjectCard-name">${subject}${focus?'<span class="focusBadge">重点</span>':''}</div>
       <div class="subjectCard-sum">クリア ${cleared}/${total}　｜　習熟度 ${m.pct}%</div>
       <div class="mastery"><i style="width:${m.pct}%"></i></div>
     </div>`;

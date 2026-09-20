@@ -14,6 +14,7 @@ import { renderSeptemberHome } from "./september.js";
 import { syncScreenHash, subjectHash } from '../utils.js';
 import { sessionHash, restoreSession } from '../session.js';
 import { isVisualMath, mathText, mathVisual, quadraticSpec, graphSvg, numberLine } from '../math-display.js';
+import { hasLesson, lessonCardsHtml } from '../lesson.js';
 
 /* ============================================================
    ステージ開始
@@ -206,11 +207,16 @@ export function renderQuestion(){
 
   body=body.replaceAll(`<div class="qtext">${q.q}</div>`,`<div class="qtext">${text(q.q)}</div>${mathVisual(q._key)}`);
   const subject=QUESTIONS[sourceSid]?.subject;
+  // まなぶ→とく：レッスン付き単元では問題の途中でもカードを読み返せる（減点なし・遷移なし）
+  const stageInfo=QUESTIONS[sourceSid];
+  const lessonPeek = hasLesson(stageInfo) && c.mode!=='boss'
+    ? `<details class="lessonPeek"><summary>📖 もう一度みる（レッスンカード）</summary>${lessonCardsHtml(stageInfo.lesson,{math:!!stageInfo.lessonMath})}</details>` : '';
   const nav=subject?`<nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">教科選択</a><span>›</span><a href="${subjectHash(subject)}">${escapeHtml(subject)}</a><span>› ${escapeHtml(c.title)}</span></nav>`:'';
   app().innerHTML="";
   app().appendChild(el(`<div>${nav}<div class="card">${hud}${rewardHud}${bossHud}${timerHtml}${tags}${speechPrompt}${body}
     ${q.speech?`<button class="btn secondary" id="examSpeak" type="button">🔊 英語を聞く</button>${q.reading?`<details class="sepReading"><summary>読み方のヒント</summary>${escapeHtml(q.reading)}<p class="muted">カタカナは目安。音声をまねしてみよう。</p></details>`:''}`:''}
     ${hintHtml}
+    ${lessonPeek}
     ${q.examPractice?'<button class="fallbackLink" id="examUnknown" type="button">わからない・答えを確認する</button>':''}
     <div class="fb" id="fb"></div>
     <div id="nextWrap"></div>

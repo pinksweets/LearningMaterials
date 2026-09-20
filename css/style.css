@@ -389,3 +389,23 @@ a.link{color:var(--accent2);}
 .sepReading summary, .sepMeaning summary { cursor: pointer; min-height: 44px; }
 .sepMeaning p { font-size: 1.5rem; font-weight: bold; }
 @media (max-width: 480px) { .sepGrid { grid-template-columns: 1fr; } }
+
+/* ---------- まなぶ→とく（レッスン機能）・重点バッジ ---------- */
+.subjectCard.focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,255,255,.04) inset;}
+.focusBadge{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;background:var(--accent);color:#1a1200;font-size:.72rem;font-weight:800;vertical-align:middle;}
+.lessonBtn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+.lessonBtn.unread{border-color:var(--accent2);color:var(--accent2);}
+.lessonScreen .lessonDots{display:flex;gap:8px;justify-content:center;margin:8px 0 12px;}
+.lessonDot{width:10px;height:10px;border-radius:50%;background:var(--line);}
+.lessonDot.done{background:var(--muted);}
+.lessonDot.on{background:var(--accent);}
+.lessonCard{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px;margin:10px 0;line-height:1.75;}
+.lessonCard h3{margin:4px 0 8px;font-size:1.08rem;}
+.lessonCard p{margin:0 0 10px;}
+.lessonKind{font-size:.78rem;color:var(--muted);font-weight:700;}
+.lessonFormula{margin:10px 0;padding:10px 12px;border-radius:10px;background:var(--panel);border:1px dashed var(--accent);font-size:1.1rem;text-align:center;}
+.lessonNav{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.lessonNote{margin-top:10px;font-size:.82rem;}
+.lessonPeek{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:0 12px;}
+.lessonPeek summary{padding:10px 0;cursor:pointer;color:var(--accent2);font-size:.9rem;}
+.lessonPeek .lessonCard{margin:8px 0 12px;}
