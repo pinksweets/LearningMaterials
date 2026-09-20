@@ -401,7 +401,9 @@ a.link{color:var(--accent2);}
 .lessonDot.on{background:var(--accent);}
 .lessonCard{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px;margin:10px 0;line-height:1.75;}
 .lessonCard h3{margin:4px 0 8px;font-size:1.08rem;}
-.lessonCard p{margin:0 0 10px;}
+.lessonCard p{margin:0 0 10px;overflow-wrap:anywhere;}
+.lessonCard math{display:inline-block;max-width:100%;overflow-x:auto;vertical-align:middle;}
+.lessonFormula math{display:inline-block;max-width:100%;overflow-x:auto;}
 .lessonKind{font-size:.78rem;color:var(--muted);font-weight:700;}
 .lessonFormula{margin:10px 0;padding:10px 12px;border-radius:10px;background:var(--panel);border:1px dashed var(--accent);font-size:1.1rem;text-align:center;}
 .lessonNav{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
