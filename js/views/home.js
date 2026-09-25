@@ -1,4 +1,4 @@
-import { el, app, toast, escapeAttr, escapeHtml, todayStr, addDays, syncScreenHash } from "../utils.js";
+import { el, app, toast, escapeAttr, escapeHtml, todayStr, addDays, syncScreenHash, subjectHash } from "../utils.js";
 import { stopTimer } from "../timer.js";
 import { stopBossTension, stopSpeech, playAnswerSound, BGM, startYouTubeBgm, stopYouTubeBgm } from "../audio.js";
 import {
@@ -30,8 +30,9 @@ export function testPrepCategories(today=todayStr()){
   return [
     {subject:septemberSubject(),title:'9/11 小テスト対策',date:'2026-09-11',added:1,range:'英語｜p.42〜47・No.103〜122'},
     {subject:september15Subject(),title:'9/15 英語小テスト対策',date:'2026-09-15',added:2,range:'英語｜p.48〜53・No.123〜142'},
-    {subject:'📅 9/16 実力テスト対策',title:'9/16 実力テスト対策',date:'2026-09-16',added:3,range:'国語・数学・英語｜各50問・写真の範囲を練習'}
-  ].sort((a,b)=>b.added-a.added).map(item=>({...item,past:item.date<today,status:item.date<today?'過去のテスト':item.date===today?'今日のテスト':'これからのテスト'}));
+    {subject:'📅 9/16 実力テスト対策',title:'9/16 実力テスト対策',date:'2026-09-16',added:3,range:'国語・数学・英語｜各50問・写真の範囲を練習'},
+    {subject:'🧪 化学基礎',title:'10/13〜19 中間テスト対策｜化学',date:'2026-10-13',endDate:'2026-10-19',added:4,keepSubject:true,href:subjectHash('🧪 化学基礎'),range:'ニューサポート 新編化学基礎｜第7・8・9・11節｜80問'}
+  ].sort((a,b)=>b.added-a.added).map(item=>({...item,past:(item.endDate||item.date)<today,status:(item.endDate||item.date)<today?'過去のテスト':item.endDate&&item.date<=today?'テスト期間中':item.date===today?'今日のテスト':'これからのテスト'}));
 }
 export function renderTestPrepPanel(today=todayStr()){
   // 既定は閉じた状態（<details>）。クリックで開く。開閉状態は保存しない（毎回閉じて始まる）。
@@ -40,7 +41,7 @@ export function renderTestPrepPanel(today=todayStr()){
     <p class="muted">受けるテストを選んでね。新しく追加した対策から並んでいるよ。</p>
     <div class="testPrepCategories">${items.map(item=>{
       const {cleared,total}=subjectClearedCount(item.subject);
-      return `<a class="testPrepCard${item.past?' isPast':''}" href="#test/${item.date}">
+      return `<a class="testPrepCard${item.past?' isPast':''}" href="${escapeAttr(item.href||`#test/${item.date}`)}">
         <span class="testPrepStatus">${item.status}</span><strong>${item.title}</strong>
         <span>${item.range}</span><small>クリア ${cleared}/${total}　→</small></a>`;
     }).join('')}</div></details>`;
@@ -136,7 +137,7 @@ export function renderHome(){
   if(!state.title)evalTitle();   // 初回は現在の称号を確定
 
   // 追加機能（教科選択ファースト化）：教科カードをorder順・重複除去で動的生成
-  const testSubjects=new Set(testPrepCategories().map(item=>item.subject));
+  const testSubjects=new Set(testPrepCategories().filter(item=>!item.keepSubject).map(item=>item.subject));
   const cardsHtml = subjectList().filter(subject=>!testSubjects.has(subject)).map(subject=>{
     const {cleared,total} = subjectClearedCount(subject);
     const m = subjectMastery(subject);

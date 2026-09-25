@@ -28,8 +28,9 @@ import * as sep16Ma from "./sep16_math.js";
 import * as sep16En from "./sep16_english.js";
 import * as njz from "./njz_nijikansuu_zero.js";
 import * as ecz from "./ecz_denki_kairo_zero.js";
+import * as ch1 from "./ch1_midterm.js";
 
-const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5, lbq, sep, sep15, sep16Ja, sep16Ma, sep16En, njz, ecz];
+const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5, lbq, sep, sep15, sep16Ja, sep16Ma, sep16En, njz, ecz, ch1];
 
 /* 全単元（登録順） */
 export const units = MODULES.flatMap(m => m.units);
