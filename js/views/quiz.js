@@ -15,6 +15,7 @@ import { syncScreenHash, subjectHash } from '../utils.js';
 import { sessionHash, restoreSession } from '../session.js';
 import { isVisualMath, mathText, mathVisual, quadraticSpec, graphSvg, numberLine } from '../math-display.js';
 import { hasLesson, lessonCardsHtml } from '../lesson.js';
+import { isMockExam, examTotal, examAward, examNumericMatch } from '../mock-exam.js';
 
 /* ============================================================
    ステージ開始
@@ -82,6 +83,7 @@ export function renderQuestion(){
   const num=c.i+1, total=c.list.length;
   const pct=Math.round((c.i)/total*100);
   const isBoss = c.mode==='boss';
+  const mock = isMockExam(c);
   initRewardProgress(c);
   syncBossTension(isBoss);
   const timeAttackOn = isBoss ? true : !q.examPractice && !!(state.settings&&state.settings.timeAttack); // ボス戦は強制ON
@@ -89,11 +91,10 @@ export function renderQuestion(){
   const hud=`<div class="hud">
     <span class="chip">${c.title}</span>
     <span class="chip">Q <span class="em">${num}</span>/${total}</span>
-    <span class="chip">スコア <span class="em" id="quizScore">${c.score}</span></span>
-    <span class="chip combo" id="quizCombo">🔥 ${c.combo}</span>
+    ${mock?`<span class="chip">${examTotal(c)}点満点・採点は最後</span><span class="chip">この問題 ${q.points}点</span>`:`<span class="chip">スコア <span class="em" id="quizScore">${c.score}</span></span><span class="chip combo" id="quizCombo">🔥 ${c.combo}</span>`}
   </div>
   <div class="progress"><div class="bar" style="width:${pct}%"></div></div>`;
-  const rewardHud = rewardHudHtml(c,isBoss);
+  const rewardHud = mock?'':rewardHudHtml(c,isBoss);
 
   const bossHud = isBoss ? `<div class="bossHud">
       <div class="bossRow">
@@ -202,14 +203,14 @@ export function renderQuestion(){
   }
 
   // 追加機能（数学統合）：q.hintがある問題のみ「💡 ヒント」ボタンを表示（減点なし）
-  const hintHtml = q.hint ? `<button class="fallbackLink" id="hintBtn" type="button">💡 ヒント</button>
+  const hintHtml = q.hint && !mock ? `<button class="fallbackLink" id="hintBtn" type="button">💡 ヒント</button>
     <div class="muted" id="hintText" style="display:none;margin-top:6px"></div>` : "";
 
   body=body.replaceAll(`<div class="qtext">${q.q}</div>`,`<div class="qtext">${text(q.q)}</div>${mathVisual(q._key)}`);
   const subject=QUESTIONS[sourceSid]?.subject;
   // まなぶ→とく：レッスン付き単元では問題の途中でもカードを読み返せる（減点なし・遷移なし）
   const stageInfo=QUESTIONS[sourceSid];
-  const lessonPeek = hasLesson(stageInfo) && c.mode!=='boss'
+  const lessonPeek = hasLesson(stageInfo) && c.mode!=='boss' && !mock
     ? `<details class="lessonPeek"><summary>📖 もう一度みる（レッスンカード）</summary>${lessonCardsHtml(stageInfo.lesson,{math:!!stageInfo.lessonMath})}</details>` : '';
   const nav=subject?`<nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">教科選択</a><span>›</span><a href="${subjectHash(subject)}">${escapeHtml(subject)}</a><span>› ${escapeHtml(c.title)}</span></nav>`:'';
   app().innerHTML="";
@@ -217,7 +218,7 @@ export function renderQuestion(){
     ${q.speech?`<button class="btn secondary" id="examSpeak" type="button">🔊 英語を聞く</button>${q.reading?`<details class="sepReading"><summary>読み方のヒント</summary>${escapeHtml(q.reading)}<p class="muted">カタカナは目安。音声をまねしてみよう。</p></details>`:''}`:''}
     ${hintHtml}
     ${lessonPeek}
-    ${q.examPractice?'<button class="fallbackLink" id="examUnknown" type="button">わからない・答えを確認する</button>':''}
+    ${q.examPractice?`<button class="fallbackLink" id="examUnknown" type="button">${mock?'わからない（0点で次へ）':'わからない・答えを確認する'}</button>`:''}
     <div class="fb" id="fb"></div>
     <div id="nextWrap"></div>
   </div>
@@ -387,6 +388,7 @@ export function answer(isCorrect, clickedBtn, chosenIdx){
   const c=state.cur, q=c.list[c.i];
   document.querySelectorAll('.opt').forEach(o=>o.classList.add('disabled'));
   // 正解・不正解の色付け
+  if(isMockExam(c)){finishQuestion(isCorrect,q);return;}
   if(q.type==="maru"){
     document.querySelectorAll('[data-mx]').forEach(o=>{
       const val=o.dataset.mx==='true';
@@ -417,7 +419,7 @@ export function checkInput(q){
     ? accepted.some(answer=>normalizeAnswer(val)===normalizeAnswer(answer))
     : isAnyAnswerMatch(val,accepted);
   inputEl.disabled=true;
-  inputEl.classList.add(isCorrect?'correct':'wrong');
+  if(!isMockExam(state.cur))inputEl.classList.add(isCorrect?'correct':'wrong');
   document.getElementById('inputCheck').disabled=true;
   const fb2=document.getElementById('fallbackToChoice'); if(fb2)fb2.disabled=true;
   finishQuestion(isCorrect,q,{correctText});
@@ -429,9 +431,9 @@ export function checkSuji(q){
   const val=inputEl.value;
   if(normalizeAnswer(val)===""){toast('こたえを入力してね！');return;}
   stopTimer();
-  const isCorrect=isAnyAnswerMatch(val,q.a);
+  const isCorrect=isMockExam(state.cur)?examNumericMatch(val,q.a):isAnyAnswerMatch(val,q.a);
   inputEl.disabled=true;
-  inputEl.classList.add(isCorrect?'correct':'wrong');
+  if(!isMockExam(state.cur))inputEl.classList.add(isCorrect?'correct':'wrong');
   document.getElementById('sujiCheck').disabled=true;
   const hintBtn=document.getElementById('hintBtn'); if(hintBtn)hintBtn.disabled=true;
   finishQuestion(isCorrect,q,{correctText:isCorrect?null:q.a.join(' / ')});
@@ -574,7 +576,8 @@ export function finishQuestion(isCorrect,q,opts){
   c.answer={correct:isCorrect,timeUp:!!opts.timeUp,correctText:opts.correctText||''};
   c.draft=[...document.querySelectorAll('#inputAns,.fillInput,select[data-sel]')].map(input=>input.value);
   stopTimer(); // 採点確定時点で必ずタイマー停止（時間切れ経路も含め二重に保証）
-  playAnswerSound(isCorrect);
+  const mock=isMockExam(c);
+  if(!mock)playAnswerSound(isCorrect);
   const sourceSid = c.mode==='review' && q._key ? q._key.split('-')[0] : c.sid;
   const leapFeedbackEntry = QUESTIONS[sourceSid] && isLeapSubject(QUESTIONS[sourceSid].subject) ? extractLeapEntry(q) : null;
   const leapSpeechFeedback = leapFeedbackEntry && leapFeedbackEntry.headword
@@ -591,7 +594,11 @@ export function finishQuestion(isCorrect,q,opts){
     speedBonus = Math.round(c._timeLeft/c._timeLimit*10);
   }
 
-  if(isCorrect){
+  if(mock){
+    c.score+=examAward(q,isCorrect);
+    if(isCorrect)c.correct++;
+    else c.wrongThisRun.push(q);
+  }else if(isCorrect){
     c.correct++; c.combo++; c.maxCombo=Math.max(c.maxCombo,c.combo);
     let pts = q.lv==="標準"?15:10;
     let bonus = c.combo>=3 ? (c.combo>=5?10:5) : 0;
@@ -682,7 +689,10 @@ export function renderSavedAnswer(q,keepFeedback=false){
   const reward=document.querySelector?.('.rewardHud');
   if(reward)reward.outerHTML=rewardHudHtml(c,c.mode==='boss');
   document.querySelectorAll('.opt,#inputAns,.fillInput,select[data-sel],#inputCheck,#sujiCheck,#fillCheck,#kumiCheck,#nenpyoCheck,#junbanCheck,#examUnknown,#fallbackToChoice,.arrows button').forEach(node=>node.disabled=true);
-  document.querySelectorAll('[data-i]').forEach(node=>{if(Number(node.dataset.i)===c.shuffledCorrect)node.classList.add('correct');});
+  if(isMockExam(c)){
+    fb.className='fb show';
+    fb.innerHTML='<div class="head">回答を受け付けたよ</div><div class="exp">正解と解説は、最後の結果画面で確認しよう。</div>';
+  }else document.querySelectorAll('[data-i]').forEach(node=>{if(Number(node.dataset.i)===c.shuffledCorrect)node.classList.add('correct');});
   const slider=document.getElementById('mathParameter');
   if(slider)slider.addEventListener('input',()=>{document.getElementById('mathParameterValue').value=slider.value;document.getElementById('mathExplore').innerHTML=graphSvg(quadraticSpec(q._key,Number(slider.value)));});
   document.querySelectorAll('[data-graph-step]').forEach(button=>button.addEventListener('click',()=>{

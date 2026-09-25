@@ -1,4 +1,4 @@
-import { el, app, toast } from "../utils.js";
+import { el, app, toast, escapeHtml } from "../utils.js";
 import { stopTimer } from "../timer.js";
 import { stopBossTension, stopSpeech, playBossResultSound } from "../audio.js";
 import { state, save, evalTitle, masteredCount } from "../state.js";
@@ -10,6 +10,7 @@ import { renderSeptember15Home, startSeptember15Review } from "./september15.js"
 import { renderSeptemberHome, startSeptemberReview } from "./september.js";
 import { syncScreenHash } from '../utils.js';
 import { sessionHash } from '../session.js';
+import { isMockExam, examTotal, examBreakdown, examAnswer } from '../mock-exam.js';
 
 /* ============================================================
    追加機能：ボス戦の勝敗画面
@@ -90,7 +91,9 @@ export function renderResult(){
   c.result='normal';
   syncScreenHash(sessionHash(c),true);
   const total=c.list.length-(c.startIndex||0);
-  const pctRaw=c.correct/total*100;
+  const mock=isMockExam(c);
+  const maxPoints=mock?examTotal(c):0;
+  const pctRaw=mock?c.score/maxPoints*100:c.correct/total*100;
   const pct=Math.round(pctRaw);
   let rank,msg;
   if(pct>=90){rank="S";msg="かんぺき！この調子なら赤点なんて心配なし！";}
@@ -98,6 +101,7 @@ export function renderResult(){
   else if(pct>=60){rank="B";msg="いい感じ！あと少しで安心圏。復習でつめよう。";}
   else if(pct>=40){rank="C";msg="ここからが伸びどころ。まちがえた問題を復習しよう！";}
   else{rank="D";msg="大丈夫、解説を読み直せば必ず伸びる。もう一回いこう！";}
+  if(mock)msg=pct>=80?'目標の80点相当を達成！間違えた分野を確認して仕上げよう。':'分野別の得点を見て、苦手なステージを復習してから再挑戦しよう。';
 
   // ステージクリア＆ベスト更新（復習はSRSで管理するのでプール操作は不要）
   let newlyCleared=false;
@@ -139,12 +143,13 @@ export function renderResult(){
   app().appendChild(el(`<div class="card center">
     <div class="muted">${c.title}　${c.mode==='practice'?'共有された1問の結果':c.partial?'途中から練習した問題の結果':'結果'}</div>
     <div class="rankbig">${rank}</div>
-    <div style="font-size:1.3rem;font-weight:800">正答率 ${pct}%</div>
-    <div class="muted">${c.correct} / ${total} 問正解　｜　最大コンボ ${c.maxCombo}　｜　獲得 ${c.score}点</div>
-    <div class="muted">フィーバー ${c.feverCount||0}回</div>
+    <div style="font-size:1.3rem;font-weight:800">${mock?`得点 ${c.score} / ${maxPoints}点`:`正答率 ${pct}%`}</div>
+    <div class="muted">${c.correct} / ${total} 問正解${mock?'　｜　配点どおりに採点（ボーナスなし）':`　｜　最大コンボ ${c.maxCombo}　｜　獲得 ${c.score}点`}</div>
+    ${mock?'':`<div class="muted">フィーバー ${c.feverCount||0}回</div>`}
     <div style="margin:10px 0;font-weight:700">${msg}</div>
     ${badgeHtml}
     ${wrongList}
+    ${mock?examResultHtml(c):''}
     <div class="row" style="margin-top:16px">
       <button class="btn secondary" id="retryBtn">もう一度</button>
       <button class="btn" id="homeBtn">ホームへ →</button>
@@ -167,4 +172,11 @@ export function renderResult(){
   });
 
   if(newlyCleared) setTimeout(()=>toast('🎉 ステージクリア！おつかれさま！'),400);
+}
+
+export function examResultHtml(c){
+  const wrong=new Set(c.wrongThisRun.map(q=>q._key));
+  return `<section style="text-align:left"><h2>分野別の得点と復習</h2>
+    <ul>${examBreakdown(c).map(g=>`<li>${escapeHtml(g.title)}：${g.earned} / ${g.total}点${g.earned<g.total&&QUESTIONS[g.sourceStage]?`　<a href="#/stage/${encodeURIComponent(g.sourceStage)}/1">この分野を復習</a>`:''}</li>`).join('')}</ul>
+    <h2>正解と解説</h2>${c.list.slice(c.startIndex||0).map((q,i)=>`<details><summary>問${i+1}　${wrong.has(q._key)?'×':'○'}　${wrong.has(q._key)?0:q.points} / ${q.points}点　${escapeHtml(q.q)}</summary><p>正解：${escapeHtml(examAnswer(q))}</p><p>${escapeHtml(q.exp)}</p></details>`).join('')}</section>`;
 }

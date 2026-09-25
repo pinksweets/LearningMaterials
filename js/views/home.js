@@ -31,7 +31,7 @@ export function testPrepCategories(today=todayStr()){
     {subject:septemberSubject(),title:'9/11 小テスト対策',date:'2026-09-11',added:1,range:'英語｜p.42〜47・No.103〜122'},
     {subject:september15Subject(),title:'9/15 英語小テスト対策',date:'2026-09-15',added:2,range:'英語｜p.48〜53・No.123〜142'},
     {subject:'📅 9/16 実力テスト対策',title:'9/16 実力テスト対策',date:'2026-09-16',added:3,range:'国語・数学・英語｜各50問・写真の範囲を練習'},
-    {subject:'🧪 化学基礎',title:'10/13〜19 中間テスト対策｜化学',date:'2026-10-13',endDate:'2026-10-19',added:4,keepSubject:true,href:subjectHash('🧪 化学基礎'),range:'ニューサポート 新編化学基礎｜第7・8・9・11節｜80問'}
+    {subject:'🧪 化学基礎',title:'10/13〜19 中間テスト対策｜化学',date:'2026-10-13',endDate:'2026-10-19',added:4,keepSubject:true,href:subjectHash('🧪 化学基礎'),range:'ニューサポート 新編化学基礎｜第7・8・9・11節｜練習80問＋模擬34問・100点'}
   ].sort((a,b)=>b.added-a.added).map(item=>({...item,past:(item.endDate||item.date)<today,status:(item.endDate||item.date)<today?'過去のテスト':item.endDate&&item.date<=today?'テスト期間中':item.date===today?'今日のテスト':'これからのテスト'}));
 }
 export function renderTestPrepPanel(today=todayStr()){

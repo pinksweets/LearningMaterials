@@ -115,6 +115,10 @@ export function renderSubjectHome(subject){
     <h1>${escapeHtml(subject)}</h1>
     ${resumePanel(subject)}
     <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">${september16?'← テスト対策へ':'← 教科選択へ'}</button>
+    ${subject==='🧪 化学基礎'?`<section class="sepPlan"><strong>10/13〜19 中間テスト｜模擬テストカリキュラム</strong>
+      <ol><li>基礎固め：第7・8節の4ステージ40問で、組成式と電子対を練習。</li><li>範囲を仕上げる：第9・11節の4ステージ40問で、分子の形と結晶の性質を確認。</li><li>力試し：模擬テスト34問・100点満点。2点×10問、3点×16問、4点×8問。目安40分を自分で計って解こう。</li><li>振り返り：結果の分野別得点から復習し、翌日もう一度挑戦。目標は80点、最後は全分野の取りこぼしをなくそう。</li></ol>
+      <p>模擬テストは練習問題から選んだ復習用。正解・解説は最後にまとめて確認できるよ。学校の実際の配点・出題を予想するものではないよ。</p>
+      <a class="btn" href="#/stage/ch1mock1/1">100点満点の模擬テストを始める</a></section>`:''}
     ${september16?`<div class="sepPlan"><strong>9月16日｜国語・数学・英語の実力テスト</strong>
       <p>本番はBenesseの問題。ここでは、もらった写真の学習範囲に沿うオリジナル問題を練習するよ。Benesseの公式問題・本番の予想問題ではないよ。</p>
       <p>各教科5ステージ×10問。まずは①から、苦手なところは解説を読んでもう一度。国語・英語の読解本文もここで読めるよ。</p>
@@ -124,7 +128,7 @@ export function renderSubjectHome(subject){
         <span class="chip">クリア <span class="em">${cleared}/${total}</span></span>
       </div>
       ${leapDailyHtml}
-      <div class="muted">好きなステージからいつでも始められるよ。1問ごとに解説が出るよ。</div>
+      <div class="muted">好きなステージからいつでも始められるよ。通常練習は1問ごと、模擬テストは最後に解説が出るよ。</div>
       ${leapIntro}
       ${groupControlsHtml}
       ${stagesHtml}

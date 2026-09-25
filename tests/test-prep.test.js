@@ -27,7 +27,7 @@ test('中間テストは期間の最終日まで開催中で、化学の教科�
   assert.equal(first('2026-10-20').past,true);
   assert.equal(first('2026-10-20').status,'過去のテスト');
   assert.equal(first('2026-09-25').keepSubject,true);
-  assert.equal(stagesOfSubject(first('2026-09-25').subject).length,8);
+  assert.equal(stagesOfSubject(first('2026-09-25').subject).length,9);
   assert.ok(renderTestPrepPanel('2026-09-25').includes(`href="${first('2026-09-25').href}"`));
 });
 test('過去のカテゴリも選択可能で、9/11の既存単元IDを維持する',()=>{
