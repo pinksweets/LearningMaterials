@@ -158,7 +158,7 @@ export function renderQuestion(){
       <button class="btn" id="nenpyoCheck">こたえ合わせ</button>`;
   } else if(useInputMode){
     body=`<div class="qtext">${q.q}</div>
-      ${q.chemicalFormula?'<p class="muted">数字は普通に入力してOK（例：H2O、Ca2+）。大文字・小文字を区別しよう。</p>':''}
+      ${q.chemicalFormula?'<p class="muted">下付き・上付きの数字も普通の数字で入力してOK。電荷の符号は末尾に書こう。大文字・小文字を区別するよ。</p>':''}
       <div class="inputWrap">
         <input type="text" id="inputAns" placeholder="こたえを入力…" autocomplete="off" ${q.chemicalFormula?'autocapitalize="off" spellcheck="false"':''}>
       </div>
