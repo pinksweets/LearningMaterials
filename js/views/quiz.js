@@ -1,5 +1,5 @@
 import { shuffle, el, app, toast, escapeHtml } from "../utils.js";
-import { normalizeAnswer, isAnswerMatch, isAnyAnswerMatch } from "../answers.js";
+import { normalizeAnswer, isAnswerMatch, isAnyAnswerMatch, isChemicalFormulaMatch } from "../answers.js";
 import { stopTimer, startTimer, timeLimitFor } from "../timer.js";
 import { FEVER_BONUS, initRewardProgress, applyFeverProgress, rewardHudHtml } from "../fever.js";
 import { QUESTIONS } from "../content.js";
@@ -158,8 +158,9 @@ export function renderQuestion(){
       <button class="btn" id="nenpyoCheck">こたえ合わせ</button>`;
   } else if(useInputMode){
     body=`<div class="qtext">${q.q}</div>
+      ${q.chemicalFormula?'<p class="muted">数字は普通に入力してOK（例：H2O、Ca2+）。大文字・小文字を区別しよう。</p>':''}
       <div class="inputWrap">
-        <input type="text" id="inputAns" placeholder="こたえを入力…" autocomplete="off">
+        <input type="text" id="inputAns" placeholder="こたえを入力…" autocomplete="off" ${q.chemicalFormula?'autocapitalize="off" spellcheck="false"':''}>
       </div>
       <button class="btn" id="inputCheck">こたえる</button>
       ${q.forceInput?'':'<button class="fallbackLink" id="fallbackToChoice">選択肢を見る</button>'}`;
@@ -416,7 +417,7 @@ export function checkInput(q){
   stopTimer();
   const correctText=q.choices[q.a];
   const accepted=[correctText,...(q.accept||[])];
-  const isCorrect=q.forceInput
+  const isCorrect=q.chemicalFormula ? isChemicalFormulaMatch(val,accepted) : q.forceInput
     ? accepted.some(answer=>normalizeAnswer(val)===normalizeAnswer(answer))
     : isAnyAnswerMatch(val,accepted);
   inputEl.disabled=true;

@@ -31,3 +31,10 @@ export function isAnyAnswerMatch(input, answers){
   const list=Array.isArray(answers)?answers:[answers];
   return list.some(a=>isAnswerMatch(input,a));
 }
+
+// 化学式だけに適用。元素記号の大小文字を保ち、普通の数字と上付き・下付き数字を許容する。
+export function isChemicalFormulaMatch(input, answers){
+  const normalize=value=>String(value??'').normalize('NFKC').replace(/\s/g,'').replace(/[−－]/g,'-');
+  const value=normalize(input);
+  return value!=='' && answers.some(answer=>value===normalize(answer));
+}

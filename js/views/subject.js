@@ -115,7 +115,13 @@ export function renderSubjectHome(subject){
     <h1>${escapeHtml(subject)}</h1>
     ${resumePanel(subject)}
     <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">${september16?'← テスト対策へ':'← 教科選択へ'}</button>
-    ${subject==='🧪 化学基礎'?`<section class="sepPlan"><strong>10/13〜19 中間テスト｜模擬テストカリキュラム</strong>
+    ${subject==='🧪 化学基礎'?`<section class="sepPlan"><strong>化学式が苦手なら｜1日10分・6問から</strong>
+      <p>最初は「まず まなぶ」で確認してから、説明を閉じて入力しよう。時間制限はないよ。H2OやCa(OH)2のように普通の数字で入力できるよ。</p>
+      <ol><li><a href="#/stage/ch1f1/1">① 基本分子</a>：名前・式・形をセットで覚える。</li><li><a href="#/stage/ch1f2/1">② イオン式</a>：元素記号・個数・電荷を区別する。</li><li><a href="#/stage/ch1f3/1">③ 電荷を合わせる</a>：合計0になる個数を考える。</li><li><a href="#/stage/ch1f4/1">④ 括弧のある式</a>：イオンのまとまりを保って書く。</li><li><a href="#/stage/ch1f5/1">⑤ ミニテスト</a>：6問・20点満点で確認。解説は最後だよ。</li></ol>
+      <p>毎日10分の目安：前日の式を見ずに書く2分 → 新しい式を学ぶ3分 → 入力して答え合わせ3分 → 間違えた式を紙に書き直す2分。</p>
+      <p>翌日・3日後・1週間後を目安に同じステージへ戻ろう。「今日の復習」も使えるよ。翌日も何も見ずに書けたら一歩前進！ ミニテストで間違えた分野を復習したら、下の100点模擬テストへ進もう。</p>
+      <button class="btn" data-lesson="ch1f1" type="button">基本分子4つから まなぶ</button>
+      </section><section class="sepPlan"><strong>10/13〜19 中間テスト｜模擬テストカリキュラム</strong>
       <ol><li>基礎固め：第7・8節の4ステージ40問で、組成式と電子対を練習。</li><li>範囲を仕上げる：第9・11節の4ステージ40問で、分子の形と結晶の性質を確認。</li><li>力試し：模擬テスト34問・100点満点。2点×10問、3点×16問、4点×8問。目安40分を自分で計って解こう。</li><li>振り返り：結果の分野別得点から復習し、翌日もう一度挑戦。目標は80点、最後は全分野の取りこぼしをなくそう。</li></ol>
       <p>模擬テストは練習問題から選んだ復習用。正解・解説は最後にまとめて確認できるよ。学校の実際の配点・出題を予想するものではないよ。</p>
       <a class="btn" href="#/stage/ch1mock1/1">100点満点の模擬テストを始める</a></section>`:''}
