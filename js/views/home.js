@@ -1,5 +1,6 @@
 import { el, app, toast, escapeAttr, escapeHtml, todayStr, addDays, syncScreenHash, subjectHash } from "../utils.js";
 import { stopTimer } from "../timer.js";
+import { appendReportingSettings } from './reporting.js';
 import { stopBossTension, stopSpeech, playAnswerSound, BGM, startYouTubeBgm, stopYouTubeBgm } from "../audio.js";
 import {
   DAILY_GOAL_OPTIONS,
@@ -214,6 +215,7 @@ export function renderHome(){
     </div>
   </div>`));
 
+  appendReportingSettings();
   document.querySelectorAll('.subjectCard').forEach(node=>{
     node.addEventListener('click',()=>renderSubjectHome(node.dataset.subject));
   });

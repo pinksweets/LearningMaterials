@@ -10,6 +10,7 @@ import { renderSeptember15Home, startSeptember15Review } from "./september15.js"
 import { renderSeptemberHome, startSeptemberReview } from "./september.js";
 import { syncScreenHash } from '../utils.js';
 import { sessionHash } from '../session.js';
+import { reportCompletion, appendReportingStatus } from './reporting.js';
 import { isMockExam, examTotal, examBreakdown, examAnswer } from '../mock-exam.js';
 
 /* ============================================================
@@ -22,6 +23,7 @@ export function renderBossDefeat(){
   playBossResultSound(false);
   const c=state.cur;
   c.result='defeat';
+  reportCompletion(c);
   syncScreenHash(sessionHash(c),true);
   save();
   app().innerHTML="";
@@ -37,6 +39,7 @@ export function renderBossDefeat(){
     </div>
   </div>`));
   // 追加機能（教科選択ファースト化）：ボス戦は必ず特定教科のステージなので、直前の教科ホームへ戻る
+  appendReportingStatus(c);
   document.getElementById('homeBtn').addEventListener('click',()=>renderSubjectHome(QUESTIONS[c.sid].subject));
   document.getElementById('retryBtn').addEventListener('click',()=>startBoss(c.sid));
 }
@@ -47,6 +50,7 @@ export function renderBossVictory(){
   playBossResultSound(true);
   const c=state.cur;
   c.result='victory';
+  reportCompletion(c);
   syncScreenHash(sessionHash(c),true);
   if(!c.resultApplied)state.totalScore += c.score;
   c.resultApplied=true;
@@ -75,6 +79,7 @@ export function renderBossVictory(){
     </div>
   </div>`));
   // 追加機能（教科選択ファースト化）：ボス戦は必ず特定教科のステージなので、直前の教科ホームへ戻る
+  appendReportingStatus(c);
   document.getElementById('homeBtn').addEventListener('click',()=>renderSubjectHome(QUESTIONS[c.sid].subject));
   document.getElementById('retryBtn').addEventListener('click',()=>startBoss(c.sid));
   setTimeout(()=>toast('🎉🏆 '+badgeName+'！おめでとう！'),400);
@@ -89,6 +94,7 @@ export function renderResult(){
   stopSpeech();
   const c=state.cur;
   c.result='normal';
+  reportCompletion(c);
   syncScreenHash(sessionHash(c),true);
   const total=c.list.length-(c.startIndex||0);
   const mock=isMockExam(c);
@@ -157,6 +163,7 @@ export function renderResult(){
   </div>`));
 
   // 追加機能（教科選択ファースト化）：stageモードは直前の教科ホームへ、reviewモード（教科横断）は教科選択へ戻る
+  appendReportingStatus(c);
   document.getElementById('homeBtn').addEventListener('click',()=>{
     if(c.september15Review){renderSeptember15Home(true);return;}
     if(c.septemberReview){renderSeptemberHome(true);return;}

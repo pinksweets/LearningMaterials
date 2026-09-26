@@ -6,6 +6,8 @@ export function snapshotSession(c){
   const fields=['sid','mode','title','i','startIndex','correct','combo','maxCombo','score','feverGauge','feverLeft','feverCount','weakHits','lives','bossHP','bossMaxHP','bossName','septemberReview','september15Review','_forceChoice','_timeLeft','_timeLimit','result','resultApplied','partial'];
   const out={version:1, keys:c.list.map(q=>q._key), wrongKeys:(c.wrongThisRun||[]).map(q=>q._key)};
   for(const field of fields)if(c[field]!==undefined)out[field]=c[field];
+  if(c.reportId)out.reportId=c.reportId;
+  if(c.reportQueued)out.reportQueued=true;
   out.draft=c.draft || [];
   out.choiceOrder=c.choiceOrder || null;
   out._nenpyoOrder=c._nenpyoOrder || null;

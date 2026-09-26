@@ -418,3 +418,9 @@ a.link{color:var(--accent2);}
 .lessonPeek{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:0 12px;}
 .lessonPeek summary{padding:10px 0;cursor:pointer;color:var(--accent2);font-size:.9rem;}
 .lessonPeek .lessonCard{margin:8px 0 12px;}
+/* 学習実績の送信設定 */
+.reportSettings summary{cursor:pointer;font-weight:700;}
+.reportSettings input[type="url"],.reportSettings input[name="learner"]{display:block;box-sizing:border-box;width:100%;margin-top:6px;padding:10px 12px;border:1px solid #555b80;border-radius:8px;background:#15182e;color:#fff;font:inherit;}
+.reportSettings form p{margin:14px 0;}
+.reportSettings button{margin:4px 6px 4px 0;}
+.reportSettings input[type="checkbox"]{width:18px;height:18px;vertical-align:middle;}

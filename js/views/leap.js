@@ -14,6 +14,7 @@ import {
 } from "../leap-study.js";
 import { stopBossTension, speakEnglish, stopSpeech } from "../audio.js";
 import { renderSubjectHome } from "./subject.js";
+import { reportCompletion, appendReportingStatus } from './reporting.js';
 
 export function startLeapSpeed(sid) {
   const stage=QUESTIONS[sid];
@@ -160,6 +161,7 @@ export function renderLeapSpeedResult(c) {
   stopSpeech();
   if(!c||!c.leapSession){renderSubjectHome(LEAP_BASIC_SUBJECT);return;}
   const stats=getLeapStats(c.leapSession,Date.now());
+  reportCompletion(c,stats);
   const today=leapSessionsOn();
   const complete=today>=LEAP_DAILY_TARGET;
   app().innerHTML='';
@@ -185,6 +187,7 @@ export function renderLeapSpeedResult(c) {
     </div>
   </div>`));
   const again=document.getElementById('leapAgainBtn');
+  appendReportingStatus(c);
   if(again)again.addEventListener('click',()=>startLeapSpeed(c.sid));
   const home=document.getElementById('leapHomeBtn');
   if(home)home.addEventListener('click',()=>renderSubjectHome(LEAP_BASIC_SUBJECT));

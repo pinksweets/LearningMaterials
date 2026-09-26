@@ -434,3 +434,8 @@ localStorage.removeItem('rekishi-quest-v1')
 ```
 
 実行後、ページを再読み込みすると初期状態から始まります。
+# 学習実績の自動送信
+
+ステージ・復習・ボス戦・LEAPの完了実績を、Google Apps Script経由でスプレッドシートに記録できます。初期状態はOFFです。ホーム末尾の「学習実績の自動送信」で学習者コードを設定します。送信先は `js/reporting.js` の `REPORT_ENDPOINT` に固定しており、変更はソースから行います。
+
+受信スクリプトと導入・確認手順は [integrations/google-apps-script/README.md](integrations/google-apps-script/README.md) を参照してください。教材の配信は従来どおり静的で、実績収集部分だけに外部処理を使います。

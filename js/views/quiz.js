@@ -9,6 +9,7 @@ import { playAnswerSound, speakEnglish, syncBossTension, stopBossTension, stopSp
 import { renderHome } from "./home.js";
 import { renderSubjectHome } from "./subject.js";
 import { renderResult, renderBossDefeat, renderBossVictory } from "./results.js";
+import { reportCompletion } from './reporting.js';
 import { renderSeptember15Home } from "./september15.js";
 import { renderSeptemberHome } from "./september.js";
 import { syncScreenHash, subjectHash } from '../utils.js';
@@ -657,6 +658,8 @@ export function finishQuestion(isCorrect,q,opts){
     if(c.bossHP<=0){ renderBossVictory(); return; }
   }
 
+  // Queue the completed set immediately, even before the learner presses 結果を見る.
+  if(c.mode!=='boss' && c.i===c.list.length-1)reportCompletion(c);
   renderSavedAnswer(q,true);
 }
 

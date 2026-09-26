@@ -16,6 +16,8 @@ import { renderCollection } from './views/collection.js';
 import { stopLeapClock } from './views/leap.js';
 import { stopTimer } from './timer.js';
 import { stopSpeech, stopBossTension } from './audio.js';
+import { flushReports } from './reporting.js';
+import { updateReportingStatus } from './views/reporting.js';
 
 export function renderUrlScreen(initial=false){
   const hash=window.location.hash;
@@ -73,6 +75,12 @@ export function renderUrlScreen(initial=false){
 
 document.addEventListener('DOMContentLoaded', function () {
   load();
+  window.addEventListener('reportingchange',updateReportingStatus);
+  window.addEventListener('online',()=>{void flushReports();});
+  window.addEventListener('storage',updateReportingStatus);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)void flushReports();});
+  setInterval(()=>{if(!document.hidden)void flushReports();},60000);
+  void flushReports();
   touchStreak();
   renderUrlScreen(true);
   window.history.scrollRestoration='manual';
