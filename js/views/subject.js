@@ -115,6 +115,12 @@ export function renderSubjectHome(subject){
     <h1>${escapeHtml(subject)}</h1>
     ${resumePanel(subject)}
     <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">${september16?'← テスト対策へ':'← 教科選択へ'}</button>
+    ${subject==='📜 歴史総合'?`<section class="sepPlan"><strong>10/13〜19 中間テスト｜歴史の学習プラン</strong>
+      <ol><li>基礎を確認：36「世界恐慌」・37「ファシズム・軍部の台頭」を各15問。</li><li>流れを整理：38「対外侵略と国際秩序」・39「日中戦争の開始」を各15問。</li><li>力試し：復習模擬テスト34問・100点。目安35分を自分で計ろう。目標は80点。</li><li>結果の分野別得点から苦手を復習し、翌日にもう一度挑戦しよう。</li></ol>
+      <p>模擬は練習から選んだ復習用。各分野25点、1問2〜4点で、正解と解説は最後に出るよ。学校の実際の出題・配点ではないよ。</p>
+      <p>写真の項目36〜39に対応。39は日中戦争までを収録し、写っていない国内の戦時体制は含めていないよ。</p>
+      <a class="btn secondary" href="#/stage/h26s1/1">36 世界恐慌から練習する</a>
+      <a class="btn" href="#/stage/h26mock1/1">歴史の100点模擬テストを始める</a></section>`:''}
     ${subject==='🧪 化学基礎'?`<section class="sepPlan"><strong>化学式が苦手なら｜1日10分・6問から</strong>
       <p>最初は「まず まなぶ」で確認してから、説明を閉じて入力しよう。時間制限はないよ。H2OやCa(OH)2のように普通の数字で入力できるよ。</p>
       <ol><li><a href="#/stage/ch1f1/1">① 基本分子</a>：名前・式・形をセットで覚える。</li><li><a href="#/stage/ch1f2/1">② イオン式</a>：元素記号・個数・電荷を区別する。</li><li><a href="#/stage/ch1f3/1">③ 電荷を合わせる</a>：合計0になる個数を考える。</li><li><a href="#/stage/ch1f4/1">④ 括弧のある式</a>：イオンのまとまりを保って書く。</li><li><a href="#/stage/ch1f5/1">⑤ ミニテスト</a>：6問・20点満点で確認。解説は最後だよ。</li></ol>

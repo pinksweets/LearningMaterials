@@ -18,7 +18,7 @@ test('テスト対策は追加順の降順、当日は過去扱いにしない',
   assert.ok(testPrepCategories('2027-01-01').every(c=>c.past));
 });
 test('中間テストは期間の最終日まで開催中で、化学の教科へ移動できる',()=>{
-  const first=date=>testPrepCategories(date)[0];
+  const first=date=>testPrepCategories(date).find(c=>c.subject==='🧪 化学基礎');
   assert.equal(first('2026-10-12').status,'これからのテスト');
   for(const date of ['2026-10-13','2026-10-16','2026-10-19']){
     assert.equal(first(date).status,'テスト期間中');
