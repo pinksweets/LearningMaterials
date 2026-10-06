@@ -35,8 +35,10 @@ import * as chFormula from "./ch1_formula.js";
 
 import * as h26 from './h26_midterm.js';
 import * as h26Mock from './h26_mock.js';
+import * as e26 from './e26_midterm.js';
+import * as e26Mock from './e26_mock.js';
 
-const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5, lbq, sep, sep15, sep16Ja, sep16Ma, sep16En, njz, ecz, ch1, chMock, chFormula, h26, h26Mock];
+const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5, lbq, sep, sep15, sep16Ja, sep16Ma, sep16En, njz, ecz, ch1, chMock, chFormula, h26, h26Mock, e26, e26Mock];
 
 /* 全単元（登録順） */
 export const units = MODULES.flatMap(m => m.units);
