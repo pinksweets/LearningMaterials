@@ -29,6 +29,7 @@ import { september15Subject } from "./september15.js";
 export function testPrepCategories(today=todayStr()){
   // 追加順を明示し、新しく追加した対策から表示する。日付は年も固定する。
   return [
+    {subject:'⚡ 中間テスト電気回路',title:'10/13〜19 中間テスト対策｜電気回路',date:'2026-10-13',endDate:'2026-10-19',added:7,href:subjectHash('⚡ 中間テスト電気回路'),range:'ジュールの法則・電子レンジ・計算プリント｜練習66問＋模擬34問・100点'},
     {subject:'🇬🇧 中間テスト英語',title:'10/13〜19 中間テスト対策｜英語',date:'2026-10-13',endDate:'2026-10-19',added:6,href:subjectHash('🇬🇧 中間テスト英語'),range:'教科書6ページ＋プリント40項目｜基礎100問＋模擬34問・100点'},
     {subject:septemberSubject(),title:'9/11 小テスト対策',date:'2026-09-11',added:1,range:'英語｜p.42〜47・No.103〜122'},
     {subject:september15Subject(),title:'9/15 英語小テスト対策',date:'2026-09-15',added:2,range:'英語｜p.48〜53・No.123〜142'},
