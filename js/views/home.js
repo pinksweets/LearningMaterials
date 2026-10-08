@@ -33,16 +33,17 @@ export function testPrepCategories(today=todayStr()){
     {subject:'🧬 生物基礎 visual',title:'10/13〜19 中間テスト対策｜生物基礎',date:'2026-10-13',endDate:'2026-10-19',added:8,keepSubject:true,href:subjectHash('🧬 生物基礎 visual'),range:'p.80〜89｜体内環境・体液・循環・肝臓・腎臓｜図解付き60問'},
     {subject:'⚡ 中間テスト電気回路',title:'10/13〜19 中間テスト対策｜電気回路',date:'2026-10-13',endDate:'2026-10-19',added:7,href:subjectHash('⚡ 中間テスト電気回路'),range:'電力と熱・抵抗率・電池・計算｜練習126問＋模擬2回・各100点'},
     {subject:'🇬🇧 中間テスト英語',title:'10/13〜19 中間テスト対策｜英語',date:'2026-10-13',endDate:'2026-10-19',added:6,href:subjectHash('🇬🇧 中間テスト英語'),range:'教科書6ページ＋プリント40項目｜基礎100問＋模擬34問・100点'},
-    {subject:septemberSubject(),title:'9/11 小テスト対策',date:'2026-09-11',added:1,range:'英語｜p.42〜47・No.103〜122'},
-    {subject:september15Subject(),title:'9/15 英語小テスト対策',date:'2026-09-15',added:2,range:'英語｜p.48〜53・No.123〜142'},
-    {subject:'📅 9/16 実力テスト対策',title:'9/16 実力テスト対策',date:'2026-09-16',added:3,range:'国語・数学・英語｜各50問・写真の範囲を練習'},
+    {subject:septemberSubject(),title:'9/11 小テスト対策',date:'2026-09-11',added:1,hidden:true,range:'英語｜p.42〜47・No.103〜122'},
+    {subject:september15Subject(),title:'9/15 英語小テスト対策',date:'2026-09-15',added:2,hidden:true,range:'英語｜p.48〜53・No.123〜142'},
+    {subject:'📅 9/16 実力テスト対策',title:'9/16 実力テスト対策',date:'2026-09-16',added:3,hidden:true,range:'国語・数学・英語｜各50問・写真の範囲を練習'},
     {subject:'📜 歴史総合',title:'10/13〜19 中間テスト対策｜歴史',date:'2026-10-13',endDate:'2026-10-19',added:5,keepSubject:true,href:subjectHash('📜 歴史総合'),range:'項目36〜39｜世界恐慌〜日中戦争｜練習60問＋模擬34問・100点'},
     {subject:'🧪 化学基礎',title:'10/13〜19 中間テスト対策｜化学',date:'2026-10-13',endDate:'2026-10-19',added:4,keepSubject:true,href:subjectHash('🧪 化学基礎'),range:'ニューサポート 新編化学基礎｜第7・8・9・11節｜練習80問＋模擬34問・100点'}
   ].sort((a,b)=>b.added-a.added).map(item=>({...item,past:(item.endDate||item.date)<today,status:(item.endDate||item.date)<today?'過去のテスト':item.endDate&&item.date<=today?'テスト期間中':item.date===today?'今日のテスト':'これからのテスト'}));
 }
 export function renderTestPrepPanel(today=todayStr()){
   // 既定は閉じた状態（<details>）。クリックで開く。開閉状態は保存しない（毎回閉じて始まる）。
-  const items=testPrepCategories(today);
+  // 非表示の対策も登録は残し、通常の教科カードへ再表示されるのを防ぐ。
+  const items=testPrepCategories(today).filter(item=>!item.hidden);
   return `<details class="testPrepPanel"><summary id="testPrepHeading"><span>📅 テスト対策</span><span class="testPrepToggle">${items.length}件　</span></summary>
     <p class="muted">受けるテストを選んでね。新しく追加した対策から並んでいるよ。</p>
     <div class="testPrepCategories">${items.map(item=>{
