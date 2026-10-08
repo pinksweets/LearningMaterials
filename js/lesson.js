@@ -3,6 +3,7 @@
    単元の lesson は「①たとえ話 ②式と単位 ③よくある勘違い」の3枚固定を運用ルールとする。 */
 import { escapeHtml } from './utils.js';
 import { mathText, graphSvg } from './math-display.js';
+import { bioDiagram } from './bio-display.js';
 
 export const LESSON_CARD_COUNT = 3;
 export const LESSON_KINDS = ['たとえ話', '式と単位', 'よくある勘違い'];
@@ -18,8 +19,8 @@ export function lessonBodyHtml(body, options={}){
 }
 
 export function lessonCardHtml(card, index, options={}){
-  const kind = LESSON_KINDS[index] || '';
-  const figure = card.graph ? graphSvg(card.graph, card.graphStep ?? 2) : '';
+  const kind = card.kind || LESSON_KINDS[index] || '';
+  const figure = (card.graph ? graphSvg(card.graph, card.graphStep ?? 2) : '') + bioDiagram(card.diagram);
   const formula = card.formula ? `<div class="lessonFormula">${options.math?mathText(card.formula):escapeHtml(card.formula)}</div>` : '';
   return `<article class="lessonCard" data-lesson-card="${index}">
     <div class="lessonKind">${index+1}/${LESSON_CARD_COUNT}　${escapeHtml(kind)}</div>

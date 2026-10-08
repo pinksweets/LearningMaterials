@@ -418,6 +418,12 @@ a.link{color:var(--accent2);}
 .lessonPeek{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:0 12px;}
 .lessonPeek summary{padding:10px 0;cursor:pointer;color:var(--accent2);font-size:.9rem;}
 .lessonPeek .lessonCard{margin:8px 0 12px;}
+/* 図の意味は色に加えて、文字と矢印でも伝える。 */
+.bioFigure{margin:14px 0;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--panel);}
+.bioFigure svg{display:block;width:100%;max-width:600px;height:auto;margin:auto;}
+.bioFigure figcaption{display:flex;flex-direction:column;gap:6px;margin-top:10px;line-height:1.65;}
+.bioFigure figcaption span{font-size:.85rem;color:var(--muted);}
+@media(max-width:420px){.bioFigure{padding:4px;}.bioFigure figcaption{padding:6px;}}
 /* 学習実績の送信設定 */
 .reportSettings summary{cursor:pointer;font-weight:700;}
 .reportSettings input[type="url"],.reportSettings input[name="learner"]{display:block;box-sizing:border-box;width:100%;margin-top:6px;padding:10px 12px;border:1px solid #555b80;border-radius:8px;background:#15182e;color:#fff;font:inherit;}

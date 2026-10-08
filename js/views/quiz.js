@@ -16,6 +16,7 @@ import { syncScreenHash, subjectHash } from '../utils.js';
 import { sessionHash, restoreSession } from '../session.js';
 import { isVisualMath, mathText, mathVisual, quadraticSpec, graphSvg, numberLine } from '../math-display.js';
 import { hasLesson, lessonCardsHtml } from '../lesson.js';
+import { bioDiagram } from '../bio-display.js';
 import { isMockExam, examTotal, examAward, examNumericMatch } from '../mock-exam.js';
 
 /* ============================================================
@@ -208,7 +209,7 @@ export function renderQuestion(){
   const hintHtml = q.hint && !mock ? `<button class="fallbackLink" id="hintBtn" type="button">💡 ヒント</button>
     <div class="muted" id="hintText" style="display:none;margin-top:6px"></div>` : "";
 
-  body=body.replaceAll(`<div class="qtext">${q.q}</div>`,`<div class="qtext">${text(q.q)}</div>${mathVisual(q._key)}`);
+  body=body.replaceAll(`<div class="qtext">${q.q}</div>`,`<div class="qtext">${text(q.q)}</div>${mathVisual(q._key)}${bioDiagram(q.diagram)}`);
   const subject=QUESTIONS[sourceSid]?.subject;
   // まなぶ→とく：レッスン付き単元では問題の途中でもカードを読み返せる（減点なし・遷移なし）
   const stageInfo=QUESTIONS[sourceSid];
@@ -687,6 +688,8 @@ export function renderSavedAnswer(q,keepFeedback=false){
   if(keepFeedback && !isVisualMath(q._key)){
     // The original speech prompt and reward detail stay visible on first grading.
   }else fb.innerHTML=`<div class="head">${c.answer.correct?'⭕ 正解！':c.answer.timeUp?'⏰ 時間切れ。解説を確認しよう':'もう一度、考え方を確認しよう'}</div><div class="exp">${explanation}</div>${c.answer.correctText?`<p>正解：${isVisualMath(q._key)?mathText(c.answer.correctText):escapeHtml(c.answer.correctText)}</p>`:''}${mathVisual(q._key,true)}`;
+  // 回答後・途中保存からの復元の両方で図を表示。模擬中には答えを出さない。
+  if(!isMockExam(c) && q.studyDiagram && !fb.innerHTML.includes('data-bio-diagram='))fb.innerHTML+=bioDiagram(q.studyDiagram);
   const score=document.getElementById('quizScore'),combo=document.getElementById('quizCombo');
   if(score)score.textContent=c.score;
   if(combo)combo.textContent='🔥 '+c.combo;
