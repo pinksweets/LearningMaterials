@@ -47,8 +47,8 @@ test('全学習カードに生物用の見出しを表示し、各ステージ�
   assert.doesNotMatch(question,/組織液|リンパ液|血しょう/); // 代替テキストにも正解を含めない。
 });
 
-test('テスト対策に最新追加の生物を掲載、10/19まで期間中として扱う',()=>{
-  const first=date=>testPrepCategories(date)[0];
+test('テスト対策に生物を掲載、10/19まで期間中として扱う',()=>{
+  const first=date=>testPrepCategories(date).find(item=>item.subject===units[0].subject);
   assert.equal(first('2026-10-08').subject,units[0].subject);
   assert.equal(first('2026-10-12').status,'これからのテスト');
   for(const date of ['2026-10-13','2026-10-19'])assert.equal(first(date).status,'テスト期間中');

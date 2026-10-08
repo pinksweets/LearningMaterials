@@ -11,6 +11,7 @@ import { renderSeptemberHome, startSeptemberReview } from "./september.js";
 import { syncScreenHash } from '../utils.js';
 import { sessionHash } from '../session.js';
 import { reportCompletion, appendReportingStatus } from './reporting.js';
+import { mathADiagram } from '../ma26-display.js';
 import { isMockExam, examTotal, examBreakdown, examAnswer } from '../mock-exam.js';
 
 /* ============================================================
@@ -185,5 +186,5 @@ export function examResultHtml(c){
   const wrong=new Set(c.wrongThisRun.map(q=>q._key));
   return `<section style="text-align:left"><h2>分野別の得点と復習</h2>
     <ul>${examBreakdown(c).map(g=>`<li>${escapeHtml(g.title)}：${g.earned} / ${g.total}点${g.earned<g.total&&QUESTIONS[g.sourceStage]?`　<a href="#/stage/${encodeURIComponent(g.sourceStage)}/1">この分野を復習</a>`:''}</li>`).join('')}</ul>
-    <h2>正解と解説</h2>${c.list.slice(c.startIndex||0).map((q,i)=>`<details><summary>問${i+1}　${wrong.has(q._key)?'×':'○'}　${wrong.has(q._key)?0:q.points} / ${q.points}点　${escapeHtml(q.q)}</summary><p>正解：${escapeHtml(examAnswer(q))}</p><p>${escapeHtml(q.exp)}</p></details>`).join('')}</section>`;
+    <h2>正解と解説</h2>${c.list.slice(c.startIndex||0).map((q,i)=>`<details><summary>問${i+1}　${wrong.has(q._key)?'×':'○'}　${wrong.has(q._key)?0:q.points} / ${q.points}点　${escapeHtml(q.q)}</summary>${mathADiagram(q.maDiagram)}<p>正解：${escapeHtml(examAnswer(q))}</p><p>${escapeHtml(q.exp)}</p></details>`).join('')}</section>`;
 }

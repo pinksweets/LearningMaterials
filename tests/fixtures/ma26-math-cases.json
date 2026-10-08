@@ -1,0 +1,1372 @@
+[
+  {
+    "key": "ma26s1-0",
+    "answer": "1/3",
+    "spec": {
+      "kind": "coinDice",
+      "threshold": 3
+    }
+  },
+  {
+    "key": "ma26s1-1",
+    "answer": "1/4",
+    "spec": {
+      "kind": "coinDice",
+      "threshold": 4
+    }
+  },
+  {
+    "key": "ma26s1-2",
+    "answer": "1/6",
+    "spec": {
+      "kind": "coinDice",
+      "threshold": 5
+    }
+  },
+  {
+    "key": "ma26s1-3",
+    "answer": "1/12",
+    "spec": {
+      "kind": "coinDice",
+      "threshold": 6
+    }
+  },
+  {
+    "key": "ma26s1-4",
+    "answer": "6/25",
+    "spec": {
+      "kind": "bags",
+      "r1": 3,
+      "w1": 2,
+      "r2": 2,
+      "w2": 3,
+      "same": false
+    }
+  },
+  {
+    "key": "ma26s1-5",
+    "answer": "1/3",
+    "spec": {
+      "kind": "bags",
+      "r1": 4,
+      "w1": 2,
+      "r2": 3,
+      "w2": 3,
+      "same": false
+    }
+  },
+  {
+    "key": "ma26s1-6",
+    "answer": "26/49",
+    "spec": {
+      "kind": "bags",
+      "r1": 5,
+      "w1": 2,
+      "r2": 4,
+      "w2": 3,
+      "same": true
+    }
+  },
+  {
+    "key": "ma26s1-7",
+    "answer": "91/216",
+    "spec": {
+      "kind": "atLeastDie",
+      "n": 3
+    }
+  },
+  {
+    "key": "ma26s1-8",
+    "answer": "671/1296",
+    "spec": {
+      "kind": "atLeastDie",
+      "n": 4
+    }
+  },
+  {
+    "key": "ma26s1-9",
+    "answer": "4651/7776",
+    "spec": {
+      "kind": "atLeastDie",
+      "n": 5
+    }
+  },
+  {
+    "key": "ma26s2-0",
+    "answer": "3/8",
+    "spec": {
+      "kind": "binomial",
+      "n": 3,
+      "r": 1,
+      "sides": 2
+    }
+  },
+  {
+    "key": "ma26s2-1",
+    "answer": "3/8",
+    "spec": {
+      "kind": "binomial",
+      "n": 4,
+      "r": 2,
+      "sides": 2
+    }
+  },
+  {
+    "key": "ma26s2-2",
+    "answer": "5/16",
+    "spec": {
+      "kind": "binomial",
+      "n": 5,
+      "r": 3,
+      "sides": 2
+    }
+  },
+  {
+    "key": "ma26s2-3",
+    "answer": "15/64",
+    "spec": {
+      "kind": "binomial",
+      "n": 6,
+      "r": 4,
+      "sides": 2
+    }
+  },
+  {
+    "key": "ma26s2-4",
+    "answer": "25/216",
+    "spec": {
+      "kind": "binomial",
+      "n": 4,
+      "r": 2,
+      "sides": 6
+    }
+  },
+  {
+    "key": "ma26s2-5",
+    "answer": "1053/3125",
+    "spec": {
+      "kind": "redAtLeast",
+      "n": 5,
+      "min": 4,
+      "red": 3,
+      "sides": 5
+    }
+  },
+  {
+    "key": "ma26s2-6",
+    "answer": "2/27",
+    "spec": {
+      "kind": "nthRed",
+      "n": 4,
+      "r": 3
+    }
+  },
+  {
+    "key": "ma26s2-7",
+    "answer": "8/81",
+    "spec": {
+      "kind": "nthRed",
+      "n": 5,
+      "r": 3
+    }
+  },
+  {
+    "key": "ma26s2-8",
+    "answer": "15/64",
+    "spec": {
+      "kind": "walk",
+      "n": 6,
+      "pos": 2,
+      "neg": 1
+    }
+  },
+  {
+    "key": "ma26s2-9",
+    "answer": "5/16",
+    "spec": {
+      "kind": "walk",
+      "n": 5,
+      "pos": 2,
+      "neg": 3
+    }
+  },
+  {
+    "key": "ma26s3-0",
+    "answer": "2/5",
+    "spec": {
+      "kind": "conditionalCards",
+      "blue": 5,
+      "total": 10,
+      "reverse": false
+    }
+  },
+  {
+    "key": "ma26s3-1",
+    "answer": "1/2",
+    "spec": {
+      "kind": "conditionalCards",
+      "blue": 6,
+      "total": 11,
+      "reverse": false
+    }
+  },
+  {
+    "key": "ma26s3-2",
+    "answer": "1/2",
+    "spec": {
+      "kind": "conditionalCards",
+      "blue": 7,
+      "total": 12,
+      "reverse": true
+    }
+  },
+  {
+    "key": "ma26s3-3",
+    "answer": "2/3",
+    "spec": {
+      "kind": "conditionalCards",
+      "blue": 8,
+      "total": 13,
+      "reverse": true
+    }
+  },
+  {
+    "key": "ma26s3-4",
+    "answer": "1/2",
+    "spec": {
+      "kind": "conditionalPercent",
+      "share": 20,
+      "joint": 10
+    }
+  },
+  {
+    "key": "ma26s3-5",
+    "answer": "1/2",
+    "spec": {
+      "kind": "conditionalPercent",
+      "share": 30,
+      "joint": 15
+    }
+  },
+  {
+    "key": "ma26s3-6",
+    "answer": "1/2",
+    "spec": {
+      "kind": "conditionalPercent",
+      "share": 40,
+      "joint": 20
+    }
+  },
+  {
+    "key": "ma26s3-7",
+    "answer": "1/3",
+    "spec": {
+      "kind": "conditionalDice",
+      "min": 8
+    }
+  },
+  {
+    "key": "ma26s3-8",
+    "answer": "2/5",
+    "spec": {
+      "kind": "conditionalDice",
+      "min": 9
+    }
+  },
+  {
+    "key": "ma26s3-9",
+    "answer": "1/2",
+    "spec": {
+      "kind": "conditionalDice",
+      "min": 10
+    }
+  },
+  {
+    "key": "ma26s4-0",
+    "answer": "1/15",
+    "spec": {
+      "kind": "lottery",
+      "n": 10,
+      "r": 3,
+      "event": "both"
+    }
+  },
+  {
+    "key": "ma26s4-1",
+    "answer": "14/55",
+    "spec": {
+      "kind": "lottery",
+      "n": 11,
+      "r": 4,
+      "event": "firstOnly"
+    }
+  },
+  {
+    "key": "ma26s4-2",
+    "answer": "35/132",
+    "spec": {
+      "kind": "lottery",
+      "n": 12,
+      "r": 5,
+      "event": "secondOnly"
+    }
+  },
+  {
+    "key": "ma26s4-3",
+    "answer": "7/26",
+    "spec": {
+      "kind": "lottery",
+      "n": 13,
+      "r": 6,
+      "event": "neither"
+    }
+  },
+  {
+    "key": "ma26s4-4",
+    "answer": "1/2",
+    "spec": {
+      "kind": "lottery",
+      "n": 14,
+      "r": 7,
+      "event": "second"
+    }
+  },
+  {
+    "key": "ma26s4-5",
+    "answer": "5/39",
+    "spec": {
+      "kind": "lottery",
+      "n": 13,
+      "r": 5,
+      "event": "both"
+    }
+  },
+  {
+    "key": "ma26s4-6",
+    "answer": "45/182",
+    "spec": {
+      "kind": "lottery",
+      "n": 14,
+      "r": 5,
+      "event": "firstOnly"
+    }
+  },
+  {
+    "key": "ma26s4-7",
+    "answer": "5/21",
+    "spec": {
+      "kind": "lottery",
+      "n": 15,
+      "r": 5,
+      "event": "secondOnly"
+    }
+  },
+  {
+    "key": "ma26s4-8",
+    "answer": "11/24",
+    "spec": {
+      "kind": "lottery",
+      "n": 16,
+      "r": 5,
+      "event": "neither"
+    }
+  },
+  {
+    "key": "ma26s4-9",
+    "answer": "5/17",
+    "spec": {
+      "kind": "lottery",
+      "n": 17,
+      "r": 5,
+      "event": "second"
+    }
+  },
+  {
+    "key": "ma26s5-0",
+    "answer": "3.5",
+    "spec": {
+      "kind": "diceExpectation",
+      "n": 1
+    }
+  },
+  {
+    "key": "ma26s5-1",
+    "answer": "7",
+    "spec": {
+      "kind": "diceExpectation",
+      "n": 2
+    }
+  },
+  {
+    "key": "ma26s5-2",
+    "answer": "10.5",
+    "spec": {
+      "kind": "diceExpectation",
+      "n": 3
+    }
+  },
+  {
+    "key": "ma26s5-3",
+    "answer": "100/3",
+    "spec": {
+      "kind": "weightedCards"
+    }
+  },
+  {
+    "key": "ma26s5-4",
+    "answer": "-10",
+    "spec": {
+      "kind": "coinProfit",
+      "n": 4,
+      "fee": 110
+    }
+  },
+  {
+    "key": "ma26s5-5",
+    "answer": "-50",
+    "spec": {
+      "kind": "ballProfit",
+      "red": 2,
+      "white": 4,
+      "k": 3,
+      "reward": 100,
+      "fee": 150
+    }
+  },
+  {
+    "key": "ma26s5-6",
+    "answer": "-10",
+    "spec": {
+      "kind": "ballProfit",
+      "red": 3,
+      "white": 3,
+      "k": 3,
+      "reward": 100,
+      "fee": 160
+    }
+  },
+  {
+    "key": "ma26s5-7",
+    "answer": "36",
+    "spec": {
+      "kind": "prizes",
+      "n": 100,
+      "prizes": [
+        [
+          1000,
+          2
+        ],
+        [
+          200,
+          8
+        ],
+        [
+          0,
+          90
+        ]
+      ]
+    }
+  },
+  {
+    "key": "ma26s5-8",
+    "answer": "50",
+    "spec": {
+      "kind": "compareDice",
+      "scale": 100,
+      "fixed": 300
+    }
+  },
+  {
+    "key": "ma26s5-9",
+    "answer": "5",
+    "spec": {
+      "kind": "coinPoints",
+      "n": 5,
+      "prizes": {
+        "3": 4,
+        "4": 16,
+        "5": 40
+      }
+    }
+  },
+  {
+    "key": "ma26s6-0",
+    "answer": "36",
+    "spec": {
+      "kind": "positiveComposition",
+      "sum": 10
+    }
+  },
+  {
+    "key": "ma26s6-1",
+    "answer": "312",
+    "spec": {
+      "kind": "rankDigits",
+      "rank": 46
+    }
+  },
+  {
+    "key": "ma26s6-2",
+    "answer": "24",
+    "spec": {
+      "kind": "circleOpposite",
+      "children": 4
+    }
+  },
+  {
+    "key": "ma26s6-3",
+    "answer": "48",
+    "spec": {
+      "kind": "circleSeparated",
+      "children": 4
+    }
+  },
+  {
+    "key": "ma26s6-4",
+    "answer": "270",
+    "spec": {
+      "kind": "pairedDigits"
+    }
+  },
+  {
+    "key": "ma26s6-5",
+    "answer": "210",
+    "spec": {
+      "kind": "ascendingDigits"
+    }
+  },
+  {
+    "key": "ma26s6-6",
+    "answer": "9",
+    "spec": {
+      "kind": "derangement",
+      "n": 4
+    }
+  },
+  {
+    "key": "ma26s6-7",
+    "answer": "64",
+    "spec": {
+      "kind": "rooms",
+      "n": 6
+    }
+  },
+  {
+    "key": "ma26s6-8",
+    "answer": "31",
+    "spec": {
+      "kind": "groups",
+      "n": 6
+    }
+  },
+  {
+    "key": "ma26s6-9",
+    "answer": "21",
+    "spec": {
+      "kind": "composition",
+      "sum": 5
+    }
+  },
+  {
+    "key": "ma26s7-0",
+    "answer": "1/9",
+    "spec": {
+      "kind": "rpsOne",
+      "event": "Aonly"
+    }
+  },
+  {
+    "key": "ma26s7-1",
+    "answer": "2/9",
+    "spec": {
+      "kind": "rpsOne",
+      "event": "allDifferent"
+    }
+  },
+  {
+    "key": "ma26s7-2",
+    "answer": "1/3",
+    "spec": {
+      "kind": "rpsOne",
+      "event": "draw"
+    }
+  },
+  {
+    "key": "ma26s7-3",
+    "answer": "8/27",
+    "spec": {
+      "kind": "maxDice",
+      "n": 3,
+      "m": 4,
+      "exact": false
+    }
+  },
+  {
+    "key": "ma26s7-4",
+    "answer": "61/216",
+    "spec": {
+      "kind": "maxDice",
+      "n": 3,
+      "m": 5,
+      "exact": true
+    }
+  },
+  {
+    "key": "ma26s7-5",
+    "answer": "91/216",
+    "spec": {
+      "kind": "maxDice",
+      "n": 3,
+      "m": 6,
+      "exact": true
+    }
+  },
+  {
+    "key": "ma26s7-6",
+    "answer": "64/243",
+    "spec": {
+      "kind": "binomial",
+      "n": 6,
+      "r": 1,
+      "sides": 3
+    }
+  },
+  {
+    "key": "ma26s7-7",
+    "answer": "2",
+    "spec": {
+      "kind": "quizExpectation",
+      "n": 6,
+      "sides": 3
+    }
+  },
+  {
+    "key": "ma26s7-8",
+    "answer": "1/3",
+    "spec": {
+      "kind": "rpsOne",
+      "event": "twoRemain"
+    }
+  },
+  {
+    "key": "ma26s7-9",
+    "answer": "5/27",
+    "spec": {
+      "kind": "rpsThree"
+    }
+  },
+  {
+    "key": "ma26s8-0",
+    "answer": "4/35",
+    "spec": {
+      "kind": "transfer",
+      "aw": 3,
+      "ab": 2,
+      "bw": 2,
+      "bb": 4,
+      "same": false
+    }
+  },
+  {
+    "key": "ma26s8-1",
+    "answer": "11/21",
+    "spec": {
+      "kind": "transfer",
+      "aw": 4,
+      "ab": 2,
+      "bw": 2,
+      "bb": 4,
+      "same": true
+    }
+  },
+  {
+    "key": "ma26s8-2",
+    "answer": "4/49",
+    "spec": {
+      "kind": "transfer",
+      "aw": 5,
+      "ab": 2,
+      "bw": 2,
+      "bb": 4,
+      "same": false
+    }
+  },
+  {
+    "key": "ma26s8-3",
+    "answer": "1/2",
+    "spec": {
+      "kind": "transfer",
+      "aw": 6,
+      "ab": 2,
+      "bw": 2,
+      "bb": 4,
+      "same": true
+    }
+  },
+  {
+    "key": "ma26s8-4",
+    "answer": "4/63",
+    "spec": {
+      "kind": "transfer",
+      "aw": 7,
+      "ab": 2,
+      "bw": 2,
+      "bb": 4,
+      "same": false
+    }
+  },
+  {
+    "key": "ma26s8-5",
+    "answer": "5/6",
+    "spec": {
+      "kind": "prizeDraw",
+      "event": "atLeast"
+    }
+  },
+  {
+    "key": "ma26s8-6",
+    "answer": "3/20",
+    "spec": {
+      "kind": "prizeDraw",
+      "event": "oneEach"
+    }
+  },
+  {
+    "key": "ma26s8-7",
+    "answer": "1/56",
+    "spec": {
+      "kind": "allRed",
+      "r": 3,
+      "w": 5,
+      "k": 3
+    }
+  },
+  {
+    "key": "ma26s8-8",
+    "answer": "1/3",
+    "spec": {
+      "kind": "swap",
+      "aw": 2,
+      "ab": 1,
+      "steps": 2
+    }
+  },
+  {
+    "key": "ma26s8-9",
+    "answer": "7/12",
+    "spec": {
+      "kind": "mixedBag",
+      "ar": 3,
+      "aw": 2,
+      "br": 3,
+      "bw": 4
+    }
+  },
+  {
+    "key": "ma26s9-0",
+    "answer": "4",
+    "spec": {
+      "kind": "internal",
+      "length": 6,
+      "m": 2,
+      "n": 1
+    }
+  },
+  {
+    "key": "ma26s9-1",
+    "answer": "6",
+    "spec": {
+      "kind": "internal",
+      "length": 10,
+      "m": 3,
+      "n": 2
+    }
+  },
+  {
+    "key": "ma26s9-2",
+    "answer": "8",
+    "spec": {
+      "kind": "internal",
+      "length": 14,
+      "m": 4,
+      "n": 3
+    }
+  },
+  {
+    "key": "ma26s9-3",
+    "answer": "10",
+    "spec": {
+      "kind": "internal",
+      "length": 18,
+      "m": 5,
+      "n": 4
+    }
+  },
+  {
+    "key": "ma26s9-4",
+    "answer": "12",
+    "spec": {
+      "kind": "external",
+      "length": 4,
+      "m": 3,
+      "n": 2
+    }
+  },
+  {
+    "key": "ma26s9-5",
+    "answer": "16",
+    "spec": {
+      "kind": "external",
+      "length": 4,
+      "m": 4,
+      "n": 3
+    }
+  },
+  {
+    "key": "ma26s9-6",
+    "answer": "20",
+    "spec": {
+      "kind": "external",
+      "length": 4,
+      "m": 5,
+      "n": 4
+    }
+  },
+  {
+    "key": "ma26s9-7",
+    "answer": "6",
+    "spec": {
+      "kind": "parallel",
+      "ap": 2,
+      "ab": 6,
+      "bc": 18
+    }
+  },
+  {
+    "key": "ma26s9-8",
+    "answer": "7",
+    "spec": {
+      "kind": "parallel",
+      "ap": 3,
+      "ab": 9,
+      "bc": 21
+    }
+  },
+  {
+    "key": "ma26s9-9",
+    "answer": "8",
+    "spec": {
+      "kind": "parallel",
+      "ap": 4,
+      "ab": 12,
+      "bc": 24
+    }
+  },
+  {
+    "key": "ma26s10-0",
+    "answer": "4/5",
+    "spec": {
+      "kind": "bisectorInner",
+      "ab": 4,
+      "ac": 5,
+      "bc": 4.5,
+      "ratio": true
+    }
+  },
+  {
+    "key": "ma26s10-1",
+    "answer": "5/7",
+    "spec": {
+      "kind": "bisectorInner",
+      "ab": 5,
+      "ac": 7,
+      "bc": 6,
+      "ratio": true
+    }
+  },
+  {
+    "key": "ma26s10-2",
+    "answer": "6/7",
+    "spec": {
+      "kind": "bisectorInner",
+      "ab": 6,
+      "ac": 7,
+      "bc": 6.5,
+      "ratio": true
+    }
+  },
+  {
+    "key": "ma26s10-3",
+    "answer": "3.5",
+    "spec": {
+      "kind": "bisectorInner",
+      "ab": 7,
+      "ac": 9,
+      "bc": 8,
+      "ratio": false
+    }
+  },
+  {
+    "key": "ma26s10-4",
+    "answer": "4",
+    "spec": {
+      "kind": "bisectorInner",
+      "ab": 8,
+      "ac": 9,
+      "bc": 8.5,
+      "ratio": false
+    }
+  },
+  {
+    "key": "ma26s10-5",
+    "answer": "4.5",
+    "spec": {
+      "kind": "bisectorInner",
+      "ab": 9,
+      "ac": 11,
+      "bc": 10,
+      "ratio": false
+    }
+  },
+  {
+    "key": "ma26s10-6",
+    "answer": "5",
+    "spec": {
+      "kind": "bisectorInner",
+      "ab": 10,
+      "ac": 11,
+      "bc": 10.5,
+      "ratio": false
+    }
+  },
+  {
+    "key": "ma26s10-7",
+    "answer": "5.5",
+    "spec": {
+      "kind": "bisectorInner",
+      "ab": 11,
+      "ac": 13,
+      "bc": 12,
+      "ratio": false
+    }
+  },
+  {
+    "key": "ma26s10-8",
+    "answer": "6",
+    "spec": {
+      "kind": "bisectorInner",
+      "ab": 12,
+      "ac": 13,
+      "bc": 12.5,
+      "ratio": false
+    }
+  },
+  {
+    "key": "ma26s10-9",
+    "answer": "6.5",
+    "spec": {
+      "kind": "bisectorInner",
+      "ab": 13,
+      "ac": 15,
+      "bc": 14,
+      "ratio": false
+    }
+  },
+  {
+    "key": "ma26s11-0",
+    "answer": "16",
+    "spec": {
+      "kind": "bisectorOuter",
+      "ab": 8,
+      "ac": 6,
+      "bc": 4,
+      "target": "BD"
+    }
+  },
+  {
+    "key": "ma26s11-1",
+    "answer": "14",
+    "spec": {
+      "kind": "bisectorOuter",
+      "ab": 10,
+      "ac": 7,
+      "bc": 6,
+      "target": "DC"
+    }
+  },
+  {
+    "key": "ma26s11-2",
+    "answer": "24",
+    "spec": {
+      "kind": "bisectorOuter",
+      "ab": 12,
+      "ac": 8,
+      "bc": 8,
+      "target": "BD"
+    }
+  },
+  {
+    "key": "ma26s11-3",
+    "answer": "18",
+    "spec": {
+      "kind": "bisectorOuter",
+      "ab": 14,
+      "ac": 9,
+      "bc": 10,
+      "target": "DC"
+    }
+  },
+  {
+    "key": "ma26s11-4",
+    "answer": "32",
+    "spec": {
+      "kind": "bisectorOuter",
+      "ab": 16,
+      "ac": 10,
+      "bc": 12,
+      "target": "BD"
+    }
+  },
+  {
+    "key": "ma26s11-5",
+    "answer": "22",
+    "spec": {
+      "kind": "bisectorOuter",
+      "ab": 18,
+      "ac": 11,
+      "bc": 14,
+      "target": "DC"
+    }
+  },
+  {
+    "key": "ma26s11-6",
+    "answer": "40",
+    "spec": {
+      "kind": "bisectorOuter",
+      "ab": 20,
+      "ac": 12,
+      "bc": 16,
+      "target": "BD"
+    }
+  },
+  {
+    "key": "ma26s11-7",
+    "answer": "26",
+    "spec": {
+      "kind": "bisectorOuter",
+      "ab": 22,
+      "ac": 13,
+      "bc": 18,
+      "target": "DC"
+    }
+  },
+  {
+    "key": "ma26s11-8",
+    "answer": "48",
+    "spec": {
+      "kind": "bisectorOuter",
+      "ab": 24,
+      "ac": 14,
+      "bc": 20,
+      "target": "BD"
+    }
+  },
+  {
+    "key": "ma26s11-9",
+    "answer": "30",
+    "spec": {
+      "kind": "bisectorOuter",
+      "ab": 26,
+      "ac": 15,
+      "bc": 22,
+      "target": "DC"
+    }
+  },
+  {
+    "key": "ma26s12-0",
+    "answer": "45",
+    "spec": {
+      "kind": "circumAngles",
+      "b": 25,
+      "c": 20
+    }
+  },
+  {
+    "key": "ma26s12-1",
+    "answer": "42",
+    "spec": {
+      "kind": "circumAngles",
+      "b": 27,
+      "c": 21
+    }
+  },
+  {
+    "key": "ma26s12-2",
+    "answer": "39",
+    "spec": {
+      "kind": "circumAngles",
+      "b": 29,
+      "c": 22
+    }
+  },
+  {
+    "key": "ma26s12-3",
+    "answer": "36",
+    "spec": {
+      "kind": "circumAngles",
+      "b": 31,
+      "c": 23
+    }
+  },
+  {
+    "key": "ma26s12-4",
+    "answer": "33",
+    "spec": {
+      "kind": "circumAngles",
+      "b": 33,
+      "c": 24
+    }
+  },
+  {
+    "key": "ma26s12-5",
+    "answer": "30",
+    "spec": {
+      "kind": "circumAngles",
+      "b": 35,
+      "c": 25
+    }
+  },
+  {
+    "key": "ma26s12-6",
+    "answer": "27",
+    "spec": {
+      "kind": "circumAngles",
+      "b": 37,
+      "c": 26
+    }
+  },
+  {
+    "key": "ma26s12-7",
+    "answer": "7",
+    "spec": {
+      "kind": "rightRadius",
+      "bc": 14
+    }
+  },
+  {
+    "key": "ma26s12-8",
+    "answer": "25",
+    "spec": {
+      "kind": "centralBase",
+      "angle": 130
+    }
+  },
+  {
+    "key": "ma26s12-9",
+    "answer": "100",
+    "spec": {
+      "kind": "equalRadiusAngle",
+      "base": 40
+    }
+  },
+  {
+    "key": "ma26s13-0",
+    "answer": "3/200",
+    "spec": {
+      "kind": "bayes",
+      "a": 2,
+      "b": 2,
+      "da": 1,
+      "db": 2,
+      "posterior": false
+    }
+  },
+  {
+    "key": "ma26s13-1",
+    "answer": "9/500",
+    "spec": {
+      "kind": "bayes",
+      "a": 3,
+      "b": 2,
+      "da": 1,
+      "db": 3,
+      "posterior": false
+    }
+  },
+  {
+    "key": "ma26s13-2",
+    "answer": "1/50",
+    "spec": {
+      "kind": "bayes",
+      "a": 4,
+      "b": 2,
+      "da": 1,
+      "db": 4,
+      "posterior": false
+    }
+  },
+  {
+    "key": "ma26s13-3",
+    "answer": "9/700",
+    "spec": {
+      "kind": "bayes",
+      "a": 5,
+      "b": 2,
+      "da": 1,
+      "db": 2,
+      "posterior": false
+    }
+  },
+  {
+    "key": "ma26s13-4",
+    "answer": "3/200",
+    "spec": {
+      "kind": "bayes",
+      "a": 6,
+      "b": 2,
+      "da": 1,
+      "db": 3,
+      "posterior": false
+    }
+  },
+  {
+    "key": "ma26s13-5",
+    "answer": "3/11",
+    "spec": {
+      "kind": "bayes",
+      "a": 3,
+      "b": 2,
+      "da": 1,
+      "db": 4,
+      "posterior": true
+    }
+  },
+  {
+    "key": "ma26s13-6",
+    "answer": "1/2",
+    "spec": {
+      "kind": "bayes",
+      "a": 4,
+      "b": 2,
+      "da": 1,
+      "db": 2,
+      "posterior": true
+    }
+  },
+  {
+    "key": "ma26s13-7",
+    "answer": "5/11",
+    "spec": {
+      "kind": "bayes",
+      "a": 5,
+      "b": 2,
+      "da": 1,
+      "db": 3,
+      "posterior": true
+    }
+  },
+  {
+    "key": "ma26s13-8",
+    "answer": "3/7",
+    "spec": {
+      "kind": "bayes",
+      "a": 6,
+      "b": 2,
+      "da": 1,
+      "db": 4,
+      "posterior": true
+    }
+  },
+  {
+    "key": "ma26s13-9",
+    "answer": "7/11",
+    "spec": {
+      "kind": "bayes",
+      "a": 7,
+      "b": 2,
+      "da": 1,
+      "db": 2,
+      "posterior": true
+    }
+  },
+  {
+    "key": "ma26s14-0",
+    "answer": "1/3",
+    "spec": {
+      "kind": "monty",
+      "event": "stay"
+    }
+  },
+  {
+    "key": "ma26s14-1",
+    "answer": "2/3",
+    "spec": {
+      "kind": "monty",
+      "event": "switch"
+    }
+  },
+  {
+    "key": "ma26s14-2",
+    "answer": "2",
+    "spec": {
+      "kind": "monty",
+      "event": "ratio"
+    }
+  },
+  {
+    "key": "ma26s14-3",
+    "answer": "0",
+    "spec": {
+      "kind": "monty",
+      "event": "initialWin"
+    }
+  },
+  {
+    "key": "ma26s14-4",
+    "answer": "1",
+    "spec": {
+      "kind": "monty",
+      "event": "initialLose"
+    }
+  },
+  {
+    "key": "ma26s14-5",
+    "answer": "6",
+    "spec": {
+      "kind": "monty",
+      "event": "count"
+    }
+  },
+  {
+    "key": "ma26s14-6",
+    "answer": "1/2",
+    "spec": {
+      "kind": "monty",
+      "event": "random"
+    }
+  },
+  {
+    "key": "ma26s14-7",
+    "answer": "1/2",
+    "spec": {
+      "kind": "monty",
+      "event": "unaware"
+    }
+  },
+  {
+    "key": "ma26s14-8",
+    "answer": "3/4",
+    "spec": {
+      "kind": "monty",
+      "event": "four"
+    }
+  },
+  {
+    "key": "ma26s14-9",
+    "answer": "1/3",
+    "spec": {
+      "kind": "monty",
+      "event": "difference"
+    }
+  }
+]

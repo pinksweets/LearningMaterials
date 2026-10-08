@@ -29,6 +29,7 @@ import { september15Subject } from "./september15.js";
 export function testPrepCategories(today=todayStr()){
   // 追加順を明示し、新しく追加した対策から表示する。日付は年も固定する。
   return [
+    {subject:'📐 数学A',title:'10/13〜19 中間テスト対策｜数学A',date:'2026-10-13',endDate:'2026-10-19',added:9,keepSubject:true,href:subjectHash('📐 数学A'),range:'p.54〜79｜確率・三角形の比・外心｜練習120問＋発展20問＋模擬34問・100点'},
     {subject:'🧬 生物基礎 visual',title:'10/13〜19 中間テスト対策｜生物基礎',date:'2026-10-13',endDate:'2026-10-19',added:8,keepSubject:true,href:subjectHash('🧬 生物基礎 visual'),range:'p.80〜89｜体内環境・体液・循環・肝臓・腎臓｜図解付き60問'},
     {subject:'⚡ 中間テスト電気回路',title:'10/13〜19 中間テスト対策｜電気回路',date:'2026-10-13',endDate:'2026-10-19',added:7,href:subjectHash('⚡ 中間テスト電気回路'),range:'電力と熱・抵抗率・電池・計算｜練習126問＋模擬2回・各100点'},
     {subject:'🇬🇧 中間テスト英語',title:'10/13〜19 中間テスト対策｜英語',date:'2026-10-13',endDate:'2026-10-19',added:6,href:subjectHash('🇬🇧 中間テスト英語'),range:'教科書6ページ＋プリント40項目｜基礎100問＋模擬34問・100点'},

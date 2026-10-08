@@ -15,7 +15,7 @@
      （バンプを忘れると古いキャッシュがいつまでも残り続ける）。
 ============================================================ */
 
-const CACHE_NAME = 'gakushu-quest-v26';
+const CACHE_NAME = 'gakushu-quest-v27';
 let cacheFallbackUntil = 0;
 
 const ASSETS = [
@@ -27,6 +27,9 @@ const ASSETS = [
   './icons/icon-512.png',
   './icons/icon-512-maskable.png',
   './icons/apple-touch-icon.png',
+  './js/ma26-display.js',
+  './data/ma26_midterm.js',
+  './data/ma26_mock.js',
   './js/main.js',
   './js/content.js',
   './js/utils.js',
