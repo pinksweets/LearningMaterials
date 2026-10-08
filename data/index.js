@@ -41,7 +41,10 @@ import * as e26Mock from './e26_mock.js';
 import * as ec26 from './ec26_midterm.js';
 import * as ec26Mock from './ec26_mock.js';
 
-const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5, lbq, sep, sep15, sep16Ja, sep16Ma, sep16En, njz, ecz, ch1, chMock, chFormula, h26, h26Mock, e26, e26Mock, ec26, ec26Mock];
+import * as ec26Text from './ec26_textbook.js';
+import * as ec26TextMock from './ec26_textbook_mock.js';
+
+const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5, lbq, sep, sep15, sep16Ja, sep16Ma, sep16En, njz, ecz, ch1, chMock, chFormula, h26, h26Mock, e26, e26Mock, ec26, ec26Mock, ec26Text, ec26TextMock];
 
 /* 全単元（登録順） */
 export const units = MODULES.flatMap(m => m.units);

@@ -19,7 +19,7 @@ test('電気回路は10/13〜19の専用入口から練習66問と100点模擬�
   }
   assert.equal(category('2026-10-20').past,true);
   assert.equal(testPrepCategories('2026-10-07')[0].subject,category('2026-10-07').subject);
-  assert.equal(stagesOfSubject(category('2026-10-07').subject).length,8);
+  assert.equal(stagesOfSubject(category('2026-10-07').subject).length,15);
   assert.deepEqual(practice.map(u=>u.questions.length),[10,10,10,8,8,10,10]);
   assert.ok(practice.flatMap(u=>u.questions).every(q=>q.examPractice));
   assert.equal(new Set(practice.flatMap(u=>u.questions).map(q=>q.sourceImage)).size,6);
