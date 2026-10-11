@@ -4,6 +4,7 @@
 import { escapeHtml } from './utils.js';
 import { mathText, graphSvg } from './math-display.js';
 import { bioDiagram } from './bio-display.js';
+import { guidedStudyHtml, explorerHtml } from './quadratic-study.js';
 
 export const LESSON_CARD_COUNT = 3;
 export const LESSON_KINDS = ['たとえ話', '式と単位', 'よくある勘違い'];
@@ -28,6 +29,8 @@ export function lessonCardHtml(card, index, options={}){
     ${lessonBodyHtml(card.body, options)}
     ${formula}
     ${figure}
+    ${card.guidedExample ? guidedStudyHtml(card.guidedExample) : ''}
+    ${card.explorer ? explorerHtml(card.explorer) : ''}
   </article>`;
 }
 

@@ -2,23 +2,25 @@ import { shuffle, el, app, toast, escapeHtml } from "../utils.js";
 import { normalizeAnswer, isAnswerMatch, isAnyAnswerMatch, isChemicalFormulaMatch } from "../answers.js";
 import { stopTimer, startTimer, timeLimitFor } from "../timer.js";
 import { FEVER_BONUS, initRewardProgress, applyFeverProgress, rewardHudHtml } from "../fever.js";
-import { QUESTIONS } from "../content.js";
+import { QUESTIONS, MATH1_PREP_SUBJECT, canonicalSubject, displaySubjectForStage } from "../content.js";
 import { extractLeapEntry, isLeapSubject, shouldShowLeapWordBeforeAnswer } from "../leap-study.js";
 import { state, save, dueList, updateQStat, unlockCard, isStageUnlockedForBoss, recordStudyAnswer } from "../state.js";
 import { playAnswerSound, speakEnglish, syncBossTension, stopBossTension, stopSpeech } from "../audio.js";
 import { renderHome } from "./home.js";
-import { renderSubjectHome } from "./subject.js";
+import { renderStageHome } from "./subject.js";
+import { mathChapterForStage } from './math.js';
 import { renderResult, renderBossDefeat, renderBossVictory } from "./results.js";
 import { reportCompletion } from './reporting.js';
 import { renderSeptember15Home } from "./september15.js";
 import { renderSeptemberHome } from "./september.js";
-import { syncScreenHash, subjectHash } from '../utils.js';
+import { syncScreenHash, subjectHash, mathChapterHash } from '../utils.js';
 import { sessionHash, restoreSession } from '../session.js';
 import { isVisualMath, mathText, mathVisual, quadraticSpec, graphSvg, numberLine } from '../math-display.js';
 import { hasLesson, lessonCardsHtml } from '../lesson.js';
 import { mathADiagram } from '../ma26-display.js';
 import { bioDiagram } from '../bio-display.js';
 import { isMockExam, examTotal, examAward, examNumericMatch } from '../mock-exam.js';
+import { mountLessonActivities } from '../quadratic-study.js';
 
 /* ============================================================
    ステージ開始
@@ -79,7 +81,7 @@ export function renderQuestion(){
   c._locked=!!c.answer;
   syncScreenHash(sessionHash(c),true);
   const q=c.list[c.i];
-  const text=value=>isVisualMath(q._key)?mathText(value):value;
+  const text=value=>isVisualMath(q._key)||q.strictNumeric?mathText(value):value;
   const sourceSid = c.mode==='review' && q._key ? q._key.split('-')[0] : c.sid;
   const leapEntry = QUESTIONS[sourceSid] && isLeapSubject(QUESTIONS[sourceSid].subject) ? extractLeapEntry(q) : null;
   const preAnswerLeapEntry = leapEntry && shouldShowLeapWordBeforeAnswer(q) ? leapEntry : null;
@@ -178,7 +180,7 @@ export function renderQuestion(){
     const rows=q.blanks.map((label,idx)=>`
       <div class="blk" style="margin:8px 0">
         <small style="color:var(--muted);font-size:.78rem">${label}</small>
-        <input type="text" class="fillInput" data-fillidx="${idx}" autocomplete="off">
+        <input type="text" class="fillInput" data-fillidx="${idx}" autocomplete="off"${q.strictNumeric?` aria-label="${escapeHtml(label)}"`:''}>
       </div>`).join("");
     body=`<div class="qtext">${q.q}</div>${rows}
       <button class="btn" id="fillCheck">こたえ合わせ</button>`;
@@ -211,12 +213,14 @@ export function renderQuestion(){
     <div class="muted" id="hintText" style="display:none;margin-top:6px"></div>` : "";
 
   body=body.replaceAll(`<div class="qtext">${q.q}</div>`,`<div class="qtext">${text(q.q)}</div>${mathVisual(q._key)}${bioDiagram(q.diagram)}${mathADiagram(q.maDiagram)}`);
-  const subject=QUESTIONS[sourceSid]?.subject;
+  const subject=QUESTIONS[sourceSid]?displaySubjectForStage(sourceSid):null;
+  const chapter=mathChapterForStage(sourceSid);
   // まなぶ→とく：レッスン付き単元では問題の途中でもカードを読み返せる（減点なし・遷移なし）
   const stageInfo=QUESTIONS[sourceSid];
   const lessonPeek = hasLesson(stageInfo) && c.mode!=='boss' && !mock
     ? `<details class="lessonPeek"><summary>📖 もう一度みる（レッスンカード）</summary>${lessonCardsHtml(stageInfo.lesson,{math:!!stageInfo.lessonMath})}</details>` : '';
-  const nav=subject?`<nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">教科選択</a><span>›</span><a href="${subjectHash(subject)}">${escapeHtml(subject)}</a><span>› ${escapeHtml(c.title)}</span></nav>`:'';
+  const nav=subject?`<nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">教科選択</a><span>›</span><a href="${subjectHash(subject)}">${escapeHtml(subject)}</a>${chapter?`<span>›</span><a href="${mathChapterHash(chapter.id)}">${escapeHtml(chapter.title)}</a>`:''}<span>› ${escapeHtml(c.title)}</span></nav>`:'';
+  const backLabel=c.mode==='review'?'教科選択へ':chapter?chapter.title+'の単元一覧へ':subject===MATH1_PREP_SUBJECT?'テスト対策の単元一覧へ':'単元一覧へ';
   app().innerHTML="";
   app().appendChild(el(`<div>${nav}<div class="card">${hud}${rewardHud}${bossHud}${timerHtml}${tags}${speechPrompt}${body}
     ${q.speech?`<button class="btn secondary" id="examSpeak" type="button">🔊 英語を聞く</button>${q.reading?`<details class="sepReading"><summary>読み方のヒント</summary>${escapeHtml(q.reading)}<p class="muted">カタカナは目安。音声をまねしてみよう。</p></details>`:''}`:''}
@@ -226,10 +230,11 @@ export function renderQuestion(){
     <div class="fb" id="fb"></div>
     <div id="nextWrap"></div>
   </div>
-  <div class="quizTools"><button class="btn secondary small" id="quitBtn">← 単元一覧へ（途中保存）</button><button class="btn secondary small" id="shareQuestion">この問題を共有</button></div>
+  <div class="quizTools"><button class="btn secondary small" id="quitBtn">← ${escapeHtml(backLabel)}（途中保存）</button><button class="btn secondary small" id="shareQuestion">この問題を共有</button></div>
   <div id="shareFallback" hidden><label>問題のリンク<input id="shareUrl" readonly></label></div>
   </div>`));
 
+  if(lessonPeek && stageInfo.lesson.some(card=>card.guidedExample||card.explorer))mountLessonActivities(app(),stageInfo.lesson);
   const examSpeak=document.getElementById('examSpeak');
   if(examSpeak)examSpeak.addEventListener('click',()=>{
     if(!speakEnglish(q.speech,{manual:true}))toast('音声を再生できないよ。端末の音声設定を確認してね。');
@@ -249,9 +254,8 @@ export function renderQuestion(){
       stopSpeech();
       if(c.september15Review){renderSeptember15Home(true);return;}
       if(c.septemberReview){renderSeptemberHome(true);return;}
-      // 追加機能（教科選択ファースト化）：stage/bossは直前の教科ホームへ、reviewは教科選択へ戻る
-      const backSubject = c.mode!=='review' ? QUESTIONS[c.sid].subject : null;
-      if(backSubject) renderSubjectHome(backSubject); else renderHome();
+      // stage/boss/practiceはその単元の表示上の所属へ、reviewは教科選択へ戻る。
+      if(c.mode!=='review')renderStageHome(c.sid);else renderHome();
     }
   });
   document.getElementById('shareQuestion').addEventListener('click',async()=>{
@@ -435,7 +439,7 @@ export function checkSuji(q){
   const val=inputEl.value;
   if(normalizeAnswer(val)===""){toast('こたえを入力してね！');return;}
   stopTimer();
-  const isCorrect=isMockExam(state.cur)?examNumericMatch(val,q.a):isAnyAnswerMatch(val,q.a);
+  const isCorrect=isMockExam(state.cur)||q.strictNumeric?examNumericMatch(val,q.a):isAnyAnswerMatch(val,q.a);
   inputEl.disabled=true;
   if(!isMockExam(state.cur))inputEl.classList.add(isCorrect?'correct':'wrong');
   document.getElementById('sujiCheck').disabled=true;
@@ -453,7 +457,7 @@ export function checkFill(q){
   let allRight=true;
   inputs.forEach(inp=>{
     const idx=parseInt(inp.dataset.fillidx);
-    const ok=isAnswerMatch(inp.value,q.a[idx]);
+    const ok=q.strictNumeric?examNumericMatch(inp.value,[q.a[idx]]):isAnswerMatch(inp.value,q.a[idx]);
     if(!ok)allRight=false;
     inp.disabled=true;
     inp.classList.add(ok?'correct':'wrong');
@@ -675,7 +679,7 @@ export function saveQuestionDraft(){
 
 export function resumePanel(subject){
   const c=state.cur?.mode==='practice'?restoreSession(state.resumeSession):state.cur;
-  if(!c || !Array.isArray(c.list) || c.result || (subject && QUESTIONS[c.sid]?.subject!==subject))return '';
+  if(!c || !Array.isArray(c.list) || c.result || (subject && displaySubjectForStage(c.sid)!==canonicalSubject(subject)))return '';
   return `<aside class="resumePanel"><strong>続きから学習できるよ</strong><a class="btn secondary" href="${sessionHash(c)}">${escapeHtml(c.title)} · ${c.i+1}問目から再開</a></aside>`;
 }
 
@@ -691,6 +695,7 @@ export function renderSavedAnswer(q,keepFeedback=false){
   }else fb.innerHTML=`<div class="head">${c.answer.correct?'⭕ 正解！':c.answer.timeUp?'⏰ 時間切れ。解説を確認しよう':'もう一度、考え方を確認しよう'}</div><div class="exp">${explanation}</div>${c.answer.correctText?`<p>正解：${isVisualMath(q._key)?mathText(c.answer.correctText):escapeHtml(c.answer.correctText)}</p>`:''}${mathVisual(q._key,true)}`;
   // 回答後・途中保存からの復元の両方で図を表示。模擬中には答えを出さない。
   if(!isMockExam(c) && q.studyDiagram && !fb.innerHTML.includes('data-bio-diagram='))fb.innerHTML+=bioDiagram(q.studyDiagram);
+  if(!isMockExam(c) && q.supportGraph && !fb.innerHTML.includes('data-quadratic-feedback'))fb.innerHTML+=`<section data-quadratic-feedback><h3>答えた後に、グラフで確かめよう</h3>${q.supportGraph.label?`<p>${escapeHtml(q.supportGraph.label)}</p>`:''}${graphSvg(q.supportGraph)}</section>`;
   const score=document.getElementById('quizScore'),combo=document.getElementById('quizCombo');
   if(score)score.textContent=c.score;
   if(combo)combo.textContent='🔥 '+c.combo;

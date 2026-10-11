@@ -1,11 +1,13 @@
-import { el, app, escapeHtml, syncScreenHash, subjectHash } from "../utils.js";
+import { el, app, escapeHtml, syncScreenHash, subjectHash, mathChapterHash } from "../utils.js";
 import { stopTimer } from "../timer.js";
 import { stopBossTension, stopSpeech } from "../audio.js";
 import { markLessonSeen, isLessonSeen } from "../state.js";
-import { QUESTIONS } from "../content.js";
+import { QUESTIONS, MATH1_PREP_SUBJECT, displaySubjectForStage } from "../content.js";
 import { lessonCardHtml, hasLesson } from "../lesson.js";
-import { renderSubjectHome } from "./subject.js";
+import { renderStageHome } from "./subject.js";
+import { mathChapterForStage } from './math.js';
 import { startStage } from "./quiz.js";
+import { mountLessonActivities } from '../quadratic-study.js';
 
 /* ============================================================
    レッスン画面（まなぶ）：3枚のカードを1枚ずつ読み、最後に「とく」へ進む。
@@ -23,13 +25,16 @@ export function renderLesson(sid,page=0){
   const total=s.lesson.length;
   const last=page>=total-1;
   const seen=isLessonSeen(sid);
-  const subject=s.subject;
+  const subject=displaySubjectForStage(sid);
+  const chapter=mathChapterForStage(sid);
+  const backLabel=chapter?chapter.title+'の単元一覧へ':subject===MATH1_PREP_SUBJECT?'テスト対策の単元一覧へ':'単元一覧へ';
   const math=!!s.lessonMath;
+  document.title=s.title+'｜学習クエスト';
   const dots=Array.from({length:total},(_,i)=>`<span class="lessonDot ${i===page?'on':''}${i<page?' done':''}"></span>`).join('');
 
   app().innerHTML="";
   app().appendChild(el(`<div>
-    <nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">教科選択</a><span>›</span><a href="${subjectHash(subject)}">${escapeHtml(subject)}</a><span>› ${escapeHtml(s.title)}</span></nav>
+    <nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">教科選択</a><span>›</span><a href="${subjectHash(subject)}">${escapeHtml(subject)}</a>${chapter?`<span>›</span><a href="${mathChapterHash(chapter.id)}">${escapeHtml(chapter.title)}</a>`:''}<span>› ${escapeHtml(s.title)}</span></nav>
     <div class="card lessonScreen">
       <div class="hud"><span class="chip">📖 まなぶ</span><span class="chip">${escapeHtml(s.title)}</span></div>
       <div class="lessonDots" aria-label="${page+1}枚目 / ${total}枚">${dots}</div>
@@ -43,10 +48,10 @@ export function renderLesson(sid,page=0){
       </div>
       <div class="muted lessonNote">${seen?'もう一度読んでいます。問題の途中でも「📖 もう一度みる」から読み返せます。':'まずは3枚のカードを読んでから問題に進みます。問題の途中でも読み返せます。'}</div>
     </div>
-    <div class="quizTools"><button class="btn secondary small" id="lessonBack" type="button">← 単元一覧へ</button></div>
+    <div class="quizTools"><button class="btn secondary small" id="lessonBack" type="button">← ${escapeHtml(backLabel)}</button></div>
   </div>`));
 
-  document.getElementById('lessonBack').addEventListener('click',()=>renderSubjectHome(subject));
+  document.getElementById('lessonBack').addEventListener('click',()=>renderStageHome(sid));
   const prev=document.getElementById('lessonPrev');
   if(prev)prev.addEventListener('click',()=>renderLesson(sid,page-1));
   const next=document.getElementById('lessonNext');
@@ -55,5 +60,9 @@ export function renderLesson(sid,page=0){
   if(skip)skip.addEventListener('click',()=>startStage(sid));
   const start=document.getElementById('lessonStart');
   if(start)start.addEventListener('click',()=>{ markLessonSeen(sid); startStage(sid); });
+  mountLessonActivities(app(),s.lesson,complete=>{
+    const advance=next||start;
+    if(advance)advance.disabled=!complete;
+  });
   window.scrollTo?.(0,0);
 }

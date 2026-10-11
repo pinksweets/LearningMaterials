@@ -47,8 +47,10 @@ import * as b26 from './b26_midterm.js';
 
 import * as ma26 from './ma26_midterm.js';
 import * as ma26Mock from './ma26_mock.js';
+import * as mqSupport from './mq_quadratic_support.js';
+import * as mqMock from './mq_quadratic_mock.js';
 
-const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5, lbq, sep, sep15, sep16Ja, sep16Ma, sep16En, njz, ecz, ch1, chMock, chFormula, h26, h26Mock, e26, e26Mock, ec26, ec26Mock, ec26Text, ec26TextMock, b26, ma26, ma26Mock];
+const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5, lbq, sep, sep15, sep16Ja, sep16Ma, sep16En, njz, ecz, ch1, chMock, chFormula, h26, h26Mock, e26, e26Mock, ec26, ec26Mock, ec26Text, ec26TextMock, b26, ma26, ma26Mock, mqSupport, mqMock];
 
 /* 全単元（登録順） */
 export const units = MODULES.flatMap(m => m.units);

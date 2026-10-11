@@ -418,6 +418,23 @@ a.link{color:var(--accent2);}
 .lessonPeek{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:0 12px;}
 .lessonPeek summary{padding:10px 0;cursor:pointer;color:var(--accent2);font-size:.9rem;}
 .lessonPeek .lessonCard{margin:8px 0 12px;}
+.guidedStudy,.quadraticExplorer,.paperTask{margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);}
+.guidedStudy h4,.quadraticExplorer h4{margin:0 0 10px;}
+.guidedInputs{display:flex;gap:12px;flex-wrap:wrap;}
+.guidedInputs label{flex:1 1 140px;min-width:0;}
+.guidedInputs input,.guidedReason select,.quadraticExplorer select{display:block;width:100%;box-sizing:border-box;margin:6px 0 12px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);color:var(--text);font:inherit;}
+.guidedReason{display:block;}
+.guidedReason select{white-space:normal;}
+.guidedStudy [aria-invalid="true"]{border-color:#ff8e93;outline:1px solid #ff8e93;}
+.guidedActions{display:flex;gap:10px;flex-wrap:wrap;}
+.guidedHistory{padding-left:24px;}
+.guidedHistory li{margin-bottom:12px;}
+.guidedStudy details summary{cursor:pointer;}
+.quadraticExplorer label{display:block;margin:8px 0;}
+.quadraticExplorer input[type="range"]{display:block;width:100%;margin:12px 0;accent-color:var(--accent);}
+.quadraticExplorer .mathFigure{margin-left:0;margin-right:0;}
+.lessonNav .btn:disabled{opacity:.5;cursor:default;}
+@media(max-width:420px){.guidedStudy,.quadraticExplorer,.paperTask{padding:10px;}.guidedInputs label{flex-basis:100%;}.guidedActions .btn{width:100%;}.guidedHistory{padding-left:18px;}}
 /* 図の意味は色に加えて、文字と矢印でも伝える。 */
 .bioFigure{margin:14px 0;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--panel);}
 .bioFigure svg{display:block;width:100%;max-width:600px;height:auto;margin:auto;}
@@ -425,6 +442,47 @@ a.link{color:var(--accent2);}
 .bioFigure figcaption span{font-size:.85rem;color:var(--muted);}
 @media(max-width:420px){.bioFigure{padding:4px;}.bioFigure figcaption{padding:6px;}}
 /* 学習実績の送信設定 */
+/* 数学Ⅰ：3章の入口と、章内の学ぶ順序 */
+.mathCourse h1{text-align:left;font-size:1.6rem;}
+.mathCourse h2{font-size:1.12rem;margin:22px 0 12px;}
+.mathCourse a{color:var(--accent2);}
+.mathCourseIntro{margin-top:16px;}
+.mathCourseIntro p{margin:10px 0 16px;}
+.mathStartBox{border-top:1px solid var(--line);padding-top:18px;margin-top:18px;}
+.mathStartBox>strong{font-size:1.08rem;color:var(--accent);}
+.mathTextLink{display:inline-block;margin:12px 0 4px;font-size:.9rem;}
+.mathChapterCards{display:grid;gap:12px;}
+.mathChapterCard{display:grid;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:20px;text-decoration:none;}
+.mathCourse .mathChapterCard{color:var(--text);}
+.mathChapterCard>strong{font-size:1.2rem;}
+.mathChapterCard>span:not(.mathChapterNumber),.mathChapterCard>small{font-size:.87rem;color:var(--muted);}
+.mathChapterCard>b{font-size:.87rem;color:var(--accent2);}
+.mathChapterNumber{color:var(--accent);font-size:.78rem;font-weight:800;}
+.mathChapterCard:hover,.mathStageMain:hover{background:rgba(142,202,230,.1);}
+.mathChapterCard:focus-visible,.mathStageMain:focus-visible,.mathChapterNav a:focus-visible,.mathCourse .lessonBtn:focus-visible,.mathCourse .bossBtn:focus-visible{outline:3px solid var(--accent2);outline-offset:3px;}
+.mathChapterNav{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+.mathChapterNav a{border:1px solid var(--line);border-radius:999px;padding:10px 14px;font-size:.85rem;text-decoration:none;background:var(--panel2);}
+.mathChapterNav a[aria-current="page"]{border-color:var(--accent);color:var(--accent);font-weight:800;}
+.mathCourseSection h2{border-left:3px solid var(--accent2);padding-left:10px;}
+.mathStage{margin:12px 0;border:1px solid var(--line);border-radius:14px;background:var(--panel2);overflow:hidden;}
+.mathStage.isCleared{border-color:var(--ok);}
+.mathStageMain{display:flex;align-items:flex-start;gap:14px;width:100%;border:0;background:transparent;color:var(--text);padding:16px;text-align:left;font:inherit;cursor:pointer;}
+.mathStageNumber{min-width:28px;font-size:1.35rem;font-weight:800;line-height:1.4;color:var(--accent);}
+.mathStageText{display:grid;gap:4px;min-width:0;}
+.mathStageText strong{font-size:1.02rem;overflow-wrap:anywhere;}
+.mathStageKind{color:var(--accent2);font-size:.73rem;}
+.mathStageDescription{font-size:.8rem;color:var(--muted);overflow-wrap:anywhere;}
+.mathStageHint{font-size:.8rem;font-weight:800;color:var(--accent);margin-top:3px;}
+.mathStageFooter{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 16px 12px;font-size:.75rem;color:var(--muted);}
+.mathStageActions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;}
+.mathStageActions button{min-height:44px;}
+.mathStageActions button:disabled{opacity:.55;cursor:default;}
+.mathStage>.mastery{margin:0;border:0;border-radius:0;height:4px;}
+.mathPrepLink{margin-top:28px;padding:16px;border:1px dashed var(--line);border-radius:14px;}
+.mathPrepLink p{font-size:.85rem;color:var(--muted);margin:6px 0;}
+.mathPrepLink a{display:inline-block;padding:8px 0;font-size:.9rem;}
+@media(max-width:420px){.mathCourseIntro,.mathChapterCard{padding:16px;}.mathStageMain{padding:14px;gap:10px;}.mathStageFooter{align-items:flex-start;flex-direction:column;padding:0 14px 12px;}.mathChapterNav a{padding:10px;font-size:.8rem;}}
+
 .reportSettings summary{cursor:pointer;font-weight:700;}
 .reportSettings input[type="url"],.reportSettings input[name="learner"]{display:block;box-sizing:border-box;width:100%;margin-top:6px;padding:10px 12px;border:1px solid #555b80;border-radius:8px;background:#15182e;color:#fff;font:inherit;}
 .reportSettings form p{margin:14px 0;}

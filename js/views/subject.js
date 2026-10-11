@@ -14,7 +14,8 @@ import {
   setSubjectGroupsCollapsed,
   isLessonSeen
 } from "../state.js";
-import { QUESTIONS } from "../content.js";
+import { QUESTIONS, canonicalSubject, displaySubjectForStage, MATH1_SUBJECT, MATH1_PREP_SUBJECT } from "../content.js";
+import { renderMathHome, mathChapterForStage } from './math.js';
 import { renderHome } from "./home.js";
 import { startStage, startBoss, resumePanel } from "./quiz.js";
 import { startLeapSpeed } from "./leap.js";
@@ -29,6 +30,8 @@ import { subjectHash } from '../utils.js';
    教科ホーム（新設）：指定した教科のステージ一覧のみ表示
 ============================================================ */
 export function renderSubjectHome(subject){
+  subject=canonicalSubject(subject);
+  if(subject===MATH1_SUBJECT){renderMathHome();return;}
   if(subject==='📅 9/15 英語小テスト対策'){renderSeptember15Home(true);return;}
   if(subject==='📅 9/11 小テスト対策'){renderSeptemberHome(true);return;}
   const september16=subject==='📅 9/16 実力テスト対策';
@@ -114,7 +117,14 @@ export function renderSubjectHome(subject){
   app().appendChild(el(`<div>
     <h1>${escapeHtml(subject)}</h1>
     ${resumePanel(subject)}
-    <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">${september16?'← テスト対策へ':'← 教科選択へ'}</button>
+    <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">${september16||subject===MATH1_PREP_SUBJECT?'← テスト対策へ':'← 教科選択へ'}</button>
+    ${subject===MATH1_PREP_SUBJECT?`<a class="mathTextLink" href="${subjectHash(MATH1_SUBJECT)}">数学Ⅰの通常教材（3章）へ →</a><section class="sepPlan"><strong>二次関数を、一行ずつ理解しよう</strong>
+      <p>式を整える理由を答える例題 → 10問の練習 → 紙で自力で解く、の順で進もう。練習は時間制限なしだよ。</p>
+      <ol><li>展開と代入 → 平方完成 → 軸・頂点・対称な点からグラフ。</li><li>グラフの移動 → xの範囲内の最大・最小。頂点と両端の値を比べよう。</li><li>最大・最小の条件からcを求める。縦に動くcと、軸を動かすcを分けて考えよう。</li><li>9ステージ・90問の後に、34問・100点の確認模擬テスト。学習用の目安は45分・80点。時間は自分で計ろう。</li></ol>
+      <p>画面の正解だけでなく、平方完成の途中式・グラフ・最大最小を選ぶ理由を、紙で説明できるか確かめてね。模試の正解・解説は終了後にまとめて見られるよ。</p>
+      <a class="btn" href="#/lesson/mqs1">一行ずつの例題から始める</a>
+      <a class="btn secondary" href="#/lesson/mqs2">平方完成から学び直す</a>
+      <a class="btn secondary" href="#/stage/mqmock1/1">100点の確認模擬テストへ</a></section>`:''}
     ${subject==='📐 数学A'?`<section class="sepPlan"><strong>10/13〜19 中間テスト｜数学Aの学習プラン</strong>
       <p>写真p.54〜79に対応するオリジナル問題だよ。通常範囲は確率8ステージ・図形4ステージ、各10問。基礎から応用へ進もう。</p>
       <ol><li>確率：独立・反復試行 → 条件付き・乗法定理 → 期待値 → 章末問題の数え上げ・じゃんけん・玉の移動。</li><li>図形：内分・外分・平行線 → 内角・外角の二等分線 → 外心。内心・重心は今回の対象外だよ。</li><li>通常120問を練習したら、復習模擬テスト34問・100点へ。目安50分を自分で計ろう。学習目標は80点。</li><li>終了後の分野別結果から苦手なステージへ戻り、翌日に再挑戦しよう。</li></ol>
@@ -183,7 +193,10 @@ export function renderSubjectHome(subject){
     </div>
   </div>`));
 
-  document.getElementById('subjectBackBtn').addEventListener('click',renderHome);
+  document.getElementById('subjectBackBtn').addEventListener('click',()=>{
+    renderHome();
+    if(subject===MATH1_PREP_SUBJECT){const panel=document.querySelector('.testPrepPanel');if(panel)panel.open=true;}
+  });
   const expandAll=document.getElementById('expandAllGroups');
   if(expandAll)expandAll.addEventListener('click',()=>{
     setSubjectGroupsCollapsed(subject,groupNames,false);
@@ -241,4 +254,11 @@ export function openStage(sid){
   const s=QUESTIONS[sid];
   if(hasLesson(s) && !isLessonSeen(sid)){ renderLesson(sid); return; }
   startStage(sid);
+}
+
+/* 単元の表示所属へ戻る。通常数学Ⅰは、学習していた章まで戻す。 */
+export function renderStageHome(sid){
+  const subject=displaySubjectForStage(sid);
+  if(subject===MATH1_SUBJECT){renderMathHome(mathChapterForStage(sid)?.id);return;}
+  renderSubjectHome(subject);
 }

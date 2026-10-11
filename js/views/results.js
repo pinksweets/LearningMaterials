@@ -2,9 +2,10 @@ import { el, app, toast, escapeHtml } from "../utils.js";
 import { stopTimer } from "../timer.js";
 import { stopBossTension, stopSpeech, playBossResultSound } from "../audio.js";
 import { state, save, evalTitle, masteredCount } from "../state.js";
-import { QUESTIONS, STAGE_ORDER, CARDS } from "../content.js";
+import { QUESTIONS, STAGE_ORDER, CARDS, MATH1_PREP_SUBJECT, displaySubjectForStage } from "../content.js";
 import { renderHome } from "./home.js";
-import { renderSubjectHome } from "./subject.js";
+import { renderStageHome } from "./subject.js";
+import { mathChapterForStage } from './math.js';
 import { startStage, startReview, startBoss } from "./quiz.js";
 import { renderSeptember15Home, startSeptember15Review } from "./september15.js";
 import { renderSeptemberHome, startSeptemberReview } from "./september.js";
@@ -36,12 +37,12 @@ export function renderBossDefeat(){
     <div style="margin:10px 0;font-weight:700">大丈夫、復習してから再挑戦しよう！</div>
     <div class="row" style="margin-top:16px">
       <button class="btn secondary" id="retryBtn">もう一度挑む</button>
-      <button class="btn" id="homeBtn">ホームへ →</button>
+      <button class="btn" id="homeBtn">${escapeHtml(resultHomeLabel(c))}</button>
     </div>
   </div>`));
   // 追加機能（教科選択ファースト化）：ボス戦は必ず特定教科のステージなので、直前の教科ホームへ戻る
   appendReportingStatus(c);
-  document.getElementById('homeBtn').addEventListener('click',()=>renderSubjectHome(QUESTIONS[c.sid].subject));
+  document.getElementById('homeBtn').addEventListener('click',()=>renderStageHome(c.sid));
   document.getElementById('retryBtn').addEventListener('click',()=>startBoss(c.sid));
 }
 export function renderBossVictory(){
@@ -76,12 +77,12 @@ export function renderBossVictory(){
     <div style="margin:10px 0;font-weight:700">おめでとう！このステージの理解はもう完璧だね！</div>
     <div class="row" style="margin-top:16px">
       <button class="btn secondary" id="retryBtn">もう一度挑む</button>
-      <button class="btn" id="homeBtn">ホームへ →</button>
+      <button class="btn" id="homeBtn">${escapeHtml(resultHomeLabel(c))}</button>
     </div>
   </div>`));
   // 追加機能（教科選択ファースト化）：ボス戦は必ず特定教科のステージなので、直前の教科ホームへ戻る
   appendReportingStatus(c);
-  document.getElementById('homeBtn').addEventListener('click',()=>renderSubjectHome(QUESTIONS[c.sid].subject));
+  document.getElementById('homeBtn').addEventListener('click',()=>renderStageHome(c.sid));
   document.getElementById('retryBtn').addEventListener('click',()=>startBoss(c.sid));
   setTimeout(()=>toast('🎉🏆 '+badgeName+'！おめでとう！'),400);
 }
@@ -159,7 +160,7 @@ export function renderResult(){
     ${mock?examResultHtml(c):''}
     <div class="row" style="margin-top:16px">
       <button class="btn secondary" id="retryBtn">もう一度</button>
-      <button class="btn" id="homeBtn">ホームへ →</button>
+      <button class="btn" id="homeBtn">${escapeHtml(resultHomeLabel(c))}</button>
     </div>
   </div>`));
 
@@ -169,7 +170,7 @@ export function renderResult(){
     if(c.september15Review){renderSeptember15Home(true);return;}
     if(c.septemberReview){renderSeptemberHome(true);return;}
     if(c.mode==='review') renderHome();
-    else renderSubjectHome(QUESTIONS[c.sid].subject);
+    else renderStageHome(c.sid);
   });
   document.getElementById('retryBtn').addEventListener('click',()=>{
     if(c.september15Review){startSeptember15Review();return;}
@@ -180,6 +181,15 @@ export function renderResult(){
   });
 
   if(newlyCleared) setTimeout(()=>toast('🎉 ステージクリア！おつかれさま！'),400);
+}
+
+export function resultHomeLabel(c){
+  if(c.september15Review || c.septemberReview)return 'テスト対策へ →';
+  if(c.mode==='review')return '教科選択へ →';
+  const chapter=mathChapterForStage(c.sid);
+  if(chapter)return chapter.title+'の単元一覧へ →';
+  if(displaySubjectForStage(c.sid)===MATH1_PREP_SUBJECT)return 'テスト対策の単元一覧へ →';
+  return 'ホームへ →';
 }
 
 export function examResultHtml(c){

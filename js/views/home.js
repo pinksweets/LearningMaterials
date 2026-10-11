@@ -18,7 +18,7 @@ import {
   leapSessionsOn,
   stagesOfSubject
 } from "../state.js";
-import { CARDS, QUESTIONS, totalQuestionCount } from "../content.js";
+import { CARDS, QUESTIONS, totalQuestionCount, MATH1_PREP_SUBJECT } from "../content.js";
 import { LEAP_DAILY_TARGET } from "../leap-study.js";
 import { renderSubjectHome } from "./subject.js";
 import { renderCollection } from "./collection.js";
@@ -29,6 +29,7 @@ import { september15Subject } from "./september15.js";
 export function testPrepCategories(today=todayStr()){
   // 追加順を明示し、新しく追加した対策から表示する。日付は年も固定する。
   return [
+    {subject:MATH1_PREP_SUBJECT,title:'数学Ⅰ｜二次関数のテスト対策',evergreen:true,added:10,href:subjectHash(MATH1_PREP_SUBJECT),range:'平方完成→グラフ→移動→最大・最小→c｜一行ずつの例題＋練習90問＋模擬34問・100点'},
     {subject:'📐 数学A',title:'10/13〜19 中間テスト対策｜数学A',date:'2026-10-13',endDate:'2026-10-19',added:9,keepSubject:true,href:subjectHash('📐 数学A'),range:'p.54〜79｜確率・三角形の比・外心｜練習120問＋発展20問＋模擬34問・100点'},
     {subject:'🧬 生物基礎 visual',title:'10/13〜19 中間テスト対策｜生物基礎',date:'2026-10-13',endDate:'2026-10-19',added:8,keepSubject:true,href:subjectHash('🧬 生物基礎 visual'),range:'p.80〜89｜体内環境・体液・循環・肝臓・腎臓｜図解付き60問'},
     {subject:'⚡ 中間テスト電気回路',title:'10/13〜19 中間テスト対策｜電気回路',date:'2026-10-13',endDate:'2026-10-19',added:7,href:subjectHash('⚡ 中間テスト電気回路'),range:'電力と熱・抵抗率・電池・計算｜練習126問＋模擬2回・各100点'},
@@ -38,7 +39,7 @@ export function testPrepCategories(today=todayStr()){
     {subject:'📅 9/16 実力テスト対策',title:'9/16 実力テスト対策',date:'2026-09-16',added:3,hidden:true,range:'国語・数学・英語｜各50問・写真の範囲を練習'},
     {subject:'📜 歴史総合',title:'10/13〜19 中間テスト対策｜歴史',date:'2026-10-13',endDate:'2026-10-19',added:5,keepSubject:true,href:subjectHash('📜 歴史総合'),range:'項目36〜39｜世界恐慌〜日中戦争｜練習60問＋模擬34問・100点'},
     {subject:'🧪 化学基礎',title:'10/13〜19 中間テスト対策｜化学',date:'2026-10-13',endDate:'2026-10-19',added:4,keepSubject:true,href:subjectHash('🧪 化学基礎'),range:'ニューサポート 新編化学基礎｜第7・8・9・11節｜練習80問＋模擬34問・100点'}
-  ].sort((a,b)=>b.added-a.added).map(item=>({...item,past:(item.endDate||item.date)<today,status:(item.endDate||item.date)<today?'過去のテスト':item.endDate&&item.date<=today?'テスト期間中':item.date===today?'今日のテスト':'これからのテスト'}));
+  ].sort((a,b)=>b.added-a.added).map(item=>({...item,past:!item.evergreen&&(item.endDate||item.date)<today,status:item.evergreen?'基礎から確認':(item.endDate||item.date)<today?'過去のテスト':item.endDate&&item.date<=today?'テスト期間中':item.date===today?'今日のテスト':'これからのテスト'}));
 }
 export function renderTestPrepPanel(today=todayStr()){
   // 既定は閉じた状態（<details>）。クリックで開く。開閉状態は保存しない（毎回閉じて始まる）。

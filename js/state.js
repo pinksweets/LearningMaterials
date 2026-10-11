@@ -1,4 +1,4 @@
-import { STAGE_ORDER, QUESTIONS, totalQuestionCount, CARD_BY_ID } from "./content.js";
+import { STAGE_ORDER, QUESTIONS, totalQuestionCount, CARD_BY_ID, MATH1_ZERO_SUBJECT, displaySubjectForStage, displayStagesOfSubject } from "./content.js";
 import { todayStr, addDays, toast } from "./utils.js";
 import { snapshotSession, restoreSession } from './session.js';
 
@@ -310,8 +310,7 @@ export function stageMastery(sid){
 /* 追加機能（教科選択ファースト化）：subjectを指定すると、その教科の単元だけに限定して最弱ステージを探す（省略時は全教科横断） */
 export function weakestStage(subject){
   let worst=null;
-  STAGE_ORDER.forEach(sid=>{
-    if(subject && (QUESTIONS[sid].subject||"")!==subject)return;
+  (subject?stagesOfSubject(subject):STAGE_ORDER).forEach(sid=>{
     const p=stageMastery(sid).pct;
     if(!worst||p<worst.pct)worst={sid,pct:p};
   });
@@ -322,14 +321,16 @@ export function weakestStage(subject){
 export function subjectList(){
   const seen=new Set(), out=[];
   STAGE_ORDER.forEach(sid=>{
-    const subject=QUESTIONS[sid].subject || "その他";
+    // 統合前の数学Ⅰの位置を使い、ほかの教科の表示順を保つ。
+    if(QUESTIONS[sid].subject===MATH1_ZERO_SUBJECT)return;
+    const subject=displaySubjectForStage(sid);
     if(!seen.has(subject)){ seen.add(subject); out.push(subject); }
   });
   return out;
 }
-/* 教科ごとのステージID一覧（order順） */
+/* 表示上の教科ごとのステージID一覧。数学Ⅰは章の学習順、ほかはorder順。 */
 export function stagesOfSubject(subject){
-  return STAGE_ORDER.filter(sid=>(QUESTIONS[sid].subject||"その他")===subject);
+  return displayStagesOfSubject(subject);
 }
 /* 教科の習熟度（その教科の全問題でのマスター率, %） */
 export function subjectMastery(subject){

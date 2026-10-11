@@ -24,6 +24,7 @@ export function syncScreenHash(hash,replace=false){
   window.scrollTo?.(0,NAV.scroll[hash]||0);
 }
 export function subjectHash(subject){return '#/subject/'+encodeURIComponent(subject);}
+export function mathChapterHash(id){return '#/math1/'+encodeURIComponent(id);}
 export function parseRoute(hash){
   if(!hash || hash==='#home')return {type:'home'};
   const old={'#test/2026-09-16':'september16','#test/2026-09-15':'september15','#test/2026-09-11':'september'};
@@ -31,6 +32,7 @@ export function parseRoute(hash){
   try{
     const parts=hash.split('/');
     if(parts.length===3 && parts[1]==='subject')return {type:'subject',subject:decodeURIComponent(parts[2])};
+    if(parts.length===3 && parts[1]==='math1')return {type:'math-chapter',chapter:decodeURIComponent(parts[2])};
     if(parts.length===3 && parts[1]==='lesson')return {type:'lesson',sid:decodeURIComponent(parts[2])};
     if(parts.length===4 && ['question','stage'].includes(parts[1]) && /^[1-9]\d*$/.test(parts[3]))return {type:parts[1],sid:decodeURIComponent(parts[2]),index:Number(parts[3])-1};
     if(parts.length===5 && parts[1]==='learn' && ['2026-09-11','2026-09-15'].includes(parts[2]) && /^[0-3]$/.test(parts[3]) && /^[0-4]$/.test(parts[4]))return {type:'learn',date:parts[2],group:Number(parts[3]),index:Number(parts[4])};

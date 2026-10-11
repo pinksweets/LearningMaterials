@@ -4,6 +4,7 @@ import { testPrepCategories, renderTestPrepPanel } from '../js/views/home.js';
 import { septemberSubject } from '../js/views/september.js';
 import { stagesOfSubject } from '../js/state.js';
 import { syncScreenHash, testPrepRoute } from '../js/utils.js';
+import { MATH1_SUBJECT, MATH1_PREP_SUBJECT } from '../js/content.js';
 
 test('テスト対策は追加順の降順、当日は過去扱いにしない',()=>{
   const oldCategories=date=>testPrepCategories(date).filter(c=>c.added<=3);
@@ -15,7 +16,7 @@ test('テスト対策は追加順の降順、当日は過去扱いにしない',
   assert.deepEqual(oldCategories('2026-09-16').map(c=>c.past),[false,true,true]);
   assert.equal(oldCategories('2026-09-16')[0].status,'今日のテスト');
   assert.ok(oldCategories('2026-09-17').every(c=>c.past));
-  assert.ok(testPrepCategories('2027-01-01').every(c=>c.past));
+  assert.ok(testPrepCategories('2027-01-01').filter(c=>!c.evergreen).every(c=>c.past));
 });
 test('中間テストは期間の最終日まで開催中で、化学の教科へ移動できる',()=>{
   const first=date=>testPrepCategories(date).find(c=>c.subject==='🧪 化学基礎');
@@ -34,8 +35,8 @@ test('指定した9月の3カテゴリを非表示にし、既存単元IDと残�
   const html=renderTestPrepPanel('2026-09-12');
   const categories=testPrepCategories('2026-09-12');
   assert.deepEqual(categories.filter(c=>c.hidden).map(c=>c.title),['9/16 実力テスト対策','9/15 英語小テスト対策','9/11 小テスト対策']);
-  assert.match(html,/6件/);
-  assert.equal((html.match(/class="testPrepCard/g)||[]).length,6);
+  assert.match(html,/7件/);
+  assert.equal((html.match(/class="testPrepCard/g)||[]).length,7);
   assert.doesNotMatch(html,/disabled/);
   for(const item of categories){
     if(item.hidden){
@@ -50,6 +51,20 @@ test('指定した9月の3カテゴリを非表示にし、既存単元IDと残�
   const ids=stagesOfSubject(septemberSubject());
   assert.equal(ids.length,14);
   assert.ok(ids.every(id=>id.startsWith('sepEn')));
+});
+test('数学Ⅰの補助教材は試験日を決めず、通常教材と別の入口に置く',()=>{
+  for(const date of ['2026-10-11','2027-01-01']){
+    const item=testPrepCategories(date)[0];
+    assert.equal(item.subject,MATH1_PREP_SUBJECT);
+    assert.equal(item.evergreen,true);
+    assert.equal(item.keepSubject,undefined);
+    assert.notEqual(item.subject,MATH1_SUBJECT);
+    assert.equal(stagesOfSubject(item.subject).length,10);
+    assert.equal(stagesOfSubject(MATH1_SUBJECT).length,25);
+    assert.equal(item.past,false);
+    assert.equal(item.status,'基礎から確認');
+    assert.ok(renderTestPrepPanel(date).includes(`href="${item.href}"`));
+  }
 });
 
 test('カテゴリの直リンクを解決し、未知のURLはホームに戻す',()=>{

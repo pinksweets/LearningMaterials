@@ -5,10 +5,11 @@ import { load, touchStreak, state } from "./state.js";
 import { renderHome } from "./views/home.js";
 import { renderSeptemberHome, renderSeptemberLearn } from "./views/september.js";
 import { renderSeptember15Home, renderSeptember15Learn } from "./views/september15.js";
-import { renderSubjectHome } from "./views/subject.js";
+import { renderSubjectHome, renderStageHome } from "./views/subject.js";
+import { renderMathHome, mathChapterForStage } from './views/math.js';
 import { renderLesson } from "./views/lesson.js";
-import { parseRoute, NAV, toast } from "./utils.js";
-import { QUESTIONS } from './content.js';
+import { parseRoute, NAV, toast, subjectHash, mathChapterHash } from "./utils.js";
+import { QUESTIONS, MATH1_CHAPTERS, MATH1_SUBJECT, MATH1_PREP_SUBJECT, displaySubjectForStage } from './content.js';
 import { sessionHash, restoreSession } from './session.js';
 import { startStage, renderQuestion, saveQuestionDraft } from './views/quiz.js';
 import { renderResult, renderBossVictory, renderBossDefeat } from './views/results.js';
@@ -36,7 +37,11 @@ export function renderUrlScreen(initial=false){
     if(route.type==='september16')renderSubjectHome('📅 9/16 実力テスト対策');
     else if(route.type==='september15')renderSeptember15Home(true);
     else if(route.type==='september')renderSeptemberHome(true);
-    else if(route.type==='subject' && Object.values(QUESTIONS).some(s=>s.subject===route.subject))renderSubjectHome(route.subject);
+    else if(route.type==='subject' && (route.subject===MATH1_PREP_SUBJECT || Object.values(QUESTIONS).some(s=>s.subject===route.subject)))renderSubjectHome(route.subject);
+    else if(route.type==='math-chapter'){
+      if(MATH1_CHAPTERS.some(chapter=>chapter.id===route.chapter))renderMathHome(route.chapter);
+      else {invalid=true;renderMathHome();}
+    }
     else if(route.type==='collection')renderCollection();
     else if(route.type==='lesson'){ if(QUESTIONS[route.sid]?.lesson)renderLesson(route.sid); else {invalid=true;renderHome();} }
     else if(route.type==='learn'){
@@ -60,16 +65,20 @@ export function renderUrlScreen(initial=false){
         startStage(route.sid,route.index,route.type==='question');
       }else{
         invalid=true;
-        if(QUESTIONS[route.sid])renderSubjectHome(QUESTIONS[route.sid].subject);else renderHome();
+        if(QUESTIONS[route.sid])renderStageHome(route.sid);else renderHome();
       }
     }else{invalid=route.type!=='home';renderHome();}
   }finally{NAV.restoring=false;}
   if(invalid){
     toast('この問題や途中経過は見つからなかったよ。一覧から選び直してね。');
-    const fallback=QUESTIONS[route.sid]?'#/subject/'+encodeURIComponent(QUESTIONS[route.sid].subject):'#home';
+    const chapter=mathChapterForStage(route.sid);
+    const fallback=QUESTIONS[route.sid]
+      ? chapter?mathChapterHash(chapter.id):subjectHash(displaySubjectForStage(route.sid))
+      : route.type==='math-chapter'?subjectHash(MATH1_SUBJECT):'#home';
     window.history.replaceState(null,'',fallback);NAV.current=fallback;
   }
-  document.title=(document.querySelector('h1')?.textContent || state.cur?.title || '学習クエスト')+'｜学習クエスト';
+  const mathChapter=route.type==='math-chapter' && MATH1_CHAPTERS.find(chapter=>chapter.id===route.chapter);
+  document.title=(mathChapter?'数学Ⅰ｜'+mathChapter.title:document.querySelector('h1')?.textContent || (route.type==='lesson' && QUESTIONS[route.sid]?.title) || state.cur?.title || '学習クエスト')+'｜学習クエスト';
   window.scrollTo(0,NAV.scroll[hash]||0);
 }
 
