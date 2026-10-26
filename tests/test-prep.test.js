@@ -35,8 +35,8 @@ test('指定した9月の3カテゴリを非表示にし、既存単元IDと残�
   const html=renderTestPrepPanel('2026-09-12');
   const categories=testPrepCategories('2026-09-12');
   assert.deepEqual(categories.filter(c=>c.hidden).map(c=>c.title),['9/16 実力テスト対策','9/15 英語小テスト対策','9/11 小テスト対策']);
-  assert.match(html,/7件/);
-  assert.equal((html.match(/class="testPrepCard/g)||[]).length,7);
+  assert.match(html,/8件/);
+  assert.equal((html.match(/class="testPrepCard/g)||[]).length,8);
   assert.doesNotMatch(html,/disabled/);
   for(const item of categories){
     if(item.hidden){
@@ -54,7 +54,7 @@ test('指定した9月の3カテゴリを非表示にし、既存単元IDと残�
 });
 test('数学Ⅰの補助教材は試験日を決めず、通常教材と別の入口に置く',()=>{
   for(const date of ['2026-10-11','2027-01-01']){
-    const item=testPrepCategories(date)[0];
+    const item=testPrepCategories(date).find(c=>c.subject===MATH1_PREP_SUBJECT);
     assert.equal(item.subject,MATH1_PREP_SUBJECT);
     assert.equal(item.evergreen,true);
     assert.equal(item.keepSubject,undefined);
