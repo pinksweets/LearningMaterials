@@ -1,11 +1,14 @@
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { MATH1_SUBJECT, MATH1_ZERO_SUBJECT, MATH1_PREP_SUBJECT, QUESTIONS } from '../js/content.js';
-import { mathChapterHash, subjectHash, parseRoute, todayStr, NAV } from '../js/utils.js';
-import { state, save, load } from '../js/state.js';
+import { MATH1_SUBJECT, MATH1_ZERO_SUBJECT, MATH1_PREP_SUBJECT, QUESTIONS, studyUnitById, studyUnitList } from '../js/content.js';
+import { mathChapterHash, subjectHash, studyUnitHash, parseRoute, todayStr, NAV } from '../js/utils.js';
+import { state, save, load, studyMaterialStatus, setStudyMaterialStatus } from '../js/state.js';
 import { snapshotSession } from '../js/session.js';
 import { startStage, resumePanel, finishQuestion, renderQuestion } from '../js/views/quiz.js';
 import { renderLesson } from '../js/views/lesson.js';
+import { renderHome } from '../js/views/home.js';
+import { renderLeapSpeedResult } from '../js/views/leap.js';
+import { createLeapSession, finishLeapSession } from '../js/leap-study.js';
 import { renderResult, renderBossDefeat, renderBossVictory } from '../js/views/results.js';
 import { createLocalStorage } from './helpers/env.js';
 
@@ -51,7 +54,215 @@ beforeEach(()=>{
   installDom();NAV.current='';NAV.restoring=false;NAV.scroll={};
   state.cur=null;state.resumeSession=null;state.title='学びの見習い';state.qStats={};state.studyLog={};
   state.lessonSeen={};state.stageCleared={};state.stageBest={};state.bossCleared={};state.badges=new Set();
+  state.studyMaterials={};
   state.settings={...state.settings,sound:false,englishSpeech:false,timeAttack:false};
+});
+
+test('単元未指定のホームは選択欄を開き、指定後は学習中メニューをログ・設定より先に置く（DOMスタブ）',()=>{
+  renderHome();
+  assert.match(screen.innerHTML,/<details\b[^>]*id="materialManager"[^>]*\bopen\b/);
+  assert.doesNotMatch(screen.innerHTML,/class="studyMaterialLink"/);
+  setStudyMaterialStatus('math1:quadratics','studying');
+  setStudyMaterialStatus('stage:lbp1c1w1','studying');
+  renderHome();
+  const menu=/<section class="studyMaterials"[\s\S]*?<\/section>/.exec(screen.innerHTML)?.[0];
+  assert.ok(menu);
+  assert.ok(menu.includes(`href="${studyUnitHash('math1:quadratics')}"`));
+  assert.ok(menu.includes(`href="${studyUnitHash('stage:lbp1c1w1')}"`));
+  assert.ok(!menu.includes(studyUnitHash('math1:expressions')));
+  assert.ok(!menu.includes(studyUnitHash('stage:lbp1c1w2')));
+  assert.equal((menu.match(/class="studyMaterialLink"/g)||[]).length,2);
+  const menuIndex=screen.innerHTML.indexOf(menu);
+  const logIndex=screen.innerHTML.indexOf('class="studyPanel"');
+  const settingsIndex=screen.innerHTML.indexOf('class="homeSettings"');
+  assert.ok(menuIndex>=0 && logIndex>menuIndex && settingsIndex>menuIndex);
+  const manager=/<details\b[^>]*id="materialManager"[^>]*>/.exec(screen.innerHTML)?.[0];
+  assert.ok(manager);
+  assert.doesNotMatch(manager,/\bopen\b/);
+});
+
+test('単元の指定を保存・復元すると、ホームで同じ二次関数とWeekを選べる（DOMスタブ）',()=>{
+  setStudyMaterialStatus('math1:quadratics','studying');
+  setStudyMaterialStatus('stage:lbp1c1w1','studying');
+  save();
+  state.studyMaterials={};
+  load();
+  renderHome();
+  const menu=/<section class="studyMaterials"[\s\S]*?<\/section>/.exec(screen.innerHTML)?.[0];
+  assert.ok(menu);
+  for(const id of ['math1:quadratics','stage:lbp1c1w1']){
+    assert.equal(studyMaterialStatus(id),'studying');
+    assert.ok(menu.includes(`href="${studyUnitHash(id)}"`));
+  }
+  assert.equal((menu.match(/class="studyMaterialLink"/g)||[]).length,2);
+});
+
+test('完了した単元はホームと全体の再開欄から隠れ、教科の再開欄と直リンクは使える（DOMスタブ）',async()=>{
+  const {renderUrlScreen}=await import('../js/main.js');
+  for(const completion of ['manual','all-stages']){
+    state.studyMaterials={};state.stageCleared={};
+    state.cur=session('njz1');state.cur.i=2;
+    setStudyMaterialStatus('math1:quadratics','studying');
+    renderHome();
+    assert.match(screen.innerHTML,/class="resumePanel"/);
+    if(completion==='manual')setStudyMaterialStatus('math1:quadratics','completed');
+    else studyUnitById('math1:quadratics').sids.forEach(sid=>{state.stageCleared[sid]=true;});
+    renderHome();
+    assert.equal(studyMaterialStatus('math1:quadratics'),'completed');
+    assert.ok(!screen.innerHTML.includes(`href="${studyUnitHash('math1:quadratics')}"`));
+    assert.doesNotMatch(screen.innerHTML,/class="resumePanel"/);
+    assert.equal(resumePanel(),'');
+    assert.match(resumePanel(MATH1_SUBJECT),/stage\/njz1\/3/);
+    window.location.hash=subjectHash(MATH1_SUBJECT);
+    renderUrlScreen(true);
+    assert.match(screen.innerHTML,/class="mathChapterCard"/);
+    assert.match(screen.innerHTML,/class="resumePanel"/);
+    window.location.hash='#/stage/njz1/3';
+    renderUrlScreen(true);
+    assert.equal(state.cur.sid,'njz1');
+    assert.equal(state.cur.i,2);
+    assert.equal(window.location.hash,'#/stage/njz1/3');
+    assert.equal(studyMaterialStatus('math1:quadratics'),'completed');
+  }
+});
+
+test('単元を手動で完了にしてホームへ戻っても回答履歴・ベスト・クリア記録は変わらない（DOMスタブ）',()=>{
+  state.qStats={'mqs1-0':{seen:4,correct:3,box:2,due:'2026-11-12'}};
+  state.stageBest={mqs1:90};state.stageCleared={mqs1:true};
+  const expected=structuredClone({qStats:state.qStats,stageBest:state.stageBest,stageCleared:state.stageCleared});
+  setStudyMaterialStatus('group:mqs1','studying');
+  setStudyMaterialStatus('group:mqs1','completed');
+  renderHome();
+  load();
+  assert.equal(studyMaterialStatus('group:mqs1'),'completed');
+  assert.deepEqual({qStats:state.qStats,stageBest:state.stageBest,stageCleared:state.stageCleared},expected);
+});
+
+test('LEAPの日課はWeekを学習中に指定した間だけホームに表示する（DOMスタブ）',()=>{
+  const id='stage:lbp1c1w1';
+  renderHome();
+  assert.doesNotMatch(screen.innerHTML,/class="leapDailyPanel"/);
+  setStudyMaterialStatus(id,'studying');
+  renderHome();
+  assert.match(screen.innerHTML,/class="leapDailyPanel"/);
+  setStudyMaterialStatus(id,'completed');
+  renderHome();
+  assert.doesNotMatch(screen.innerHTML,/class="leapDailyPanel"/);
+});
+
+test('単元URLは指定Week・Courseだけを開き、グループ・数学章へ進め、未知単元はホームへ戻る（DOMスタブ）',async()=>{
+  const {renderUrlScreen}=await import('../js/main.js');
+  for(const id of ['stage:lbp1c1w1','group:e1s1']){
+    window.location.hash=studyUnitHash(id);renderUrlScreen(true);
+    const ids=[...screen.innerHTML.matchAll(/class="stage" data-stage="([^"]+)"/g)].map(match=>match[1]);
+    assert.deepEqual(ids,studyUnitById(id).sids);
+    assert.ok(!ids.includes('lbp1c1w2'));assert.ok(!ids.includes('lbp1c2w1'));
+    assert.equal(window.location.hash,studyUnitHash(id));
+  }
+  window.location.hash=studyUnitHash('math1:quadratics');renderUrlScreen(true);
+  assert.match(screen.innerHTML,/data-math-stage="njz1"/);
+  assert.match(screen.innerHTML,/data-math-stage="qi10"/);
+  assert.doesNotMatch(screen.innerHTML,/data-math-stage="m1s1"|data-math-stage="tr2"/);
+  window.location.hash=studyUnitHash('stage:missing');renderUrlScreen(true);
+  assert.equal(window.location.hash,'#home');assert.match(screen.innerHTML,/class="studyMaterials"/);
+});
+
+test('選択中グループの結果からは単元へ戻り、最終ステージのクリア後はホームでその単元を隠す（DOMスタブ）',()=>{
+  const id='group:e1s1';
+  // 指定のない従来経路は教科全体へ戻る。
+  state.cur=session('e1s1');state.cur.i=state.cur.list.length;renderResult();click('homeBtn');
+  assert.equal(window.location.hash,subjectHash('🇬🇧 総合英語 Harmony'));
+  assert.match(screen.innerHTML,/class="stage" data-stage="e2s1"/);
+  setStudyMaterialStatus(id,'studying');
+  state.cur=session('e1s1');state.cur.i=state.cur.list.length;renderResult();click('homeBtn');
+  assert.equal(window.location.hash,studyUnitHash(id));
+  const ids=[...screen.innerHTML.matchAll(/class="stage" data-stage="([^"]+)"/g)].map(match=>match[1]);
+  assert.deepEqual(ids,studyUnitById(id).sids);assert.ok(!ids.includes('e2s1'));
+  studyUnitById(id).sids.forEach(sid=>{state.stageCleared[sid]=true;});
+  state.cur=session('e1s1');state.cur.i=state.cur.list.length;renderResult();click('homeBtn');
+  assert.equal(window.location.hash,'#home');assert.equal(studyMaterialStatus(id),'completed');
+  assert.ok(!screen.innerHTML.includes(`href="${studyUnitHash(id)}"`));
+  assert.doesNotMatch(screen.innerHTML,/class="stage" data-stage=/);
+});
+
+test('選択したLEAPのWeekを終えるとホームへ戻り、別WeekやCourseの一覧を出さない（DOMスタブ）',()=>{
+  const id='stage:lbp1c1w1';
+  setStudyMaterialStatus(id,'studying');setStudyMaterialStatus('stage:lbp1c1w2','studying');
+  state.cur=session('lbp1c1w1');state.cur.i=state.cur.list.length;renderResult();click('homeBtn');
+  assert.equal(window.location.hash,'#home');assert.equal(studyMaterialStatus(id),'completed');
+  const menu=/<section class="studyMaterials"[\s\S]*?<\/section>/.exec(screen.innerHTML)?.[0];
+  assert.ok(menu);assert.ok(!menu.includes(studyUnitHash(id)));
+  assert.ok(menu.includes(studyUnitHash('stage:lbp1c1w2')));assert.ok(!menu.includes(studyUnitHash('stage:lbp1c2w1')));
+});
+
+test('化学の単元URLには選んだ節のステージだけを出し、教科全体のプランや模試を混ぜない（DOMスタブ）',async()=>{
+  const {renderUrlScreen}=await import('../js/main.js');
+  const id='group:ch1s1';
+  window.location.hash=studyUnitHash(id);renderUrlScreen(true);
+  const ids=[...screen.innerHTML.matchAll(/class="stage" data-stage="([^"]+)"/g)].map(match=>match[1]);
+  assert.deepEqual(ids,['ch1s1','ch1s2']);
+  assert.deepEqual(ids,studyUnitById(id).sids);
+  assert.doesNotMatch(screen.innerHTML,/ch1f1|ch1mock1|class="sepPlan"/);
+  assert.equal(window.location.hash,studyUnitHash(id));
+});
+
+test('数学の章の再開欄はその章の個人セッションだけを出し、共有練習中も個人の再開先を使う（DOMスタブ）',async()=>{
+  const {renderMathHome}=await import('../js/views/math.js');
+  const personal=session('njz1');personal.i=2;
+  state.cur=personal;
+  renderMathHome('expressions');
+  assert.doesNotMatch(screen.innerHTML,/class="resumePanel"/);
+  renderMathHome('quadratics');
+  assert.match(screen.innerHTML,/class="resumePanel"/);
+  assert.match(screen.innerHTML,/href="#\/stage\/njz1\/3"/);
+  state.resumeSession=snapshotSession(personal);
+  state.cur=session('m1s1','practice');
+  renderMathHome('expressions');
+  assert.doesNotMatch(screen.innerHTML,/class="resumePanel"/);
+  renderMathHome('quadratics');
+  assert.match(screen.innerHTML,/href="#\/stage\/njz1\/3"/);
+  assert.ok(!resumePanel(MATH1_SUBJECT,'math1:quadratics').includes('/question/m1s1/'));
+});
+
+test('数学の完了した章は一覧・他章ナビ・案内から隠れ、直接開いた復習は残る（DOMスタブ）',async()=>{
+  const {renderMathHome}=await import('../js/views/math.js');
+  setStudyMaterialStatus('math1:quadratics','completed');
+  renderMathHome();
+  assert.ok(!screen.innerHTML.includes(`href="${mathChapterHash('quadratics')}"`));
+  assert.doesNotMatch(screen.innerHTML,/class="mathStartBox"|data-math-stage="njz1"/);
+  assert.ok(screen.innerHTML.includes(`href="${mathChapterHash('expressions')}"`));
+  renderMathHome('expressions');
+  const nav=/<nav class="mathChapterNav"[\s\S]*?<\/nav>/.exec(screen.innerHTML)?.[0];
+  assert.ok(nav);assert.ok(!nav.includes(mathChapterHash('quadratics')));
+  assert.ok(nav.includes(mathChapterHash('expressions')));
+  assert.match(screen.innerHTML,/class="mathPrepLink"/);
+  studyUnitList(MATH1_PREP_SUBJECT).forEach(unit=>setStudyMaterialStatus(unit.id,'completed'));
+  renderMathHome('expressions');
+  assert.doesNotMatch(screen.innerHTML,/class="mathPrepLink"/);
+  renderMathHome('quadratics');
+  assert.match(screen.innerHTML,/data-math-stage="njz1"/);
+  assert.ok(screen.innerHTML.includes(`href="${mathChapterHash('quadratics')}" aria-current="page"`));
+});
+
+test('LEAP高速周回の結果からは選択Weekへ戻り、完了済みならホームへ戻る（DOMスタブ）',()=>{
+  const sid='lbp1c1w1', id='stage:'+sid;
+  setStudyMaterialStatus(id,'studying');
+  const list=QUESTIONS[sid].data.map((q,index)=>({...q,_key:sid+'-'+index}));
+  const leapSession=createLeapSession(list,{now:0,durationSeconds:180});
+  finishLeapSession(leapSession,180000,'time');
+  const c={sid,mode:'leap-speed',title:QUESTIONS[sid].title,leapSession,leapRecorded:false};
+  state.cur=c;
+  renderLeapSpeedResult(c);click('leapHomeBtn');
+  assert.equal(window.location.hash,studyUnitHash(id));
+  const ids=[...screen.innerHTML.matchAll(/class="stage" data-stage="([^"]+)"/g)].map(match=>match[1]);
+  assert.deepEqual(ids,[sid]);
+  assert.doesNotMatch(screen.innerHTML,/class="stage" data-stage="(?:lbp1c1w2|lbp1c2w1)"/);
+  state.stageCleared[sid]=true;
+  renderLeapSpeedResult(c);
+  assert.match(screen.innerHTML,/id="leapHomeBtn"[^>]*>学習中の単元へ/);
+  click('leapHomeBtn');
+  assert.equal(window.location.hash,'#home');
+  assert.ok(!screen.innerHTML.includes(`href="${studyUnitHash(id)}"`));
 });
 
 test('章URLは直接開ける形式を保ち、不正なエンコードや余分な階層を拒否する',()=>{

@@ -1,8 +1,8 @@
 import { el, app, toast, escapeHtml } from "../utils.js";
 import { stopTimer } from "../timer.js";
 import { stopBossTension, stopSpeech, playBossResultSound } from "../audio.js";
-import { state, save, evalTitle, masteredCount } from "../state.js";
-import { QUESTIONS, STAGE_ORDER, CARDS, MATH1_PREP_SUBJECT, displaySubjectForStage } from "../content.js";
+import { state, save, evalTitle, masteredCount, studyMaterialStatus } from "../state.js";
+import { QUESTIONS, STAGE_ORDER, CARDS, MATH1_PREP_SUBJECT, displaySubjectForStage, studyUnitForStage } from "../content.js";
 import { renderHome } from "./home.js";
 import { renderStageHome } from "./subject.js";
 import { mathChapterForStage } from './math.js';
@@ -186,6 +186,11 @@ export function renderResult(){
 export function resultHomeLabel(c){
   if(c.september15Review || c.septemberReview)return 'テスト対策へ →';
   if(c.mode==='review')return '教科選択へ →';
+  const unit=studyUnitForStage(c.sid);
+  if(unit && state.studyMaterials?.[unit.id]==='studying'){
+    if(studyMaterialStatus(unit.id)==='completed')return '学習中の単元へ →';
+    return unit.title+'の単元一覧へ →';
+  }
   const chapter=mathChapterForStage(c.sid);
   if(chapter)return chapter.title+'の単元一覧へ →';
   if(displaySubjectForStage(c.sid)===MATH1_PREP_SUBJECT)return 'テスト対策の単元一覧へ →';

@@ -15,7 +15,7 @@
      （バンプを忘れると古いキャッシュがいつまでも残り続ける）。
 ============================================================ */
 
-const CACHE_NAME = 'gakushu-quest-v33';
+const CACHE_NAME = 'gakushu-quest-v34';
 let cacheFallbackUntil = 0;
 
 const ASSETS = [
@@ -50,6 +50,7 @@ const ASSETS = [
   './js/fever.js',
   './js/leap-study.js',
   './js/views/home.js',
+  './js/views/materials.js',
   './js/views/subject.js',
   './js/views/math.js',
   './js/views/collection.js',

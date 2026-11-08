@@ -1,6 +1,6 @@
 import { app, el, escapeHtml, escapeAttr, syncScreenHash, subjectHash, mathChapterHash } from '../utils.js';
-import { QUESTIONS, MATH1_SUBJECT, MATH1_PREP_SUBJECT, MATH1_CHAPTERS } from '../content.js';
-import { state, stageMastery, subjectMastery, subjectClearedCount, isLessonSeen, isStageUnlockedForBoss } from '../state.js';
+import { QUESTIONS, MATH1_SUBJECT, MATH1_PREP_SUBJECT, MATH1_CHAPTERS, studyUnitList } from '../content.js';
+import { state, stageMastery, subjectMastery, subjectClearedCount, isLessonSeen, isStageUnlockedForBoss, studyMaterialStatus } from '../state.js';
 import { stopTimer } from '../timer.js';
 import { stopBossTension, stopSpeech } from '../audio.js';
 import { hasLesson } from '../lesson.js';
@@ -47,6 +47,7 @@ export function mathStageHtml(sid,index){
 
 export function mathChapterCardsHtml(){
   return `<div class="mathChapterCards">${MATH1_CHAPTERS.map((chapter,index)=>{
+    if(studyMaterialStatus('math1:'+chapter.id)==='completed')return '';
     const p=mathChapterProgress(chapter);
     return `<a class="mathChapterCard" href="${mathChapterHash(chapter.id)}"><span class="mathChapterNumber">第${index+1}章</span>
       <strong>${escapeHtml(chapter.title)}</strong><span>${escapeHtml(chapter.desc)}</span>
@@ -63,10 +64,11 @@ export function renderMathHome(chapterId=''){
   const m=subjectMastery(MATH1_SUBJECT);
   const progress=chapter?mathChapterProgress(chapter):null;
   const cleared=subjectClearedCount(MATH1_SUBJECT);
+  const prepAvailable=studyUnitList(MATH1_PREP_SUBJECT).some(unit=>studyMaterialStatus(unit.id)!=='completed');
   const learningOrder=chapter?.id==='trigonometry'?[...progress.sids.slice(1),progress.sids[0]]:progress?.sids;
   const next=chapter?learningOrder.find(sid=>!state.stageCleared[sid])||learningOrder[0]:'njz1';
   let index=0;
-  const body=chapter?`<nav class="mathChapterNav" aria-label="数学Ⅰの章">${MATH1_CHAPTERS.map(item=>`<a href="${mathChapterHash(item.id)}"${item.id===chapter.id?' aria-current="page"':''}>${escapeHtml(item.title)}</a>`).join('')}</nav>
+  const body=chapter?`<nav class="mathChapterNav" aria-label="数学Ⅰの章">${MATH1_CHAPTERS.filter(item=>item.id===chapter.id || studyMaterialStatus('math1:'+item.id)!=='completed').map(item=>`<a href="${mathChapterHash(item.id)}"${item.id===chapter.id?' aria-current="page"':''}>${escapeHtml(item.title)}</a>`).join('')}</nav>
     <section class="card mathCourseIntro"><h1>${escapeHtml(chapter.title)}</h1><p>${escapeHtml(chapter.desc)}</p>
       <div class="hud"><span class="chip">${progress.sids.length}ステージ・${progress.questions}問</span><span class="chip">クリア ${progress.cleared}/${progress.sids.length}</span><span class="chip">習熟 ${progress.pct}%</span></div>
       <button class="btn" type="button" data-math-stage="${escapeAttr(next)}">${progress.cleared===progress.sids.length?'最初から復習する':'次のステージから始める'}：${escapeHtml(QUESTIONS[next].title)}</button>
@@ -74,16 +76,16 @@ export function renderMathHome(chapterId=''){
     <div class="mathCourseSections">${chapter.sections.map(section=>`<section class="mathCourseSection"><h2>${escapeHtml(section.title)}</h2>${section.sids.map(sid=>mathStageHtml(sid,++index)).join('')}</section>`).join('')}</div>`
     :`<section class="card mathCourseIntro"><h1>📐 数学Ⅰ</h1><p>学ぶ内容を${MATH1_CHAPTERS.length}つの章にまとめたよ。苦手なところから、少しずつ進めよう。</p>
       <div class="hud"><span class="chip">${MATH1_CHAPTERS.length}章・${cleared.total}ステージ・${m.total}問</span><span class="chip">クリア ${cleared.cleared}/${cleared.total}</span><span class="chip">習熟 ${m.pct}%</span></div>
-      <div class="mathStartBox"><strong>二次関数が苦手なら、ここから</strong><p>関数と座標 → 軸・頂点 → 平方完成とグラフ → 移動 → 最大・最小。やさしい説明と練習を、同じ章で順に進められるよ。</p>
+      ${studyMaterialStatus('math1:quadratics')!=='completed'?`<div class="mathStartBox"><strong>二次関数が苦手なら、ここから</strong><p>関数と座標 → 軸・頂点 → 平方完成とグラフ → 移動 → 最大・最小。やさしい説明と練習を、同じ章で順に進められるよ。</p>
         <button class="btn" type="button" data-math-stage="njz1">関数の意味から まなぶ</button>
-        <a class="mathTextLink" href="${mathChapterHash('quadratics')}">二次関数の学ぶ順序を見る →</a></div>
+        <a class="mathTextLink" href="${mathChapterHash('quadratics')}">二次関数の学ぶ順序を見る →</a></div>`:''}
     </section><section class="mathCourseChapters" aria-label="数学Ⅰの通常教材"><h2>学ぶ章を選ぼう</h2>${mathChapterCardsHtml()}</section>`;
   app().innerHTML='';
   app().appendChild(el(`<div class="mathCourse"><nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">教科選択</a><span>›</span>${chapter?`<a href="${subjectHash(MATH1_SUBJECT)}">数学Ⅰ</a><span>› ${escapeHtml(chapter.title)}</span>`:'<span>数学Ⅰ</span>'}</nav>
     <button class="btn secondary small" id="mathBack" type="button">${chapter?'← 数学Ⅰの章一覧へ':'← 教科選択へ'}</button>
-    ${resumePanel(MATH1_SUBJECT)}${body}
-    <aside class="mathPrepLink"><strong>テスト対策</strong><p>一行ずつの例題と補習90問・100点の模擬テストは、別の入口から取り組めるよ。</p>
-      <a href="${subjectHash(MATH1_PREP_SUBJECT)}">数学Ⅰのテスト対策を開く →</a></aside>
+    ${resumePanel(MATH1_SUBJECT,chapter?'math1:'+chapter.id:undefined)}${body}
+    ${prepAvailable?`<aside class="mathPrepLink"><strong>テスト対策</strong><p>一行ずつの例題と補習90問・100点の模擬テストは、別の入口から取り組めるよ。</p>
+      <a href="${subjectHash(MATH1_PREP_SUBJECT)}">数学Ⅰのテスト対策を開く →</a></aside>`:''}
   </div>`));
   document.getElementById('mathBack').addEventListener('click',()=>chapter?renderMathHome():renderHome());
   app().querySelectorAll('[data-math-stage]').forEach(button=>button.addEventListener('click',()=>openStage(button.dataset.mathStage)));

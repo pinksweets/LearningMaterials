@@ -63,6 +63,50 @@ export function displayStagesOfSubject(subject) {
   return STAGE_ORDER.filter(sid=>(QUESTIONS[sid].subject || 'その他')===displaySubject);
 }
 
+/* メニューで指定する学習単元。問題のIDや順番は変えず、表示上だけまとめる。 */
+export function studyUnitList(subject) {
+  const subjects=subject===undefined
+    ? [...new Set(STAGE_ORDER.map(displaySubjectForStage))]
+    : [canonicalSubject(subject)];
+  const out=[];
+  subjects.forEach(name=>{
+    if(name===MATH1_SUBJECT){
+      MATH1_CHAPTERS.forEach(chapter=>out.push({
+        id:'math1:'+chapter.id,subject:name,title:chapter.title,group:'',
+        sids:chapter.sections.flatMap(section=>section.sids)
+      }));
+      return;
+    }
+    const grouped=new Map();
+    displayStagesOfSubject(name).forEach(sid=>{
+      const stage=QUESTIONS[sid];
+      const group=stage.group || '';
+      // LEAPは同じPart/Course内でもWeekごとに指定できる。
+      if(name==='📘 LEAP Basic 必携英単語' || !group){
+        out.push({id:'stage:'+sid,subject:name,title:stage.title,group,sids:[sid]});
+      }else if(grouped.has(group)){
+        grouped.get(group).sids.push(sid);
+      }else{
+        const unit={id:'group:'+sid,subject:name,title:group,group,sids:[sid]};
+        grouped.set(group,unit);
+        out.push(unit);
+      }
+    });
+  });
+  return out;
+}
+export function studyUnitForStage(sid) {
+  if(!QUESTIONS[sid] || !STAGE_ORDER.includes(sid))return undefined;
+  return studyUnitList(displaySubjectForStage(sid)).find(unit=>unit.sids.includes(sid));
+}
+export function studyUnitById(id) {
+  if(typeof id!=='string')return undefined;
+  if(id.startsWith('math1:'))return studyUnitList(MATH1_SUBJECT).find(unit=>unit.id===id);
+  const match=/^(?:stage|group):(.+)$/.exec(id);
+  const unit=match?studyUnitForStage(match[1]):undefined;
+  return unit?.id===id?unit:undefined;
+}
+
 /* ---------- HQ.units[].cards + HQ.cards から CARDS / CARD_BY_ID を構築 ---------- */
 export const CARDS = [];
 HQ.units.forEach(u => { if (u.cards) CARDS.push.apply(CARDS, u.cards); });

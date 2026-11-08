@@ -8,19 +8,17 @@ import {
   save,
   evalTitle,
   dueList,
-  subjectList,
   subjectClearedCount,
-  subjectMastery,
+  studyMaterialStatus,
   getStudyDay,
   normalizeDailyGoal,
   studyVolumeLevel,
   weeklyStudySummary,
-  leapSessionsOn,
-  stagesOfSubject
+  leapSessionsOn
 } from "../state.js";
-import { CARDS, QUESTIONS, totalQuestionCount, MATH1_PREP_SUBJECT } from "../content.js";
-import { LEAP_DAILY_TARGET } from "../leap-study.js";
-import { renderSubjectHome } from "./subject.js";
+import { CARDS, totalQuestionCount, MATH1_PREP_SUBJECT, studyUnitList } from "../content.js";
+import { LEAP_DAILY_TARGET, LEAP_BASIC_SUBJECT } from "../leap-study.js";
+import { activeStudyMaterials, studyMaterialsHtml, materialManagerHtml, bindMaterialActions } from './materials.js';
 import { renderCollection } from "./collection.js";
 import { startReview, resumePanel } from "./quiz.js";
 import { septemberSubject } from "./september.js";
@@ -45,7 +43,7 @@ export function testPrepCategories(today=todayStr()){
 export function renderTestPrepPanel(today=todayStr()){
   // 既定は閉じた状態（<details>）。クリックで開く。開閉状態は保存しない（毎回閉じて始まる）。
   // 非表示の対策も登録は残し、通常の教科カードへ再表示されるのを防ぐ。
-  const items=testPrepCategories(today).filter(item=>!item.hidden);
+  const items=testPrepCategories(today).filter(item=>!item.hidden && studyUnitList(item.subject).some(unit=>studyMaterialStatus(unit.id)!=='completed'));
   return `<details class="testPrepPanel"><summary id="testPrepHeading"><span>📅 テスト対策</span><span class="testPrepToggle">${items.length}件　</span></summary>
     <p class="muted">受けるテストを選んでね。新しく追加した対策から並んでいるよ。</p>
     <div class="testPrepCategories">${items.map(item=>{
@@ -138,25 +136,14 @@ export function renderStudyPanel(){
 /* ============================================================
    教科選択画面（新トップ）
 ============================================================ */
-export function renderHome(){
+export function renderHome(options={}){
   syncScreenHash('#home');
   stopTimer(); // ホームに戻る全経路でタイマーを確実に止める（防御的）
   stopBossTension();
   stopSpeech();
   if(!state.title)evalTitle();   // 初回は現在の称号を確定
-
-  // 追加機能（教科選択ファースト化）：教科カードをorder順・重複除去で動的生成
-  const testSubjects=new Set(testPrepCategories().filter(item=>!item.keepSubject).map(item=>item.subject));
-  const cardsHtml = subjectList().filter(subject=>!testSubjects.has(subject)).map(subject=>{
-    const {cleared,total} = subjectClearedCount(subject);
-    const m = subjectMastery(subject);
-    const focus = stagesOfSubject(subject).some(sid=>QUESTIONS[sid].focus);
-    return `<div class="subjectCard${focus?' focus':''}" data-subject="${subject}">
-      <div class="subjectCard-name">${subject}${focus?'<span class="focusBadge">重点</span>':''}</div>
-      <div class="subjectCard-sum">クリア ${cleared}/${total}　｜　習熟度 ${m.pct}%</div>
-      <div class="mastery"><i style="width:${m.pct}%"></i></div>
-    </div>`;
-  }).join("");
+  const settingsOpen=!!document.querySelector('.homeSettings')?.open;
+  const activeMaterials=activeStudyMaterials();
 
   const dueN=dueList().length;
   const reviewBtn = dueN
@@ -169,11 +156,11 @@ export function renderHome(){
   const studyPanelHtml = renderStudyPanel();
   const leapToday=leapSessionsOn();
   const leapComplete=leapToday>=LEAP_DAILY_TARGET;
-  const leapGoalHtml=`<section class="leapDailyPanel" aria-label="LEAP Basic 今日の高速周回ノルマ">
+  const leapGoalHtml=activeMaterials.some(item=>item.subject===LEAP_BASIC_SUBJECT)?`<section class="leapDailyPanel" aria-label="LEAP Basic 今日の高速周回ノルマ">
     <div class="leapDailyTop"><div><strong>⚡ LEAP Basic 3分×3</strong><span>毎日短時間で、思い出す練習を積もう</span></div><b>${Math.min(leapToday,LEAP_DAILY_TARGET)}/${LEAP_DAILY_TARGET}回</b></div>
     <div class="leapDailyBar"><i style="width:${Math.min(100,Math.round(leapToday/LEAP_DAILY_TARGET*100))}%"></i></div>
     <div class="leapDailyMessage">${leapComplete?'🎊 今日の3回達成！すごい継続力だね。':'LEAP Basicの教科ホームで、Weekごとの「⚡ 高速」から始められるよ。'}</div>
-  </section>`;
+  </section>`:'';
 
   // 追加機能：眠気対策の設定トグル（タイムアタック／記述モード／サウンド）
   const ta = !!(state.settings&&state.settings.timeAttack);
@@ -201,31 +188,43 @@ export function renderHome(){
   app().innerHTML = "";
   app().appendChild(el(`<div>
     <h1>🏰 学習クエスト</h1>
-    ${resumePanel()}
     <div class="titleWrap"><span class="titleBadge">🎖 ${state.title}</span></div>
     <div class="sub">高校6教科＋英単語をゲーム感覚で攻略<br>全${totalQuestionCount()}問／基礎から発展まで　解説つき</div>
+    ${studyMaterialsHtml()}
+    ${materialManagerHtml(todayStr(),!!options.manageMaterials || !activeMaterials.length,!!options.completedMaterials,options)}
+    ${resumePanel()}
     <div class="card">
       <div class="hud">
         <span class="chip">合計スコア <span class="em">${state.totalScore}</span></span>
         <span class="chip"><span class="fire">🔥</span> 連続 <span class="em">${state.streak}</span>日</span>
         <span class="chip">バッジ <span class="em">${state.badges.size}</span></span>
       </div>
-      <div class="muted">まずは教科を選んでね。1問ごとに解説が出るよ。まちがえた問題は「今日の復習」でちょうどよいタイミングにまた出るから大丈夫！</div>
+      <div class="muted">学習中の単元から始めてみよう。まちがえた問題は「今日の復習」でちょうどよいタイミングにまた出るから大丈夫！</div>
       ${studyPanelHtml}
       ${leapGoalHtml}
-      ${settingsHtml}
-      ${bgmHtml}
-      ${renderTestPrepPanel()}
-      ${cardsHtml}
       ${reviewBtn}
       ${collBtn}
       ${badgesHtml}
+      <details class="homeSettings"${settingsOpen?' open':''}><summary>⚙️ 学習の設定</summary>${settingsHtml}${bgmHtml}</details>
     </div>
   </div>`));
 
   appendReportingSettings();
-  document.querySelectorAll('.subjectCard').forEach(node=>{
-    node.addEventListener('click',()=>renderSubjectHome(node.dataset.subject));
+  bindMaterialActions(({id,status})=>{
+    const completedMaterials=!!document.getElementById('completedMaterials')?.open;
+    const search=document.getElementById('materialSearch')?.value || '';
+    const openSubjects=[...document.querySelectorAll('[data-material-subject-panel]')].filter(panel=>panel._materialSearchActive?panel._materialWasOpen:panel.open).map(panel=>panel.dataset.materialSubjectPanel);
+    renderHome({manageMaterials:true,completedMaterials,search,openSubjects});
+    const manager=document.getElementById('materialManager');
+    const nextAction=status==='studying'?'remove':'study';
+    const buttons=[...document.querySelectorAll('[data-material-action]')];
+    const focus=buttons.find(button=>button.dataset.materialId===id && button.dataset.materialAction===nextAction && !button.closest?.('[hidden]'));
+    if(focus){
+      const panel=focus.closest?.('[data-material-subject-panel]');
+      if(panel)panel.open=true;
+      focus.focus();
+    }
+    else manager?.querySelector('summary')?.focus();
   });
   const rb=document.getElementById('reviewBtn');
   if(rb) rb.addEventListener('click',startReview);

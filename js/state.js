@@ -1,4 +1,4 @@
-import { STAGE_ORDER, QUESTIONS, totalQuestionCount, CARD_BY_ID, MATH1_ZERO_SUBJECT, displaySubjectForStage, displayStagesOfSubject } from "./content.js";
+import { STAGE_ORDER, QUESTIONS, totalQuestionCount, CARD_BY_ID, MATH1_ZERO_SUBJECT, displaySubjectForStage, displayStagesOfSubject, studyUnitById } from "./content.js";
 import { todayStr, addDays, toast } from "./utils.js";
 import { snapshotSession, restoreSession } from './session.js';
 
@@ -23,6 +23,7 @@ export const state = {
   settings:{timeAttack:true, inputMode:false, sound:true, englishSpeech:true, bgmUrl:"", dailyGoal:10}, // 追加機能：眠気対策の設定
   bossCleared:{},        // 追加機能："s1":true など、ボス撃破済みステージ
   subjectGroupCollapsed:{}, // "教科\u001fグループ":true
+  studyMaterials:{},     // 学習単元ID:"studying"（学習中）／"completed"（学習完了）
   lessonSeen:{},         // "njz1":true など、レッスンを最後まで読んだ単元（まなぶ→とく）
   // 現在のプレイ
   cur:null,
@@ -64,6 +65,7 @@ export function save(){
       settings:state.settings,
       bossCleared:state.bossCleared,
       subjectGroupCollapsed:state.subjectGroupCollapsed,
+      studyMaterials:state.studyMaterials,
       lessonSeen:state.lessonSeen,
       currentSession:state.resumeSession
     }));
@@ -93,6 +95,7 @@ export function load(){
     state.settings.dailyGoal=normalizeDailyGoal(state.settings.dailyGoal);
     state.bossCleared=(d.bossCleared&&typeof d.bossCleared==='object')?d.bossCleared:{};
     state.subjectGroupCollapsed=(d.subjectGroupCollapsed&&typeof d.subjectGroupCollapsed==='object')?d.subjectGroupCollapsed:{};
+    state.studyMaterials=normalizeStudyMaterials(d.studyMaterials);
     state.lessonSeen=(d.lessonSeen&&typeof d.lessonSeen==='object')?d.lessonSeen:{}; // 旧データ（フィールド欠落）は未読扱い
   }catch(e){/* 壊れたデータ・別バージョンは初期stateで開始 */}
   cleanupStaleQStats();  // 追加機能（数学カテゴリ細分化）：存在しない単元IDのqStatsキーが習熟度/称号を汚染しないよう掃除
@@ -331,6 +334,41 @@ export function subjectList(){
 /* 表示上の教科ごとのステージID一覧。数学Ⅰは章の学習順、ほかはorder順。 */
 export function stagesOfSubject(subject){
   return displayStagesOfSubject(subject);
+}
+/* 教材メニューの指定。章・Weekなど、学習単元ごとに状態を持つ。 */
+export function normalizeStudyMaterials(raw){
+  const out={};
+  if(!raw || typeof raw!=='object' || Array.isArray(raw))return out;
+  Object.entries(raw).forEach(([id,status])=>{
+    if(studyUnitById(id) && ['studying','completed'].includes(status))out[id]=status;
+  });
+  return out;
+}
+export function studyMaterialProgress(id){
+  const sids=studyUnitById(id)?.sids || [];
+  let mastered=0, questions=0;
+  sids.forEach(sid=>{
+    const progress=stageMastery(sid);
+    mastered+=progress.mastered;
+    questions+=progress.total;
+  });
+  return {cleared:sids.filter(sid=>state.stageCleared[sid]).length,total:sids.length,
+    pct:questions?Math.round(mastered/questions*100):0,mastered,questions};
+}
+export function studyMaterialStatus(id){
+  const unit=studyUnitById(id);
+  if(!unit)return 'available';
+  if(state.studyMaterials?.[id]==='completed')return 'completed';
+  if(unit.sids.length>0 && unit.sids.every(sid=>state.stageCleared[sid]))return 'completed';
+  return state.studyMaterials?.[id]==='studying'?'studying':'available';
+}
+export function setStudyMaterialStatus(id,status){
+  if(!studyUnitById(id) || !['studying','completed','available'].includes(status))return false;
+  state.studyMaterials=normalizeStudyMaterials(state.studyMaterials);
+  if(status==='available')delete state.studyMaterials[id];
+  else state.studyMaterials[id]=status;
+  save();
+  return true;
 }
 /* 教科の習熟度（その教科の全問題でのマスター率, %） */
 export function subjectMastery(subject){

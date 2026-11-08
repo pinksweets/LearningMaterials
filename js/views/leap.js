@@ -1,7 +1,7 @@
 import { app, el, escapeAttr, escapeHtml, toast } from "../utils.js";
 import { stopTimer } from "../timer.js";
-import { state, recordLeapSession, leapSessionsOn } from "../state.js";
-import { QUESTIONS } from "../content.js";
+import { state, recordLeapSession, leapSessionsOn, studyMaterialStatus } from "../state.js";
+import { QUESTIONS, studyUnitForStage } from "../content.js";
 import {
   LEAP_BASIC_SUBJECT,
   LEAP_DAILY_TARGET,
@@ -13,7 +13,7 @@ import {
   judgeLeapCard
 } from "../leap-study.js";
 import { stopBossTension, speakEnglish, stopSpeech } from "../audio.js";
-import { renderSubjectHome } from "./subject.js";
+import { renderSubjectHome, renderStageHome } from "./subject.js";
 import { reportCompletion, appendReportingStatus } from './reporting.js';
 
 export function startLeapSpeed(sid) {
@@ -164,6 +164,9 @@ export function renderLeapSpeedResult(c) {
   reportCompletion(c,stats);
   const today=leapSessionsOn();
   const complete=today>=LEAP_DAILY_TARGET;
+  const unit=studyUnitForStage(c.sid);
+  const selected=unit && state.studyMaterials?.[unit.id]==='studying';
+  const homeLabel=selected?(studyMaterialStatus(unit.id)==='completed'?'学習中の単元へ':unit.title+'に戻る'):'LEAP Basic に戻る';
   app().innerHTML='';
   app().appendChild(el(`<div>
     <h1>⚡ 高速周回の結果</h1>
@@ -183,12 +186,12 @@ export function renderLeapSpeedResult(c) {
         <span>${complete?'🎊 1日3回達成！今日もよく続けたね。':'あと'+Math.max(0,LEAP_DAILY_TARGET-today)+'回。3分だけ、もう一度やってみよう。'}</span>
       </div>
       <button class="btn" id="leapAgainBtn" type="button">同じステージをもう一周</button>
-      <button class="btn secondary" id="leapHomeBtn" type="button">LEAP Basic に戻る</button>
+      <button class="btn secondary" id="leapHomeBtn" type="button">${escapeHtml(homeLabel)}</button>
     </div>
   </div>`));
   const again=document.getElementById('leapAgainBtn');
   appendReportingStatus(c);
   if(again)again.addEventListener('click',()=>startLeapSpeed(c.sid));
   const home=document.getElementById('leapHomeBtn');
-  if(home)home.addEventListener('click',()=>renderSubjectHome(LEAP_BASIC_SUBJECT));
+  if(home)home.addEventListener('click',()=>renderStageHome(c.sid));
 }

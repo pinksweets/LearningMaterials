@@ -3,9 +3,9 @@ import { shuffle, el, app, toast, escapeHtml } from "../utils.js";
 import { normalizeAnswer, isAnswerMatch, isAnyAnswerMatch, isChemicalFormulaMatch } from "../answers.js";
 import { stopTimer, startTimer, timeLimitFor } from "../timer.js";
 import { FEVER_BONUS, initRewardProgress, applyFeverProgress, rewardHudHtml } from "../fever.js";
-import { QUESTIONS, MATH1_PREP_SUBJECT, canonicalSubject, displaySubjectForStage } from "../content.js";
+import { QUESTIONS, MATH1_PREP_SUBJECT, canonicalSubject, displaySubjectForStage, studyUnitForStage, studyUnitById } from "../content.js";
 import { extractLeapEntry, isLeapSubject, shouldShowLeapWordBeforeAnswer } from "../leap-study.js";
-import { state, save, dueList, updateQStat, unlockCard, isStageUnlockedForBoss, recordStudyAnswer } from "../state.js";
+import { state, save, dueList, updateQStat, unlockCard, isStageUnlockedForBoss, recordStudyAnswer, studyMaterialStatus } from "../state.js";
 import { playAnswerSound, speakEnglish, syncBossTension, stopBossTension, stopSpeech } from "../audio.js";
 import { renderHome } from "./home.js";
 import { renderStageHome } from "./subject.js";
@@ -678,9 +678,11 @@ export function saveQuestionDraft(){
   save();
 }
 
-export function resumePanel(subject){
+export function resumePanel(subject,unitId){
   const c=state.cur?.mode==='practice'?restoreSession(state.resumeSession):state.cur;
   if(!c || !Array.isArray(c.list) || c.result || (subject && displaySubjectForStage(c.sid)!==canonicalSubject(subject)))return '';
+  if(unitId && !studyUnitById(unitId)?.sids.includes(c.sid))return '';
+  if(!subject && c.mode!=='review' && studyMaterialStatus(studyUnitForStage(c.sid)?.id)==='completed')return '';
   return `<aside class="resumePanel"><strong>続きから学習できるよ</strong><a class="btn secondary" href="${sessionHash(c)}">${escapeHtml(c.title)} · ${c.i+1}問目から再開</a></aside>`;
 }
 

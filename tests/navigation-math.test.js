@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseRoute, subjectHash, syncScreenHash, NAV } from '../js/utils.js';
+import { parseRoute, subjectHash, studyUnitHash, mathChapterHash, syncScreenHash, NAV } from '../js/utils.js';
+import { QUESTIONS, STAGE_ORDER, MATH1_SUBJECT, MATH1_ZERO_SUBJECT, MATH1_CHAPTERS, displaySubjectForStage, displayStagesOfSubject, studyUnitList, studyUnitById, studyUnitForStage } from '../js/content.js';
 import { snapshotSession, restoreSession, sessionHash, questionFromKey } from '../js/session.js';
 import { mathMarkup, mathText, mathVisual, quadraticSpec, quadraticFacts } from '../js/math-display.js';
 import { state, save, load, SAVE_KEY } from '../js/state.js';
@@ -22,6 +23,77 @@ test('URLは日本語教科、特定問題、旧リンクを扱い、不正番�
   assert.deepEqual(parseRoute('#/question/sep16Ma3/6'),{type:'question',sid:'sep16Ma3',index:5});
   assert.equal(parseRoute('#test/2026-09-16').type,'september16');
   for(const hash of ['#/question/a/-1','#/question/a/0','#/subject/%XX','#/question/a/1/more'])assert.equal(parseRoute(hash).type,'invalid');
+});
+
+test('学習単元URLは章・グループ・WeekのIDを往復し、余分な階層や壊れたIDを拒否する',()=>{
+  for(const id of ['math1:quadratics','stage:lp1c1w1','group:歴史Ⅰ']){
+    const hash=studyUnitHash(id);
+    assert.ok(hash.startsWith('#/unit/'));
+    assert.deepEqual(parseRoute(hash),{type:'unit',unit:id});
+  }
+  for(const hash of ['#/unit/','#/unit/%XX','#/unit/stage:a/more'])assert.equal(parseRoute(hash).type,'invalid');
+  assert.equal(mathChapterHash('quadratics'),'#/math1/quadratics');
+  assert.deepEqual(parseRoute(mathChapterHash('quadratics')),{type:'math-chapter',chapter:'quadratics'});
+});
+
+test('学習単元は表示上の全ステージを一度ずつ含み、IDから元の問題へ到達できる',()=>{
+  const units=studyUnitList();
+  const sids=units.flatMap(unit=>unit.sids);
+  assert.equal(new Set(units.map(unit=>unit.id)).size,units.length);
+  assert.equal(new Set(sids).size,sids.length);
+  assert.deepEqual(new Set(sids),new Set(STAGE_ORDER));
+  for(const unit of units){
+    assert.deepEqual(studyUnitById(unit.id),unit);
+    assert.ok(unit.title);
+    for(const sid of unit.sids){
+      assert.equal(displaySubjectForStage(sid),unit.subject);
+      assert.deepEqual(studyUnitForStage(sid),unit);
+    }
+  }
+  for(const id of ['missing','group:missing','stage:missing','math1:missing',null])assert.equal(studyUnitById(id),undefined);
+  assert.equal(studyUnitForStage('missing'),undefined);
+});
+
+test('数学Ⅰは章単位、LEAPはPartとCourseを保った個別Week単位で指定できる',()=>{
+  const math=studyUnitList(MATH1_SUBJECT);
+  assert.deepEqual(math.map(unit=>({id:unit.id,title:unit.title,group:unit.group,sids:unit.sids})),MATH1_CHAPTERS.map(chapter=>({
+    id:'math1:'+chapter.id,title:chapter.title,group:'',sids:chapter.sections.flatMap(section=>section.sids)
+  })));
+  assert.deepEqual(studyUnitList(MATH1_ZERO_SUBJECT),math);
+  const leapSubject='📘 LEAP Basic 必携英単語';
+  const leap=studyUnitList(leapSubject);
+  const leapSids=displayStagesOfSubject(leapSubject);
+  assert.equal(leap.length,leapSids.length);
+  assert.ok(leap.length>1);
+  for(const [index,unit] of leap.entries()){
+    const sid=leapSids[index];
+    assert.deepEqual(unit,{id:'stage:'+sid,subject:leapSubject,title:QUESTIONS[sid].title,group:QUESTIONS[sid].group || '',sids:[sid]});
+  }
+  // 呼び出し元が配列を加工しても次回の単元一覧や章定義に影響しない。
+  math[0].sids.length=0;
+  assert.deepEqual(studyUnitList(MATH1_SUBJECT)[0].sids,MATH1_CHAPTERS[0].sections.flatMap(section=>section.sids));
+});
+
+test('ほかの教科は同じグループを一単元にまとめ、末尾の追加ステージも反映する',()=>{
+  const subject='📜 歴史総合';
+  const grouped=studyUnitList(subject).find(unit=>unit.group);
+  assert.ok(grouped);
+  const sid='unitAppendCheck';
+  assert.equal(QUESTIONS[sid],undefined);
+  const originalSids=grouped.sids.slice();
+  try{
+    QUESTIONS[sid]={subject,title:'追加練習',group:grouped.group,data:[]};
+    STAGE_ORDER.push(sid);
+    assert.deepEqual(studyUnitById(grouped.id).sids,[...originalSids,sid]);
+    assert.equal(studyUnitForStage(sid).id,grouped.id);
+    const standalone=studyUnitList().find(unit=>unit.id.startsWith('stage:') && unit.subject!=='📘 LEAP Basic 必携英単語');
+    assert.ok(standalone);
+    assert.equal(standalone.group,'');
+    assert.equal(standalone.title,QUESTIONS[standalone.sids[0]].title);
+  }finally{
+    STAGE_ORDER.splice(STAGE_ORDER.indexOf(sid),1);
+    delete QUESTIONS[sid];
+  }
 });
 
 test('次問は履歴を置換し、復元中は履歴を追加しない',()=>{

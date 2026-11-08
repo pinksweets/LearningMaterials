@@ -41,6 +41,7 @@ test("save(): localStorage に書き込む JSON のキー集合が仕様どお�
       "settings",
       "bossCleared",
       "subjectGroupCollapsed",
+      "studyMaterials",
       "lessonSeen",
       "currentSession",
     ])
@@ -58,6 +59,7 @@ test("save→load 往復で totalScore/badges(Set)/cards(Set)/settings が復元
   };
   state.leapDailySessions = { "2026-07-09": 2 };
   state.subjectGroupCollapsed = { "数学Ⅰ\u001f二次関数": true };
+  state.studyMaterials = { "math1:quadratics": "studying", "stage:lbp1c1w1": "completed" };
   save();
 
   // 一度クリアしてから load() で正しく復元されることを確認する
@@ -68,6 +70,7 @@ test("save→load 往復で totalScore/badges(Set)/cards(Set)/settings が復元
   state.studyLog = {};
   state.leapDailySessions = {};
   state.subjectGroupCollapsed = {};
+  state.studyMaterials = {};
 
   load();
 
@@ -81,10 +84,12 @@ test("save→load 往復で totalScore/badges(Set)/cards(Set)/settings が復元
   });
   assert.deepEqual(state.leapDailySessions, { "2026-07-09": 2 });
   assert.deepEqual(state.subjectGroupCollapsed, { "数学Ⅰ\u001f二次関数": true });
+  assert.deepEqual(state.studyMaterials, { "math1:quadratics": "studying", "stage:lbp1c1w1": "completed" });
 });
 
-test("旧データ互換: settings/bossCleared/studyLog/subjectGroupCollapsed が欠落してもデフォルトで読める", () => {
+test("旧データ互換: settings/bossCleared/studyLog/subjectGroupCollapsed/studyMaterials が欠落してもデフォルトで読める", () => {
   localStorage.clear();
+  state.studyMaterials = { "math1:quadratics": "completed" };
   localStorage.setItem(
     SAVE_KEY,
     JSON.stringify({
@@ -97,7 +102,7 @@ test("旧データ互換: settings/bossCleared/studyLog/subjectGroupCollapsed �
       lastStudyDate: "",
       cards: [],
       title: "",
-      // settings, bossCleared, studyLog, subjectGroupCollapsed は意図的に欠落（旧バージョンのセーブデータを模擬）
+      // settings, bossCleared, studyLog, subjectGroupCollapsed, studyMaterials は意図的に欠落（旧バージョンのセーブデータを模擬）
     })
   );
   load();
@@ -106,6 +111,7 @@ test("旧データ互換: settings/bossCleared/studyLog/subjectGroupCollapsed �
   assert.deepEqual(state.studyLog, {});
   assert.deepEqual(state.leapDailySessions, {});
   assert.deepEqual(state.subjectGroupCollapsed, {});
+  assert.deepEqual(state.studyMaterials, {});
 });
 
 test("壊れたJSON（構文エラー）を読み込んでも load() は例外を出さず、呼び出し前の状態を保持する", () => {

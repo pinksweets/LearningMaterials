@@ -97,6 +97,47 @@ h1{font-size:1.35rem;margin:.2em 0;text-align:center;}
 .subjectCard-name{font-weight:800;font-size:1.12rem;}
 .subjectCard-sum{font-size:.8rem;color:var(--muted);margin-top:4px;}
 .subjectCard .mastery{margin-top:8px;}
+/* 学習中の教材を最初に選び、教材の指定は管理欄にまとめる。 */
+.studyMaterials{margin:16px 0 12px;padding:18px;border:1px solid var(--accent2);border-radius:18px;background:var(--panel);}
+.materialHeading{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.materialHeading h2{margin:0;font-size:1.1rem;}
+.materialHeading>span{color:var(--muted);font-size:.85rem;white-space:nowrap;}
+.studyMaterialList{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:12px;margin-top:14px;}
+.studyMaterialLink{display:grid;gap:7px;padding:16px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;color:var(--text);text-decoration:none;overflow-wrap:anywhere;}
+.studyMaterialLink:hover{border-color:var(--accent2);}
+.studyMaterialLink span,.studyMaterialLink small,.materialProgress{color:var(--muted);font-size:.8rem;}
+.studyMaterialLink b{color:var(--accent);font-size:.9rem;}
+.materialEmpty{margin:12px 0 0;color:var(--muted);font-size:.9rem;}
+.materialManager{margin:0 0 18px;padding:14px 18px;border:1px solid var(--line);border-radius:16px;background:var(--panel);}
+.materialManager>summary{display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;min-height:44px;font-weight:700;}
+.materialManager>summary::before{content:'▶';font-size:.75rem;color:var(--accent2);}
+.materialManager[open]>summary::before{content:'▼';}
+.materialManager>summary span{margin-left:auto;color:var(--muted);font-size:.8rem;white-space:nowrap;}
+.materialManager h3{font-size:.95rem;margin:18px 0 10px;}
+.materialChoices{display:grid;gap:10px;}
+.materialSearchLabel{display:block;font-size:.85rem;font-weight:700;margin-top:14px;}
+.materialSearch{display:block;width:100%;padding:12px;margin:6px 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);font:inherit;font-size:16px;}
+.unitSubject{border-top:1px solid var(--line);margin-top:10px;padding-top:6px;}
+.unitSubject>summary{display:flex;align-items:center;gap:10px;cursor:pointer;min-height:52px;font-weight:700;overflow-wrap:anywhere;}
+.unitSubject>summary::before{content:'▶';font-size:.75rem;color:var(--accent2);}
+.unitSubject[open]>summary::before{content:'▼';}
+.unitSubject>summary span{margin-left:auto;color:var(--muted);font-size:.8rem;white-space:nowrap;}
+.unitSubject>.materialChoices{margin:6px 0 12px;}
+.materialChoice[hidden],.unitSubject[hidden],#materialSearchEmpty[hidden]{display:none;}
+.materialChoice{padding:14px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;}
+.materialChoice.isStudying{border-color:var(--accent2);}
+.materialTitle{display:block;min-height:44px;color:var(--text);font-weight:700;text-decoration:none;overflow-wrap:anywhere;}
+.materialTitle:hover{color:var(--accent2);}
+.materialRange{color:var(--muted);font-size:.8rem;margin:0 0 8px;overflow-wrap:anywhere;}
+.materialActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+.materialActions .btn,.completedMaterial .btn{min-height:44px;white-space:normal;}
+.completedMaterials{border-top:1px solid var(--line);margin-top:18px;padding-top:12px;}
+.completedMaterials>summary,.homeSettings>summary{padding:10px 0;cursor:pointer;font-weight:700;}
+.completedMaterial{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;font-size:.85rem;overflow-wrap:anywhere;}
+.completedMaterial .btn{flex-shrink:0;}
+.studyMaterialLink:focus-visible,.materialTitle:focus-visible,.materialActions button:focus-visible,.completedMaterial button:focus-visible,.materialManager summary:focus-visible{outline:3px solid var(--accent2);outline-offset:3px;}
+.homeSettings{margin-top:18px;border-top:1px solid var(--line);}
+@media(max-width:420px){.studyMaterials,.materialManager{padding:12px;}.materialActions .btn{flex:1 1 120px;}.completedMaterial{align-items:flex-start;flex-direction:column;}}
 /* ==== 追加機能（数学カテゴリ細分化）: 大カテゴリ見出し（subjectHeadより控えめ） ==== */
 .groupHead{margin-top:10px;padding:2px 2px 2px 10px;font-size:.8rem;font-weight:700;color:var(--muted);
   border-left:3px solid var(--line);}
