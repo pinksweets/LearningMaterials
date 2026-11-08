@@ -1,3 +1,4 @@
+import { trigDiagram } from '../trig-display.js';
 import { shuffle, el, app, toast, escapeHtml } from "../utils.js";
 import { normalizeAnswer, isAnswerMatch, isAnyAnswerMatch, isChemicalFormulaMatch } from "../answers.js";
 import { stopTimer, startTimer, timeLimitFor } from "../timer.js";
@@ -212,7 +213,7 @@ export function renderQuestion(){
   const hintHtml = q.hint && !mock ? `<button class="fallbackLink" id="hintBtn" type="button">💡 ヒント</button>
     <div class="muted" id="hintText" style="display:none;margin-top:6px"></div>` : "";
 
-  body=body.replaceAll(`<div class="qtext">${q.q}</div>`,`<div class="qtext">${text(q.q)}</div>${mathVisual(q._key)}${bioDiagram(q.diagram)}${mathADiagram(q.maDiagram)}`);
+  body=body.replaceAll(`<div class="qtext">${q.q}</div>`,`<div class="qtext">${text(q.q)}</div>${mathVisual(q._key)}${bioDiagram(q.diagram)}${mathADiagram(q.maDiagram)}${trigDiagram(q.trig)}`);
   const subject=QUESTIONS[sourceSid]?displaySubjectForStage(sourceSid):null;
   const chapter=mathChapterForStage(sourceSid);
   // まなぶ→とく：レッスン付き単元では問題の途中でもカードを読み返せる（減点なし・遷移なし）

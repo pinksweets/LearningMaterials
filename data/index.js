@@ -54,7 +54,9 @@ import * as oct27En from './oct27_english.js';
 import * as oct27Mock from './oct27_english_mock.js';
 import * as qi from './qi_quadratic_inequalities.js';
 
-const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5, lbq, sep, sep15, sep16Ja, sep16Ma, sep16En, njz, ecz, ch1, chMock, chFormula, h26, h26Mock, e26, e26Mock, ec26, ec26Mock, ec26Text, ec26TextMock, b26, ma26, ma26Mock, mqSupport, mqMock, oct27En, oct27Mock, qi];
+import * as tr from './m4_trigonometry.js';
+
+const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5, lbq, sep, sep15, sep16Ja, sep16Ma, sep16En, njz, ecz, ch1, chMock, chFormula, h26, h26Mock, e26, e26Mock, ec26, ec26Mock, ec26Text, ec26TextMock, b26, ma26, ma26Mock, mqSupport, mqMock, oct27En, oct27Mock, qi, tr];
 
 /* 全単元（登録順） */
 export const units = MODULES.flatMap(m => m.units);

@@ -1,3 +1,4 @@
+import { trigDiagram } from './trig-display.js';
 /* js/lesson.js — 「まなぶ→とく」レッスンカードの表示データ生成。
    DOM・state に依存しないため、ブラウザと node:test の両方で検証できる。
    単元の lesson は「①たとえ話 ②式と単位 ③よくある勘違い」の3枚固定を運用ルールとする。 */
@@ -21,12 +22,13 @@ export function lessonBodyHtml(body, options={}){
 
 export function lessonCardHtml(card, index, options={}){
   const kind = card.kind || LESSON_KINDS[index] || '';
-  const figure = (card.graph ? graphSvg(card.graph, card.graphStep ?? 2) : '') + bioDiagram(card.diagram);
+  const figure = (card.graph ? graphSvg(card.graph, card.graphStep ?? 2) : '') + bioDiagram(card.diagram) + trigDiagram(card.trig);
   const formula = card.formula ? `<div class="lessonFormula">${options.math?mathText(card.formula):escapeHtml(card.formula)}</div>` : '';
   return `<article class="lessonCard" data-lesson-card="${index}">
     <div class="lessonKind">${index+1}/${LESSON_CARD_COUNT}　${escapeHtml(kind)}</div>
     <h3>${escapeHtml(card.title||'')}</h3>
     ${lessonBodyHtml(card.body, options)}
+    ${card.checkpoint ? `<aside><p><strong>自分で確認：</strong>${escapeHtml(card.checkpoint.q)}</p><details><summary>考えてから答えを見る</summary>${lessonBodyHtml(card.checkpoint.a, options)}</details></aside>` : ''}
     ${formula}
     ${figure}
     ${card.guidedExample ? guidedStudyHtml(card.guidedExample) : ''}

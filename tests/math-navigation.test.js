@@ -2,7 +2,7 @@ import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { MATH1_SUBJECT, MATH1_ZERO_SUBJECT, MATH1_PREP_SUBJECT, QUESTIONS } from '../js/content.js';
 import { mathChapterHash, subjectHash, parseRoute, todayStr, NAV } from '../js/utils.js';
-import { state } from '../js/state.js';
+import { state, save, load } from '../js/state.js';
 import { snapshotSession } from '../js/session.js';
 import { startStage, resumePanel, finishQuestion, renderQuestion } from '../js/views/quiz.js';
 import { renderLesson } from '../js/views/lesson.js';
@@ -60,6 +60,34 @@ test('章URLは直接開ける形式を保ち、不正なエンコードや余�
   assert.deepEqual(parseRoute(subjectHash(MATH1_PREP_SUBJECT)),{type:'subject',subject:MATH1_PREP_SUBJECT});
   assert.equal(parseRoute('#/math1/%XX').type,'invalid');
   assert.equal(parseRoute('#/math1/quadratics/extra').type,'invalid');
+});
+
+test('三角比は②から開始し、図つき問題の採点・保存復元・結果から章へ戻れる（DOMスタブ）',async()=>{
+  const {renderMathHome}=await import('../js/views/math.js');
+  renderMathHome('trigonometry');
+  assert.match(screen.innerHTML,/data-math-stage="tr2"/);
+  assert.match(screen.innerHTML,/9ステージ・90問/);
+  renderLesson('tr2');
+  assert.match(screen.innerHTML,/θ＝∠C/);
+  click('lessonNext');
+  assert.match(screen.innerHTML,/<details><summary>考えてから答えを見る/);
+  click('lessonNext');click('lessonStart');
+  // 問題順はランダムでも、問題キーと図データは保存・復元される。
+  const first=state.cur.list[0];
+  finishQuestion(true,first);
+  finishQuestion(true,first);
+  assert.equal(state.cur.correct,1);
+  assert.equal(state.qStats[first._key].seen,1);
+  save();state.cur=null;load();
+  assert.equal(state.cur.sid,'tr2');
+  assert.equal(state.cur.list[0]._key,first._key);
+  assert.equal(state.cur.correct,1);
+  renderQuestion();
+  if(first.trig)assert.match(screen.innerHTML,/class="trigFigure"/);
+  state.cur.i=state.cur.list.length;
+  renderQuestion();
+  click('homeBtn');
+  assert.equal(window.location.hash,mathChapterHash('trigonometry'));
 });
 
 test('途中経過は統合後の通常数学Ⅰとテスト対策の正しい一覧にだけ表示する',()=>{

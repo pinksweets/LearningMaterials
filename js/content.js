@@ -38,6 +38,12 @@ export const MATH1_CHAPTERS = [
     {title:'6 二次関数の確認', sids:['njz10']},
     {title:'7 2次不等式の基礎', sids:['qi1','qi2','qi3','qi4','qi5']},
     {title:'8 2次不等式の応用', sids:['qi6','qi7','qi8','qi9','qi10']}
+  ]},
+  {id:'trigonometry', title:'図形と計量', desc:'坂道の意味がわかっている人は②から。θの位置と辺の対応を確かめ、特殊角・定理・面積へ進もう。', sections:[
+    {title:'必要なときの復習', sids:['tr1']},
+    {title:'ここから開始：角度を基準に考える', sids:['tr2','tr3']},
+    {title:'角度と辺の長さをつなぐ', sids:['tr4','tr5','tr6']},
+    {title:'鈍角と一般の三角形へ', sids:['tr7','tr8','tr9']}
   ]}
 ];
 const MATH1_NORMAL_STAGE_IDS = MATH1_CHAPTERS.flatMap(chapter=>chapter.sections.flatMap(section=>section.sids));

@@ -14,13 +14,14 @@ beforeEach(()=>{
   state.lessonSeen={};
 });
 
-test('数学Ⅰの3章カードには通常35ステージ350問だけを表示する',()=>{
+test('数学Ⅰの4章カードには通常44ステージ440問だけを表示する',()=>{
   const html=mathChapterCardsHtml();
-  assert.equal((html.match(/class="mathChapterCard"/g)||[]).length,3);
+  assert.equal((html.match(/class="mathChapterCard"/g)||[]).length,4);
   for(const [id,title,stages,questions] of [
     ['expressions','数と式',6,60],
     ['logic','集合と命題',4,40],
-    ['quadratics','二次関数',25,250]
+    ['quadratics','二次関数',25,250],
+    ['trigonometry','図形と計量',9,90]
   ]){
     assert.ok(html.includes(`href="#/math1/${id}"`));
     assert.ok(html.includes(`<strong>${title}</strong>`));
@@ -29,19 +30,20 @@ test('数学Ⅰの3章カードには通常35ステージ350問だけを表示�
   assert.doesNotMatch(html,/mqs\d|mqmock|100点|124問/);
 });
 
-test('章内の練習ボタンは通常の全35単元を一度ずつ示し、補習・模擬を混ぜない',()=>{
+test('章内の練習ボタンは通常の全44単元を一度ずつ示し、補習・模擬を混ぜない',()=>{
   const expected=[
     ...Array.from({length:6},(_,i)=>`m1s${i+1}`),
     ...Array.from({length:4},(_,i)=>`m2s${i+1}`),
     ...Array.from({length:5},(_,i)=>`m3s${i+1}`),
     ...Array.from({length:10},(_,i)=>`njz${i+1}`),
-    ...Array.from({length:10},(_,i)=>`qi${i+1}`)
+    ...Array.from({length:10},(_,i)=>`qi${i+1}`),
+    ...Array.from({length:9},(_,i)=>`tr${i+1}`)
   ];
   const sids=MATH1_CHAPTERS.flatMap(chapter=>chapter.sections.flatMap(section=>section.sids));
   const html=sids.map((sid,index)=>mathStageHtml(sid,index+1)).join('');
   const buttons=[...html.matchAll(/data-math-stage="([^"]+)"/g)].map(match=>match[1]);
-  assert.equal(buttons.length,35);
-  assert.equal(new Set(buttons).size,35);
+  assert.equal(buttons.length,44);
+  assert.equal(new Set(buttons).size,44);
   assert.deepEqual(buttons.slice().sort(),expected.slice().sort());
   assert.doesNotMatch(html,/data-math-(?:stage|lesson|boss)="(?:mqs\d+|mqmock1)"/);
   for(const sid of expected)assert.ok(mathChapterForStage(sid),`${sid}の所属章`);
