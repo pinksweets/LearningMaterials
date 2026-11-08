@@ -63,7 +63,10 @@ export function quadraticSpec(key,parameter){
 
 export function quadraticFacts(s){
   const f=x=>s.a*x*x+s.b*x+s.c;
-  const axis=-s.b/(2*s.a), vertex=f(axis), disc=s.b*s.b-4*s.a*s.c;
+  const axis=-s.b/(2*s.a), vertex=f(axis), rawDisc=s.b*s.b-4*s.a*s.c;
+  // √を含む係数でも、丸め誤差だけで重解を共有点なしと判定しない。
+  const tolerance=Number.EPSILON*8*(Math.abs(s.b*s.b)+Math.abs(4*s.a*s.c));
+  const disc=Math.abs(rawDisc)<=tolerance?0:rawDisc;
   const roots=disc<0?[]:disc===0?[axis]:[(-s.b-Math.sqrt(disc))/(2*s.a),(-s.b+Math.sqrt(disc))/(2*s.a)].sort((a,b)=>a-b);
   const points=s.domain?[...s.domain,...(axis>=s.domain[0]&&axis<=s.domain[1]?[axis]:[])]:[axis];
   return {axis,vertex,roots,min:Math.min(...points.map(f)),max:Math.max(...points.map(f))};

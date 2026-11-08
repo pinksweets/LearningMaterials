@@ -22,15 +22,15 @@ beforeEach(()=>{
   state.resumeSession=null;
 });
 
-test('通常の数学Ⅰとテスト対策は全35単元を重複・欠落なく分ける',()=>{
+test('通常の数学Ⅰとテスト対策は全45単元を重複・欠落なく分ける',()=>{
   const normal=displayStagesOfSubject(MATH1_SUBJECT);
   const prep=displayStagesOfSubject(MATH1_PREP_SUBJECT);
   const raw=STAGE_ORDER.filter(sid=>[MATH1_SUBJECT,MATH1_ZERO_SUBJECT].includes(QUESTIONS[sid].subject));
-  assert.equal(normal.length,25);
+  assert.equal(normal.length,35);
   assert.equal(prep.length,10);
-  assert.equal(normal.reduce((sum,sid)=>sum+QUESTIONS[sid].data.length,0),250);
+  assert.equal(normal.reduce((sum,sid)=>sum+QUESTIONS[sid].data.length,0),350);
   assert.equal(prep.reduce((sum,sid)=>sum+QUESTIONS[sid].data.length,0),124);
-  assert.equal(new Set([...normal,...prep]).size,35);
+  assert.equal(new Set([...normal,...prep]).size,45);
   assert.deepEqual([...normal,...prep].sort(),raw.slice().sort());
   assert.deepEqual(MATH1_CHAPTERS.flatMap(chapter=>chapter.sections.flatMap(section=>section.sids)),normal);
   assert.deepEqual(normal.slice(0,6),['m1s1','m1s2','m1s3','m1s4','m1s5','m1s6']);
@@ -72,9 +72,9 @@ test('クリア数・習熟度・弱点は通常教材とテスト対策で分�
   state.stageCleared.mqs1=true;
   state.stageCleared.mqmock1=true;
   for(const key of ['njz1-0','m3s1-0','mqs1-0','mqmock1-0'])state.qStats[key]={seen:3,correct:3,box:3,due:'2099-01-01'};
-  assert.deepEqual(subjectClearedCount(MATH1_SUBJECT),{cleared:2,total:25});
+  assert.deepEqual(subjectClearedCount(MATH1_SUBJECT),{cleared:2,total:35});
   assert.deepEqual(subjectClearedCount(MATH1_PREP_SUBJECT),{cleared:2,total:10});
-  assert.deepEqual(subjectMastery(MATH1_SUBJECT),{pct:1,mastered:2,total:250});
+  assert.deepEqual(subjectMastery(MATH1_SUBJECT),{pct:1,mastered:2,total:350});
   assert.deepEqual(subjectMastery(MATH1_PREP_SUBJECT),{pct:2,mastered:2,total:124});
   assert.deepEqual(subjectMastery(MATH1_ZERO_SUBJECT),subjectMastery(MATH1_SUBJECT));
   for(const sid of stagesOfSubject(MATH1_SUBJECT)){

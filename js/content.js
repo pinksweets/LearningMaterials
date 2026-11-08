@@ -29,13 +29,15 @@ export const MATH1_CHAPTERS = [
   {id:'logic', title:'集合と命題', desc:'集合の関係と、命題が正しいかを判断する考え方を学ぼう。', sections:[
     {title:'基礎から順に', sids:['m2s1','m2s2','m2s3','m2s4']}
   ]},
-  {id:'quadratics', title:'二次関数', desc:'関数と座標から始めて、平方完成・グラフ・移動・最大最小へ進もう。', sections:[
+  {id:'quadratics', title:'二次関数', desc:'関数と座標から、平方完成・最大最小・2次不等式とその応用へ進もう。', sections:[
     {title:'1 関数と座標', sids:['njz1','m3s1','njz2']},
     {title:'2 放物線・軸・頂点', sids:['njz3','njz4','njz5','njz6']},
     {title:'3 平方完成と作図', sids:['njz7','m3s2','m3s3']},
     {title:'4 移動と対称', sids:['njz8','m3s4','njz9']},
     {title:'5 最大・最小', sids:['m3s5']},
-    {title:'6 章の確認', sids:['njz10']}
+    {title:'6 二次関数の確認', sids:['njz10']},
+    {title:'7 2次不等式の基礎', sids:['qi1','qi2','qi3','qi4','qi5']},
+    {title:'8 2次不等式の応用', sids:['qi6','qi7','qi8','qi9','qi10']}
   ]}
 ];
 const MATH1_NORMAL_STAGE_IDS = MATH1_CHAPTERS.flatMap(chapter=>chapter.sections.flatMap(section=>section.sids));

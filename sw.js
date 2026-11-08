@@ -15,10 +15,11 @@
      （バンプを忘れると古いキャッシュがいつまでも残り続ける）。
 ============================================================ */
 
-const CACHE_NAME = 'gakushu-quest-v31';
+const CACHE_NAME = 'gakushu-quest-v32';
 let cacheFallbackUntil = 0;
 
 const ASSETS = [
+  './data/qi_quadratic_inequalities.js',
   './',
   './index.html',
   './manifest.webmanifest',

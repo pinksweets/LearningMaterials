@@ -60,7 +60,7 @@ test('数学Ⅰの補助教材は試験日を決めず、通常教材と別の�
     assert.equal(item.keepSubject,undefined);
     assert.notEqual(item.subject,MATH1_SUBJECT);
     assert.equal(stagesOfSubject(item.subject).length,10);
-    assert.equal(stagesOfSubject(MATH1_SUBJECT).length,25);
+    assert.equal(stagesOfSubject(MATH1_SUBJECT).length,35);
     assert.equal(item.past,false);
     assert.equal(item.status,'基礎から確認');
     assert.ok(renderTestPrepPanel(date).includes(`href="${item.href}"`));
