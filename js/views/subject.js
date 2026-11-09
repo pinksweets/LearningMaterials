@@ -122,6 +122,14 @@ export function renderSubjectHome(subject,unitId=''){
     ${unit?`<div class="sub">${escapeHtml(subject)}${unit.group && unit.group!==unit.title?'　｜　'+escapeHtml(unit.group):''}</div>`:''}
     ${resumePanel(subject,unit?.id)}
     <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">${unit?'← 学習中の単元へ':september16||subject===MATH1_PREP_SUBJECT?'← テスト対策へ':'← 教科選択へ'}</button>
+    ${subject==='📅 11/10 英語小テスト対策'?`<section class="sepPlan">
+      <strong>11/10に向けて｜20項目を思い出して、書いてみよう</strong>
+      <p>範囲は写真のp.72〜77、No.205〜224。まず意味20問、次につづり20問、最後に語法20問を練習しよう。練習は時間制限なしだよ。</p>
+      <ol><li>①の3ステージで、意味を確認してから英語を入力。teach・begin・become・goの活用も声に出そう。</li><li>②の2ステージで、on my way home、study abroad、finish doing、get used to doingなどを確認しよう。</li><li>仕上げに復習模擬34問・100点。目安20分を自分で計ろう。正解と解説は終了後に表示するよ。</li><li>結果の分野別リンクから苦手を練習し直そう。前日に取り組んだら、11/10の朝にも間違えた語を思い出してみてね。</li></ol>
+      <p>目標80点・時間・配点は学習用の目安だよ。模擬は練習から選んだ復習用で、学校の実際の出題形式・配点を示すものではないよ。</p>
+      <a class="btn secondary" href="#/stage/nov10e1/1">意味とつづりの練習を始める</a>
+      <a class="btn" href="#/stage/nov10mock1/1">11/10英語の100点模擬テストを始める</a>
+    </section>`:''}
     ${!unit && subject===MATH1_PREP_SUBJECT?`<a class="mathTextLink" href="${subjectHash(MATH1_SUBJECT)}">数学Ⅰの通常教材（3章）へ →</a><section class="sepPlan"><strong>二次関数を、一行ずつ理解しよう</strong>
       <p>式を整える理由を答える例題 → 10問の練習 → 紙で自力で解く、の順で進もう。練習は時間制限なしだよ。</p>
       <ol><li>展開と代入 → 平方完成 → 軸・頂点・対称な点からグラフ。</li><li>グラフの移動 → xの範囲内の最大・最小。頂点と両端の値を比べよう。</li><li>最大・最小の条件からcを求める。縦に動くcと、軸を動かすcを分けて考えよう。</li><li>9ステージ・90問の後に、34問・100点の確認模擬テスト。学習用の目安は45分・80点。時間は自分で計ろう。</li></ol>

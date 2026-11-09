@@ -15,7 +15,7 @@ test('10/27の入口・写真21項目の意味とつづり・60問と100点模�
   assert.equal(category('2026-10-26').status,'これからのテスト');
   assert.equal(category('2026-10-27').status,'今日のテスト');
   assert.equal(category('2026-10-28').past,true);
-  assert.equal(testPrepCategories('2026-10-26')[0].subject,category('2026-10-26').subject);
+  assert.ok(testPrepCategories('2026-10-26').findIndex(c=>c.subject===category('2026-10-26').subject)<testPrepCategories('2026-10-26').findIndex(c=>c.added===10));
   assert.ok(renderTestPrepPanel('2026-10-26').includes(category('2026-10-26').href));
   assert.equal(stagesOfSubject(category('2026-10-26').subject).length,6);
   assert.deepEqual(practice.map(u=>u.questions.length),[14,14,14,9,9]);

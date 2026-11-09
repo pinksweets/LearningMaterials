@@ -27,6 +27,7 @@ import { september15Subject } from "./september15.js";
 export function testPrepCategories(today=todayStr()){
   // 追加順を明示し、新しく追加した対策から表示する。日付は年も固定する。
   return [
+    {subject:'📅 11/10 英語小テスト対策',title:'11/10 英語小テスト対策',date:'2026-11-10',added:12,href:subjectHash('📅 11/10 英語小テスト対策'),range:'写真p.72〜77｜No.205〜224の20項目｜意味・英語入力・語法60問＋復習模擬34問・100点'},
     {subject:'📅 10/27 英語小テスト対策',title:'10/27 英語小テスト対策',date:'2026-10-27',added:11,href:subjectHash('📅 10/27 英語小テスト対策'),range:'写真p.67・69・71｜No.184〜204の21項目｜意味・つづり・使い分け60問＋復習模擬34問・100点'},
     {subject:MATH1_PREP_SUBJECT,title:'数学Ⅰ｜二次関数のテスト対策',evergreen:true,added:10,href:subjectHash(MATH1_PREP_SUBJECT),range:'平方完成→グラフ→移動→最大・最小→c｜一行ずつの例題＋練習90問＋模擬34問・100点'},
     {subject:'📐 数学A',title:'10/13〜19 中間テスト対策｜数学A',date:'2026-10-13',endDate:'2026-10-19',added:9,keepSubject:true,href:subjectHash('📐 数学A'),range:'p.54〜79｜確率・三角形の比・外心｜練習120問＋発展20問＋模擬34問・100点'},
