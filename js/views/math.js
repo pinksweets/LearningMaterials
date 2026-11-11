@@ -81,8 +81,8 @@ export function renderMathHome(chapterId=''){
         <a class="mathTextLink" href="${mathChapterHash('quadratics')}">二次関数の学ぶ順序を見る →</a></div>`:''}
     </section><section class="mathCourseChapters" aria-label="数学Ⅰの通常教材"><h2>学ぶ章を選ぼう</h2>${mathChapterCardsHtml()}</section>`;
   app().innerHTML='';
-  app().appendChild(el(`<div class="mathCourse"><nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">教科選択</a><span>›</span>${chapter?`<a href="${subjectHash(MATH1_SUBJECT)}">数学Ⅰ</a><span>› ${escapeHtml(chapter.title)}</span>`:'<span>数学Ⅰ</span>'}</nav>
-    <button class="btn secondary small" id="mathBack" type="button">${chapter?'← 数学Ⅰの章一覧へ':'← 教科選択へ'}</button>
+  app().appendChild(el(`<div class="mathCourse"><nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">ホーム</a><span>›</span>${chapter?`<a href="${subjectHash(MATH1_SUBJECT)}">数学Ⅰ</a><span>› ${escapeHtml(chapter.title)}</span>`:'<span>数学Ⅰ</span>'}</nav>
+    <button class="btn secondary small" id="mathBack" type="button">${chapter?'← 数学Ⅰの章一覧へ':'← ホームへ'}</button>
     ${resumePanel(MATH1_SUBJECT,chapter?'math1:'+chapter.id:undefined)}${body}
     ${prepAvailable?`<aside class="mathPrepLink"><strong>テスト対策</strong><p>一行ずつの例題と補習90問・100点の模擬テストは、別の入口から取り組めるよ。</p>
       <a href="${subjectHash(MATH1_PREP_SUBJECT)}">数学Ⅰのテスト対策を開く →</a></aside>`:''}

@@ -8,16 +8,51 @@ export const REPORTING={busy:false,error:''};
 export function validEndpoint(value){
   return /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(value);
 }
+export function validLearner(value){
+  return typeof value==='string'&&/^[-A-Za-z0-9_]{1,64}$/.test(value);
+}
+/* 設定しなくても送れるよう、端末ごとの学習者コードを自動で決める（例：ipad-3fa9c1）。氏名などは含めない。 */
+export function autoLearnerCode(){
+  const nav=globalThis.navigator||{}, ua=String(nav.userAgent||'');
+  const device=/iPad/.test(ua)||(/Macintosh/.test(ua)&&nav.maxTouchPoints>1)?'ipad'
+    :/iPhone/.test(ua)?'iphone':/Android/.test(ua)?(/Mobile/.test(ua)?'android':'tablet')
+    :/CrOS/.test(ua)?'chromebook':/Windows/.test(ua)?'win':/Macintosh/.test(ua)?'mac':/Linux/.test(ua)?'linux':'device';
+  const bytes=globalThis.crypto.getRandomValues(new Uint8Array(3));
+  return device+'-'+[...bytes].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+/* 保存済みの設定（v2）。未設定・旧形式（v1：保存しないとOFFのまま）は、自動送信ONに初期化して保存する。
+   明示的にOFFにできるのは、この画面でOFFにして保存した場合（v2）だけ。 */
+function storedConfig(){
+  const saved=JSON.parse(localStorage.getItem(CONFIG_KEY));
+  if(saved?.v===2)return {v:2,learner:validLearner(saved.learner)?saved.learner:'',enabled:saved.enabled===true,auto:saved.auto===true};
+  const keep=validLearner(saved?.learner);
+  const next={v:2,learner:keep?saved.learner:autoLearnerCode(),enabled:true,auto:!keep};
+  localStorage.setItem(CONFIG_KEY,JSON.stringify(next));
+  return next;
+}
 export function reportConfig(){
   try{
-    const saved=JSON.parse(localStorage.getItem(CONFIG_KEY));
-    return {learner:typeof saved?.learner==='string'?saved.learner:'',enabled:saved?.enabled===true};
+    const {learner,enabled}=storedConfig();
+    return {learner,enabled};
   }catch{return {};}
+}
+/* 学習者コードが自動で決めたものか（設定画面の説明用）。 */
+export function reportCodeIsAuto(){
+  try{return storedConfig().auto;}catch{return false;}
 }
 export function configureReporting(learner,enabled){
   learner=learner.trim();
-  if(enabled&&!/^[-A-Za-z0-9_]{1,64}$/.test(learner))throw Error('学習者コード（半角英数字・ハイフン・_、64文字以内）を確認してね。');
-  localStorage.setItem(CONFIG_KEY,JSON.stringify({learner,enabled:!!enabled}));
+  let current={};
+  try{current=storedConfig();}catch{/* 壊れた設定は自動のコードで作り直す。 */}
+  // 空欄でONにしたら、これまでのコード（なければ自動のコード）をそのまま使う。
+  let generated=false;
+  if(enabled&&!learner){
+    if(current.learner)learner=current.learner;
+    else{learner=autoLearnerCode();generated=true;}
+  }
+  const auto=generated||(learner!==''&&learner===current.learner&&!!current.auto);
+  if(enabled&&!validLearner(learner))throw Error('学習者コード（半角英数字・ハイフン・_、64文字以内）を確認してね。');
+  localStorage.setItem(CONFIG_KEY,JSON.stringify({v:2,learner,enabled:!!enabled,auto}));
   notifyReporting();
 }
 export function pendingReports(){
@@ -30,7 +65,7 @@ export function pendingReports(){
   return out;
 }
 export function notifyReporting(){
-  if(typeof window!=='undefined'&&typeof CustomEvent!=='undefined')window.dispatchEvent(new CustomEvent('reportingchange'));
+  if(typeof window!=='undefined'&&typeof CustomEvent!=='undefined'&&typeof window.dispatchEvent==='function')window.dispatchEvent(new CustomEvent('reportingchange'));
 }
 export function queueReport(session,fields){
   const config=reportConfig();
@@ -78,6 +113,7 @@ export function reportingStatus(session){
     if(REPORTING.error)return REPORTING.error;
     if(session?.reportQueued)return localStorage.getItem(PREFIX+session.reportId)?'学習実績：送信待ち':'学習実績：記録済み';
     const n=pendingReports().length;
-    return (reportConfig().enabled?'自動送信ON':'自動送信OFF')+'・送信待ち '+n+'件';
+    const config=reportConfig();
+    return (config.enabled?'自動送信ON':'自動送信OFF')+(config.learner?'（学習者コード '+config.learner+'）':'')+'・送信待ち '+n+'件';
   }catch{return '学習実績の保存状況を確認できません';}
 }

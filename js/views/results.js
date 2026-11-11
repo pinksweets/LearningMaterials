@@ -1,4 +1,4 @@
-import { el, app, toast, escapeHtml } from "../utils.js";
+import { el, app, toast, escapeHtml, escapeAttr } from "../utils.js";
 import { stopTimer } from "../timer.js";
 import { stopBossTension, stopSpeech, playBossResultSound } from "../audio.js";
 import { state, save, evalTitle, masteredCount, studyMaterialStatus } from "../state.js";
@@ -12,6 +12,7 @@ import { renderSeptemberHome, startSeptemberReview } from "./september.js";
 import { syncScreenHash } from '../utils.js';
 import { sessionHash } from '../session.js';
 import { reportCompletion, appendReportingStatus } from './reporting.js';
+import { nextStageAfter } from './start.js';
 import { mathADiagram } from '../ma26-display.js';
 import { isMockExam, examTotal, examBreakdown, examAnswer } from '../mock-exam.js';
 
@@ -146,6 +147,8 @@ export function renderResult(){
     : `<div class="muted" style="margin-top:14px">まちがい0問！すばらしい！</div>`;
 
   save();
+  // 一覧へ戻らなくても、そのまま次のステージへ進める。正答率が低いときは「もう一度」を目立たせる。
+  const next=c.mode==='stage' && !c.partial && !mock?nextStageAfter(c.sid):null;
 
   app().innerHTML="";
   app().appendChild(el(`<div class="card center">
@@ -158,9 +161,10 @@ export function renderResult(){
     ${badgeHtml}
     ${wrongList}
     ${mock?examResultHtml(c):''}
-    <div class="row" style="margin-top:16px">
-      <button class="btn secondary" id="retryBtn">もう一度</button>
-      <button class="btn" id="homeBtn">${escapeHtml(resultHomeLabel(c))}</button>
+    ${next?`<a class="btn${pct<60?' secondary':''} nextStageBtn" id="nextStageBtn" href="${escapeAttr(next.href)}">${next.sameUnit?'次のステージへ':'次のおすすめへ'}：${escapeHtml(next.title)} →</a>`:''}
+    <div class="row" style="margin-top:${next?8:16}px">
+      <button class="btn${next && pct<60?'':' secondary'}" id="retryBtn">もう一度</button>
+      <button class="btn${next?' secondary':''}" id="homeBtn">${escapeHtml(resultHomeLabel(c))}</button>
     </div>
   </div>`));
 
@@ -185,10 +189,10 @@ export function renderResult(){
 
 export function resultHomeLabel(c){
   if(c.september15Review || c.septemberReview)return 'テスト対策へ →';
-  if(c.mode==='review')return '教科選択へ →';
+  if(c.mode==='review')return 'ホームへ →';
   const unit=studyUnitForStage(c.sid);
   if(unit && state.studyMaterials?.[unit.id]==='studying'){
-    if(studyMaterialStatus(unit.id)==='completed')return '学習中の単元へ →';
+    if(studyMaterialStatus(unit.id)==='completed')return 'ホームへ →';
     return unit.title+'の単元一覧へ →';
   }
   const chapter=mathChapterForStage(c.sid);

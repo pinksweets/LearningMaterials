@@ -25,6 +25,7 @@ export const state = {
   subjectGroupCollapsed:{}, // "教科\u001fグループ":true
   studyMaterials:{},     // 学習単元ID:"studying"（学習中）／"completed"（学習完了）
   lessonSeen:{},         // "njz1":true など、レッスンを最後まで読んだ単元（まなぶ→とく）
+  stageLastAt:{},        // "njz1":1794390000000 など、そのステージで最後に回答した時刻（ホームの「つづき」の並び順）
   // 現在のプレイ
   cur:null,
   resumeSession:null
@@ -67,6 +68,7 @@ export function save(){
       subjectGroupCollapsed:state.subjectGroupCollapsed,
       studyMaterials:state.studyMaterials,
       lessonSeen:state.lessonSeen,
+      stageLastAt:state.stageLastAt,
       currentSession:state.resumeSession
     }));
   }catch(e){/* 保存できなくても学習は続けられるので握りつぶす */}
@@ -97,8 +99,43 @@ export function load(){
     state.subjectGroupCollapsed=(d.subjectGroupCollapsed&&typeof d.subjectGroupCollapsed==='object')?d.subjectGroupCollapsed:{};
     state.studyMaterials=normalizeStudyMaterials(d.studyMaterials);
     state.lessonSeen=(d.lessonSeen&&typeof d.lessonSeen==='object')?d.lessonSeen:{}; // 旧データ（フィールド欠落）は未読扱い
+    // 旧データ（フィールド欠落）は、回答履歴の復習日から「最後に学習した日」を推定して引き継ぐ。
+    state.stageLastAt=d.stageLastAt===undefined?deriveStageLastAt(state.qStats):normalizeStageLastAt(d.stageLastAt);
   }catch(e){/* 壊れたデータ・別バージョンは初期stateで開始 */}
   cleanupStaleQStats();  // 追加機能（数学カテゴリ細分化）：存在しない単元IDのqStatsキーが習熟度/称号を汚染しないよう掃除
+}
+
+/* ---------- ステージごとの最終学習時刻（ホームの「すぐ始める」「つづき」の並び順） ---------- */
+export function normalizeStageLastAt(raw){
+  const out={};
+  if(!raw||typeof raw!=='object'||Array.isArray(raw))return out;
+  Object.entries(raw).forEach(([sid,at])=>{
+    if(QUESTIONS[sid]&&Number.isFinite(at)&&at>0)out[sid]=Math.floor(at);
+  });
+  return out;
+}
+/* 旧セーブには時刻が無い。Leitner の due（＝最後に回答した日＋間隔）から、最後に回答した日を逆算する。 */
+export function deriveStageLastAt(qStats){
+  const out={};
+  if(!qStats||typeof qStats!=='object')return out;
+  Object.entries(qStats).forEach(([key,st])=>{
+    const sid=key.split('-')[0];
+    if(!QUESTIONS[sid]||!st||!/^\d{4}-\d{2}-\d{2}$/.test(st.due)||!(st.seen>0))return;
+    const box=Number.isInteger(st.box)&&st.box>=0&&st.box<SRS_INTERVAL.length?st.box:0;
+    const [y,m,d]=addDays(st.due,-SRS_INTERVAL[box]).split('-').map(Number);
+    const at=Math.min(Date.now(),new Date(y,m-1,d,12).getTime());
+    if(at>(out[sid]||0))out[sid]=at;
+  });
+  return out;
+}
+export function markStageStudied(sid,now=Date.now()){
+  if(!QUESTIONS[sid])return;
+  if(!state.stageLastAt||typeof state.stageLastAt!=='object')state.stageLastAt={};
+  state.stageLastAt[sid]=now;
+}
+export function stageLastStudied(sid){
+  const at=state.stageLastAt&&state.stageLastAt[sid];
+  return Number.isFinite(at)&&at>0?at:0;
 }
 
 /* ---------- 日別学習ログ（草グラフ・今日の目標・週間ふりかえり） ---------- */

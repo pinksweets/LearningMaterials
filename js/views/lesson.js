@@ -34,7 +34,7 @@ export function renderLesson(sid,page=0){
 
   app().innerHTML="";
   app().appendChild(el(`<div>
-    <nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">教科選択</a><span>›</span><a href="${subjectHash(subject)}">${escapeHtml(subject)}</a>${chapter?`<span>›</span><a href="${mathChapterHash(chapter.id)}">${escapeHtml(chapter.title)}</a>`:''}<span>› ${escapeHtml(s.title)}</span></nav>
+    <nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">ホーム</a><span>›</span><a href="${subjectHash(subject)}">${escapeHtml(subject)}</a>${chapter?`<span>›</span><a href="${mathChapterHash(chapter.id)}">${escapeHtml(chapter.title)}</a>`:''}<span>› ${escapeHtml(s.title)}</span></nav>
     <div class="card lessonScreen">
       <div class="hud"><span class="chip">📖 まなぶ</span><span class="chip">${escapeHtml(s.title)}</span></div>
       <div class="lessonDots" aria-label="${page+1}枚目 / ${total}枚">${dots}</div>

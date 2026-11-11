@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { createLocalStorage } from './helpers/env.js';
-import { REPORTING, REPORT_ENDPOINT, reportConfig, configureReporting, queueReport, pendingReports, flushReports, sendReport, reportingStatus } from '../js/reporting.js';
+import { REPORTING, REPORT_ENDPOINT, reportConfig, reportCodeIsAuto, autoLearnerCode, configureReporting, queueReport, pendingReports, flushReports, sendReport, reportingStatus } from '../js/reporting.js';
 import { reportCompletion } from '../js/views/reporting.js';
 import { snapshotSession, restoreSession, questionFromKey } from '../js/session.js';
 
@@ -39,7 +39,39 @@ test('旧設定や送信待ちに残るURLよりソースの固定送信先を�
   };
   await flushReports();assert.equal(pendingReports().length,0);
 });
-test('設定OFF・未設定では収集せず、不正な学習者コードを拒否',()=>{
+test('未設定の端末は設定なしで自動送信ONになり、端末の学習者コードが自動で決まって変わらない',()=>{
+  globalThis.localStorage=createLocalStorage();
+  const first=reportConfig();
+  assert.equal(first.enabled,true);
+  assert.match(first.learner,/^[a-z]+-[0-9a-f]{6}$/);
+  assert.match(first.learner,/^[-A-Za-z0-9_]{1,64}$/,'受信側の検証を通る形式');
+  assert.equal(reportCodeIsAuto(),true);
+  assert.deepEqual(reportConfig(),first,'開き直しても同じコード');
+  assert.equal(queueReport({},fields),true);
+  assert.equal(pendingReports()[0].payload.learner,first.learner);
+  assert.match(reportingStatus(null),/自動送信ON/);
+  assert.notEqual(autoLearnerCode(),autoLearnerCode());
+});
+test('旧形式の未保存相当（OFF）は自動送信ONへ移行し、入力済みの学習者コードは引き継ぐ',()=>{
+  localStorage.setItem('learning-quest-report-config-v1',JSON.stringify({learner:'',enabled:false}));
+  assert.equal(reportConfig().enabled,true);assert.equal(reportCodeIsAuto(),true);
+  localStorage.setItem('learning-quest-report-config-v1',JSON.stringify({learner:'S001',enabled:false}));
+  assert.deepEqual(reportConfig(),{learner:'S001',enabled:true});assert.equal(reportCodeIsAuto(),false);
+  localStorage.setItem('learning-quest-report-config-v1','{broken');
+  assert.deepEqual(reportConfig(),{},'壊れた設定では送らない');
+});
+test('この画面でOFFにした設定は守り、空欄のままONに戻すと同じコードを使う',()=>{
+  globalThis.localStorage=createLocalStorage();
+  const code=reportConfig().learner;
+  configureReporting(code,false);
+  assert.deepEqual(reportConfig(),{learner:code,enabled:false});
+  assert.equal(queueReport({},fields),false);
+  configureReporting('',true);
+  assert.deepEqual(reportConfig(),{learner:code,enabled:true});
+  configureReporting('tablet_01',true);
+  assert.deepEqual(reportConfig(),{learner:'tablet_01',enabled:true});assert.equal(reportCodeIsAuto(),false);
+});
+test('OFFにした端末では収集せず、不正な学習者コードを拒否',()=>{
   configureReporting('',false);assert.equal(queueReport({},fields),false);
   assert.throws(()=>configureReporting('日本語',true));
 });

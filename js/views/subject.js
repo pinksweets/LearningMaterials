@@ -121,7 +121,7 @@ export function renderSubjectHome(subject,unitId=''){
     <h1>${escapeHtml(unit?unit.title:subject)}</h1>
     ${unit?`<div class="sub">${escapeHtml(subject)}${unit.group && unit.group!==unit.title?'　｜　'+escapeHtml(unit.group):''}</div>`:''}
     ${resumePanel(subject,unit?.id)}
-    <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">${unit?'← 学習中の単元へ':september16||subject===MATH1_PREP_SUBJECT?'← テスト対策へ':'← 教科選択へ'}</button>
+    <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">← ホームへ</button>
     ${subject==='📅 11/10 英語小テスト対策'?`<section class="sepPlan">
       <strong>11/10に向けて｜20項目を思い出して、書いてみよう</strong>
       <p>範囲は写真のp.72〜77、No.205〜224。まず意味20問、次につづり20問、最後に語法20問を練習しよう。練習は時間制限なしだよ。</p>
@@ -207,7 +207,6 @@ export function renderSubjectHome(subject,unitId=''){
 
   document.getElementById('subjectBackBtn').addEventListener('click',()=>{
     renderHome();
-    if(subject===MATH1_PREP_SUBJECT){const panel=document.querySelector('.testPrepPanel');if(panel)panel.open=true;}
   });
   const expandAll=document.getElementById('expandAllGroups');
   if(expandAll)expandAll.addEventListener('click',()=>{

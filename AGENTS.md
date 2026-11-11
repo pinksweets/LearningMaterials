@@ -46,7 +46,7 @@ node tools/verify-data-append-only.mjs <ベースgit ref>   # 省略時は origi
 
 ### 画面遷移（2階層ナビゲーション）
 
-`renderHome()`（`js/views/home.js`）＝教科選択画面（教科カード・グローバルHUD・今日の復習・図鑑・設定）→ `renderSubjectHome(subject)`（`js/views/subject.js`）＝教科ホーム（その教科のステージのみ、`group` 変化点に `.groupHead`）→ `renderQuestion()`（`js/views/quiz.js`）→ `renderResult()`（`js/views/results.js`）。戻り先の教科は専用のモジュール変数では保持せず、その場で `QUESTIONS[c.sid].subject`（`c` は現在のプレイセッション `state.cur`）から都度導出する：stage/boss の結果・中断は直前の教科ホームへ、review・図鑑は教科選択画面へ戻る。
+`renderHome()`（`js/views/home.js`）＝ホーム（最上部の「すぐ始める」＝続き・おすすめを1タップで開始／教材一覧の教科カード／学習ログ・今日の復習・図鑑・設定。候補の選び方は `js/views/start.js`。**学習する単元を先に指定させない**こと。「学習中にする／完了にする」は任意の整理機能で、開いたときだけ描画する）→ `renderSubjectHome(subject)`（`js/views/subject.js`）＝教科ホーム（その教科のステージのみ、`group` 変化点に `.groupHead`）→ `renderQuestion()`（`js/views/quiz.js`）→ `renderResult()`（`js/views/results.js`）。戻り先の教科は専用のモジュール変数では保持せず、その場で `QUESTIONS[c.sid].subject`（`c` は現在のプレイセッション `state.cur`）から都度導出する：stage/boss の結果・中断は直前の教科ホームへ、review・図鑑はホームへ戻る。stage の結果画面には「次のステージへ」（`nextStageAfter`）を出す。
 
 ### 問題タイプ（8種）と採点
 
@@ -62,6 +62,10 @@ node tools/verify-data-append-only.mjs <ベースgit ref>   # 省略時は origi
 ### 進捗・モチベーション系（主に js/state.js・js/fever.js）
 
 SRS は Leitner 方式（`box` 0–5、間隔 `[0,1,3,7,14,30]` 日、`box>=3` でマスター）。`dueList()` が教科横断の「今日の復習」を生成。ストリークは `touchStreak()`（同日不変/前日+1/それ以外1）。称号（`TITLES`/`evalTitle`）・図鑑（`card` タグ→ `unlockCard`）・ボス戦（stage クリアで解放、lives=3・タイムアタック強制ON）・連続正解フィーバー（`js/fever.js`）。
+
+### 学習実績の自動送信（js/reporting.js）
+
+設定不要・初期状態でON。端末ごとの学習者コードは `autoLearnerCode()` が自動で決めて `learning-quest-report-config-v1`（`v:2`）に保存する。利用者に設定を要求する変更は入れない（設定が必要だと使われなかった経緯がある）。OFFにできるのはホーム末尾の設定欄だけ。
 
 ## PWA 運用
 

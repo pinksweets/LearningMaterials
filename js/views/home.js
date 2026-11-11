@@ -14,13 +14,16 @@ import {
   normalizeDailyGoal,
   studyVolumeLevel,
   weeklyStudySummary,
-  leapSessionsOn
+  leapSessionsOn,
+  stagesOfSubject,
+  stageLastStudied
 } from "../state.js";
 import { CARDS, totalQuestionCount, MATH1_PREP_SUBJECT, studyUnitList } from "../content.js";
 import { LEAP_DAILY_TARGET, LEAP_BASIC_SUBJECT } from "../leap-study.js";
-import { activeStudyMaterials, studyMaterialsHtml, materialManagerHtml, bindMaterialActions } from './materials.js';
+import { activeStudyMaterials, studyMaterialsHtml, materialManagerHtml, materialManagerClosedHtml, bindMaterialActions } from './materials.js';
 import { renderCollection } from "./collection.js";
-import { startReview, resumePanel } from "./quiz.js";
+import { startReview } from "./quiz.js";
+import { startPanelHtml, subjectShelfHtml } from './start.js';
 import { septemberSubject } from "./september.js";
 import { september15Subject } from "./september15.js";
 
@@ -135,7 +138,9 @@ export function renderStudyPanel(){
 }
 
 /* ============================================================
-   教科選択画面（新トップ）
+   ホーム：開いてすぐ1タップで始められる画面
+   上から「すぐ始める（続き・おすすめ）」→ 教材一覧 → 学習ログ・設定。
+   単元の「学習中にする／完了にする」は任意の整理機能として下に置く。
 ============================================================ */
 export function renderHome(options={}){
   syncScreenHash('#home');
@@ -146,9 +151,8 @@ export function renderHome(options={}){
   const settingsOpen=!!document.querySelector('.homeSettings')?.open;
   const activeMaterials=activeStudyMaterials();
 
+  const today=todayStr();
   const dueN=dueList().length;
-  const reviewBtn = dueN
-    ? `<button class="btn secondary" id="reviewBtn">🔁 今日の復習（${dueN}問）</button>` : "";
 
   const collBtn = `<button class="btn secondary" id="collBtn">📖 学習図鑑（${state.cards.size}/${CARDS.length}）</button>`;
 
@@ -157,7 +161,9 @@ export function renderHome(options={}){
   const studyPanelHtml = renderStudyPanel();
   const leapToday=leapSessionsOn();
   const leapComplete=leapToday>=LEAP_DAILY_TARGET;
-  const leapGoalHtml=activeMaterials.some(item=>item.subject===LEAP_BASIC_SUBJECT)?`<section class="leapDailyPanel" aria-label="LEAP Basic 今日の高速周回ノルマ">
+  // LEAPの日課は、Weekを学習中に指定しているか、直近2週間に取り組んでいれば出す。
+  const leapRecent=stagesOfSubject(LEAP_BASIC_SUBJECT).some(sid=>stageLastStudied(sid)>Date.now()-14*86400000);
+  const leapGoalHtml=activeMaterials.some(item=>item.subject===LEAP_BASIC_SUBJECT) || leapRecent?`<section class="leapDailyPanel" aria-label="LEAP Basic 今日の高速周回ノルマ">
     <div class="leapDailyTop"><div><strong>⚡ LEAP Basic 3分×3</strong><span>毎日短時間で、思い出す練習を積もう</span></div><b>${Math.min(leapToday,LEAP_DAILY_TARGET)}/${LEAP_DAILY_TARGET}回</b></div>
     <div class="leapDailyBar"><i style="width:${Math.min(100,Math.round(leapToday/LEAP_DAILY_TARGET*100))}%"></i></div>
     <div class="leapDailyMessage">${leapComplete?'🎊 今日の3回達成！すごい継続力だね。':'LEAP Basicの教科ホームで、Weekごとの「⚡ 高速」から始められるよ。'}</div>
@@ -186,29 +192,39 @@ export function renderHome(options={}){
       </div>
     </div>`;
 
+  const todayLog=getStudyDay(today);
+  const goal=normalizeDailyGoal(state.settings&&state.settings.dailyGoal);
   app().innerHTML = "";
-  app().appendChild(el(`<div>
-    <h1>🏰 学習クエスト</h1>
-    <div class="titleWrap"><span class="titleBadge">🎖 ${state.title}</span></div>
-    <div class="sub">高校6教科＋英単語をゲーム感覚で攻略<br>全${totalQuestionCount()}問／基礎から発展まで　解説つき</div>
-    ${studyMaterialsHtml()}
-    ${materialManagerHtml(todayStr(),!!options.manageMaterials || !activeMaterials.length,!!options.completedMaterials,options)}
-    ${resumePanel()}
-    <div class="card">
+  app().appendChild(el(`<div class="homeScreen">
+    <header class="homeHead">
+      <h1>🏰 学習クエスト</h1>
+      <div class="homeHud">
+        <span class="titleBadge">🎖 ${state.title}</span>
+        <span class="chip"><span class="fire">🔥</span> 連続 <span class="em">${state.streak}</span>日</span>
+        <span class="chip">今日 <span class="em">${todayLog.answered}</span>/${goal}問</span>
+      </div>
+    </header>
+    ${startPanelHtml(today,dueN)}
+    ${activeMaterials.length?studyMaterialsHtml(today):''}
+    ${subjectShelfHtml(today)}
+    <div class="card homeStats">
       <div class="hud">
         <span class="chip">合計スコア <span class="em">${state.totalScore}</span></span>
         <span class="chip"><span class="fire">🔥</span> 連続 <span class="em">${state.streak}</span>日</span>
         <span class="chip">バッジ <span class="em">${state.badges.size}</span></span>
       </div>
-      <div class="muted">学習中の単元から始めてみよう。まちがえた問題は「今日の復習」でちょうどよいタイミングにまた出るから大丈夫！</div>
+      <div class="muted">まちがえた問題は「今日の復習」でちょうどよいタイミングにまた出るから大丈夫！</div>
       ${studyPanelHtml}
       ${leapGoalHtml}
-      ${reviewBtn}
       ${collBtn}
       ${badgesHtml}
       <details class="homeSettings"${settingsOpen?' open':''}><summary>⚙️ 学習の設定</summary>${settingsHtml}${bgmHtml}</details>
+      <div class="sub homeAbout">高校6教科＋英単語をゲーム感覚で攻略｜全${totalQuestionCount()}問／基礎から発展まで　解説つき</div>
     </div>
+    ${options.manageMaterials?materialManagerHtml(today,true,!!options.completedMaterials,options):materialManagerClosedHtml()}
   </div>`));
+  const closedManager=options.manageMaterials?null:document.getElementById('materialManager');
+  if(closedManager)closedManager.addEventListener('toggle',()=>{if(closedManager.open)renderHome({manageMaterials:true});});
 
   appendReportingSettings();
   bindMaterialActions(({id,status})=>{

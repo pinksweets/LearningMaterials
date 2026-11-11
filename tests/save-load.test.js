@@ -43,6 +43,7 @@ test("save(): localStorage に書き込む JSON のキー集合が仕様どお�
       "subjectGroupCollapsed",
       "studyMaterials",
       "lessonSeen",
+      "stageLastAt",
       "currentSession",
     ])
   );

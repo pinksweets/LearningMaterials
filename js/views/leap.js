@@ -1,6 +1,6 @@
 import { app, el, escapeAttr, escapeHtml, toast } from "../utils.js";
 import { stopTimer } from "../timer.js";
-import { state, recordLeapSession, leapSessionsOn, studyMaterialStatus } from "../state.js";
+import { state, save, recordLeapSession, leapSessionsOn, studyMaterialStatus, markStageStudied } from "../state.js";
 import { QUESTIONS, studyUnitForStage } from "../content.js";
 import {
   LEAP_BASIC_SUBJECT,
@@ -33,6 +33,8 @@ export function recordFinishedLeapSession(c, reason, now=Date.now()) {
   const session=c.leapSession;
   finishLeapSession(session,now,reason);
   stopLeapClock(session);
+  // 途中終了でも、判定した語があればホームの「つづき」に出す。
+  if(session.judged>0&&c.sid){markStageStudied(c.sid);save();}
   // 「終了して結果を見る」は中断扱い。ノルマに加算するのは3分完了または全件完了だけ。
   const countsTowardDailyGoal=countsAsLeapDailySession(reason);
   if(countsTowardDailyGoal&&!c.leapRecorded&&session.judged>0){
@@ -166,7 +168,7 @@ export function renderLeapSpeedResult(c) {
   const complete=today>=LEAP_DAILY_TARGET;
   const unit=studyUnitForStage(c.sid);
   const selected=unit && state.studyMaterials?.[unit.id]==='studying';
-  const homeLabel=selected?(studyMaterialStatus(unit.id)==='completed'?'学習中の単元へ':unit.title+'に戻る'):'LEAP Basic に戻る';
+  const homeLabel=selected?(studyMaterialStatus(unit.id)==='completed'?'ホームへ':unit.title+'に戻る'):'LEAP Basic に戻る';
   app().innerHTML='';
   app().appendChild(el(`<div>
     <h1>⚡ 高速周回の結果</h1>

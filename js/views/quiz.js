@@ -5,7 +5,7 @@ import { stopTimer, startTimer, timeLimitFor } from "../timer.js";
 import { FEVER_BONUS, initRewardProgress, applyFeverProgress, rewardHudHtml } from "../fever.js";
 import { QUESTIONS, MATH1_PREP_SUBJECT, canonicalSubject, displaySubjectForStage, studyUnitForStage, studyUnitById } from "../content.js";
 import { extractLeapEntry, isLeapSubject, shouldShowLeapWordBeforeAnswer } from "../leap-study.js";
-import { state, save, dueList, updateQStat, unlockCard, isStageUnlockedForBoss, recordStudyAnswer, studyMaterialStatus } from "../state.js";
+import { state, save, dueList, updateQStat, unlockCard, isStageUnlockedForBoss, recordStudyAnswer, studyMaterialStatus, markStageStudied } from "../state.js";
 import { playAnswerSound, speakEnglish, syncBossTension, stopBossTension, stopSpeech } from "../audio.js";
 import { renderHome } from "./home.js";
 import { renderStageHome } from "./subject.js";
@@ -220,8 +220,8 @@ export function renderQuestion(){
   const stageInfo=QUESTIONS[sourceSid];
   const lessonPeek = hasLesson(stageInfo) && c.mode!=='boss' && !mock
     ? `<details class="lessonPeek"><summary>📖 もう一度みる（レッスンカード）</summary>${lessonCardsHtml(stageInfo.lesson,{math:!!stageInfo.lessonMath})}</details>` : '';
-  const nav=subject?`<nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">教科選択</a><span>›</span><a href="${subjectHash(subject)}">${escapeHtml(subject)}</a>${chapter?`<span>›</span><a href="${mathChapterHash(chapter.id)}">${escapeHtml(chapter.title)}</a>`:''}<span>› ${escapeHtml(c.title)}</span></nav>`:'';
-  const backLabel=c.mode==='review'?'教科選択へ':chapter?chapter.title+'の単元一覧へ':subject===MATH1_PREP_SUBJECT?'テスト対策の単元一覧へ':'単元一覧へ';
+  const nav=subject?`<nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">ホーム</a><span>›</span><a href="${subjectHash(subject)}">${escapeHtml(subject)}</a>${chapter?`<span>›</span><a href="${mathChapterHash(chapter.id)}">${escapeHtml(chapter.title)}</a>`:''}<span>› ${escapeHtml(c.title)}</span></nav>`:'';
+  const backLabel=c.mode==='review'?'ホームへ':chapter?chapter.title+'の単元一覧へ':subject===MATH1_PREP_SUBJECT?'テスト対策の単元一覧へ':'単元一覧へ';
   app().innerHTML="";
   app().appendChild(el(`<div>${nav}<div class="card">${hud}${rewardHud}${bossHud}${timerHtml}${tags}${speechPrompt}${body}
     ${q.speech?`<button class="btn secondary" id="examSpeak" type="button">🔊 英語を聞く</button>${q.reading?`<details class="sepReading"><summary>読み方のヒント</summary>${escapeHtml(q.reading)}<p class="muted">カタカナは目安。音声をまねしてみよう。</p></details>`:''}`:''}
@@ -654,6 +654,8 @@ export function finishQuestion(isCorrect,q,opts){
   if(q._key)updateQStat(q._key,isCorrect);
   const logSid = c.mode==='review' && q._key ? q._key.split('-')[0] : c.sid;
   recordStudyAnswer(isCorrect, QUESTIONS[logSid]&&QUESTIONS[logSid].subject, c.mode);
+  // ホームの「つづき」に出す順番のため、通常・ボス戦で取り組んだステージの時刻を残す。
+  if(c.mode==='stage'||c.mode==='boss')markStageStudied(c.sid);
   // 図鑑カードの解放（正解時。card は文字列または配列）
   if(isCorrect && q.card){
     (Array.isArray(q.card)?q.card:[q.card]).forEach(unlockCard);

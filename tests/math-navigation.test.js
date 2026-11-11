@@ -54,14 +54,20 @@ beforeEach(()=>{
   installDom();NAV.current='';NAV.restoring=false;NAV.scroll={};
   state.cur=null;state.resumeSession=null;state.title='学びの見習い';state.qStats={};state.studyLog={};
   state.lessonSeen={};state.stageCleared={};state.stageBest={};state.bossCleared={};state.badges=new Set();
-  state.studyMaterials={};
+  state.studyMaterials={};state.stageLastAt={};
   state.settings={...state.settings,sound:false,englishSpeech:false,timeAttack:false};
 });
 
-test('単元未指定のホームは選択欄を開き、指定後は学習中メニューをログ・設定より先に置く（DOMスタブ）',()=>{
+test('単元未指定のホームは選ばなくてもすぐ始められ、指定後は学習中メニューをログ・設定より先に置く（DOMスタブ）',()=>{
   renderHome();
-  assert.match(screen.innerHTML,/<details\b[^>]*id="materialManager"[^>]*\bopen\b/);
+  // 何も指定していなくても、1タップで始めるボタンと教材一覧が出る。単元の整理欄は閉じたまま。
+  assert.match(screen.innerHTML,/<a class="startMain" data-start="next" href="#\/stage\/m1s1\/1"/);
+  assert.match(screen.innerHTML,/class="shelfCard"/);
+  assert.doesNotMatch(/<details\b[^>]*id="materialManager"[^>]*>/.exec(screen.innerHTML)[0],/\bopen\b/);
+  assert.doesNotMatch(screen.innerHTML,/class="studyMaterials"/);
   assert.doesNotMatch(screen.innerHTML,/class="studyMaterialLink"/);
+  assert.ok(screen.innerHTML.indexOf('class="startPanel"')<screen.innerHTML.indexOf('class="shelf"'));
+  assert.ok(screen.innerHTML.indexOf('class="shelf"')<screen.innerHTML.indexOf('class="studyPanel"'));
   setStudyMaterialStatus('math1:quadratics','studying');
   setStudyMaterialStatus('stage:lbp1c1w1','studying');
   renderHome();
@@ -104,13 +110,13 @@ test('完了した単元はホームと全体の再開欄から隠れ、教科�
     state.cur=session('njz1');state.cur.i=2;
     setStudyMaterialStatus('math1:quadratics','studying');
     renderHome();
-    assert.match(screen.innerHTML,/class="resumePanel"/);
+    assert.match(screen.innerHTML,/data-start="resume" href="#\/stage\/njz1\/3"/);
     if(completion==='manual')setStudyMaterialStatus('math1:quadratics','completed');
     else studyUnitById('math1:quadratics').sids.forEach(sid=>{state.stageCleared[sid]=true;});
     renderHome();
     assert.equal(studyMaterialStatus('math1:quadratics'),'completed');
     assert.ok(!screen.innerHTML.includes(`href="${studyUnitHash('math1:quadratics')}"`));
-    assert.doesNotMatch(screen.innerHTML,/class="resumePanel"/);
+    assert.doesNotMatch(screen.innerHTML,/data-start="resume"/);
     assert.equal(resumePanel(),'');
     assert.match(resumePanel(MATH1_SUBJECT),/stage\/njz1\/3/);
     window.location.hash=subjectHash(MATH1_SUBJECT);
@@ -164,7 +170,7 @@ test('単元URLは指定Week・Courseだけを開き、グループ・数学章�
   assert.match(screen.innerHTML,/data-math-stage="qi10"/);
   assert.doesNotMatch(screen.innerHTML,/data-math-stage="m1s1"|data-math-stage="tr2"/);
   window.location.hash=studyUnitHash('stage:missing');renderUrlScreen(true);
-  assert.equal(window.location.hash,'#home');assert.match(screen.innerHTML,/class="studyMaterials"/);
+  assert.equal(window.location.hash,'#home');assert.match(screen.innerHTML,/class="startPanel"/);
 });
 
 test('選択中グループの結果からは単元へ戻り、最終ステージのクリア後はホームでその単元を隠す（DOMスタブ）',()=>{
@@ -259,7 +265,7 @@ test('LEAP高速周回の結果からは選択Weekへ戻り、完了済みなら
   assert.doesNotMatch(screen.innerHTML,/class="stage" data-stage="(?:lbp1c1w2|lbp1c2w1)"/);
   state.stageCleared[sid]=true;
   renderLeapSpeedResult(c);
-  assert.match(screen.innerHTML,/id="leapHomeBtn"[^>]*>学習中の単元へ/);
+  assert.match(screen.innerHTML,/id="leapHomeBtn"[^>]*>ホームへ/);
   click('leapHomeBtn');
   assert.equal(window.location.hash,'#home');
   assert.ok(!screen.innerHTML.includes(`href="${studyUnitHash(id)}"`));

@@ -529,3 +529,70 @@ a.link{color:var(--accent2);}
 .reportSettings form p{margin:14px 0;}
 .reportSettings button{margin:4px 6px 4px 0;}
 .reportSettings input[type="checkbox"]{width:18px;height:18px;vertical-align:middle;}
+
+/* ==== ホーム：すぐ始める／教材一覧 ====
+   単元を先に指定しなくても、開いてすぐ1タップで始められる。
+   主にタブレットで使うため、押す場所は高さ48px以上、広い画面では横に並べる。 */
+a.btn{text-decoration:none;text-align:center;box-sizing:border-box;}
+.homeHead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;margin:2px 0 14px;}
+.homeHead h1{margin:0;text-align:left;}
+.homeHud{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.startPanel{margin:0 0 22px;}
+.startMain{display:grid;gap:4px;align-content:center;min-height:104px;padding:20px 24px;border-radius:20px;
+  background:linear-gradient(180deg,var(--accent),#f08c00);color:#3a2400;text-decoration:none;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);transition:transform .08s,filter .2s;}
+.startMain:hover{filter:brightness(1.05);}
+.startMain:active{transform:scale(.99);}
+.startKicker{font-size:.92rem;font-weight:800;}
+.startMain strong{font-size:1.45rem;line-height:1.35;overflow-wrap:anywhere;}
+.startMeta{font-size:.85rem;font-weight:700;opacity:.86;overflow-wrap:anywhere;}
+.startReview{min-height:56px;margin-top:12px;font-size:1.05rem;}
+.startDone{margin:0;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel);}
+.startHeading{margin:22px 0 10px;font-size:1.05rem;}
+.startList,.shelfGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:12px;}
+.startList{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));}
+.startCard{display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--panel2);}
+.startCardMain{display:grid;flex:1;gap:4px;align-content:start;min-height:112px;padding:16px 16px 12px;color:var(--text);text-decoration:none;overflow-wrap:anywhere;}
+.startCardMain small{color:var(--accent2);font-size:.78rem;font-weight:700;}
+.startCardMain strong{font-size:1.05rem;line-height:1.4;}
+.startCardMain span{color:var(--muted);font-size:.8rem;}
+.startCardMain b{margin-top:4px;color:var(--accent);font-size:.92rem;}
+.startCardMain:active,.shelfCard:active{filter:brightness(1.15);}
+.startCardList{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;padding:0 16px;
+  border-top:1px solid var(--line);color:var(--muted);font-size:.8rem;text-decoration:none;}
+.shelf{margin:0 0 22px;}
+.shelfTests{margin-bottom:12px;}
+.shelfCard{display:grid;gap:6px;align-content:start;min-height:96px;padding:16px;border:1px solid var(--line);border-radius:16px;
+  background:var(--panel);color:var(--text);text-decoration:none;overflow-wrap:anywhere;}
+.shelfCard:hover,.startCard:hover{border-color:var(--accent2);}
+.shelfCard.isTest{border-color:var(--accent);}
+.shelfCard strong{font-size:1.08rem;line-height:1.4;}
+.shelfStatus{justify-self:start;padding:2px 10px;border-radius:999px;background:var(--accent);color:#1a1200;font-size:.72rem;font-weight:800;}
+.shelfCard.isPast .shelfStatus{border:1px solid var(--line);background:var(--panel2);color:var(--muted);}
+.shelfRange,.shelfSum{color:var(--muted);font-size:.78rem;}
+.shelfBar{display:block;height:7px;overflow:hidden;border:1px solid var(--line);border-radius:999px;background:var(--panel2);}
+.shelfBar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent2),var(--ok));}
+.shelfPast{margin-top:14px;border-top:1px solid var(--line);}
+.shelfPast>summary{display:flex;align-items:center;gap:10px;min-height:52px;cursor:pointer;font-weight:700;}
+.shelfPast>summary span{margin-left:auto;color:var(--muted);font-size:.8rem;}
+.shelfPast>.shelfGrid{margin-bottom:6px;}
+.startMain:focus-visible,.startCardMain:focus-visible,.startCardList:focus-visible,.shelfCard:focus-visible,.shelfPast>summary:focus-visible{outline:3px solid var(--accent2);outline-offset:3px;}
+.homeStats{margin-bottom:18px;}
+.homeAbout{margin:16px 0 0;}
+.nextStageBtn{margin-top:16px;}
+.homeSettings>summary,.reportSettings>summary{min-height:48px;display:flex;align-items:center;}
+.reportSettings{margin-top:18px;}
+@media(min-width:700px){
+  /* タブレット：ホームは横幅を使い、カードを2〜4列に並べる。 */
+  .wrap:has(.homeScreen){max-width:1080px;padding-left:24px;padding-right:24px;}
+  .startMain{min-height:124px;padding:24px 28px;}
+  .startMain strong{font-size:1.75rem;}
+  .startMeta{font-size:.92rem;}
+  .startReview{width:auto;min-width:280px;}
+}
+@media(max-width:420px){.startMain{padding:16px 18px;}.startMain strong{font-size:1.25rem;}}
+/* タッチ操作：小さなボタン・リンクも指で押しやすい高さ（44px以上）にする。 */
+.btn.small{padding:11px 14px;}
+.fallbackLink{min-height:44px;font-size:.9rem;}
+.lessonBtn,.stage .bossBtn,.stage .leapFastBtn,.mathStageActions button{min-height:44px;}
+.quizBreadcrumb a{display:inline-block;padding:6px 0;}

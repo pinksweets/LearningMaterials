@@ -20,7 +20,8 @@ export function materialCatalog(today=todayStr()){
 }
 
 export function activeStudyMaterials(today=todayStr()){
-  return materialCatalog(today).filter(item=>studyMaterialStatus(item.id)==='studying');
+  // 指定のある単元だけ状態を調べる（全単元を調べるとホームの表示が遅くなる）。
+  return materialCatalog(today).filter(item=>state.studyMaterials?.[item.id]==='studying' && studyMaterialStatus(item.id)==='studying');
 }
 
 export function materialContext(item){
@@ -30,13 +31,13 @@ export function materialContext(item){
 export function studyMaterialsHtml(today=todayStr()){
   const active=activeStudyMaterials(today);
   return `<section class="studyMaterials" aria-label="学習中の単元">
-    <div class="materialHeading"><h2>📚 学習中の単元</h2><span>${active.length}件</span></div>
+    <div class="materialHeading"><h2>📌 学習中に指定した単元</h2><span>${active.length}件</span></div>
     ${active.length?`<nav class="studyMaterialList" aria-label="学習中の単元を選ぶ">${active.map(item=>{
       const {cleared,total}=studyMaterialProgress(item.id);
       return `<a class="studyMaterialLink" href="${escapeAttr(item.href)}"><small>${escapeHtml(materialContext(item))}</small>
         <strong>${escapeHtml(item.title)}${item.focus?'<span class="focusBadge">重点</span>':''}</strong>
         <span>クリア ${cleared}/${total}ステージ</span><b>この単元を開く →</b></a>`;
-    }).join('')}</nav>`:'<p class="materialEmpty">いま取り組む単元を、下の「学習する単元を選ぶ」から指定してね。</p>'}
+    }).join('')}</nav>`:'<p class="materialEmpty">指定はなくても大丈夫。上の「すぐ始める」や教材一覧から、いつでも始められるよ。</p>'}
   </section>`;
 }
 
@@ -60,6 +61,12 @@ export function materialChoiceHtml(item){
     </div></article>`;
 }
 
+export function materialManagerLabel(){return '📌 単元を整理する（使わなくてもOK）';}
+/* ホームでは閉じた見出しだけを出し、開いたときに中身を描く（400以上の単元を毎回描かない）。 */
+export function materialManagerClosedHtml(){
+  return `<details class="materialManager" id="materialManager"><summary>${materialManagerLabel()}<span>開いて選ぶ</span></summary></details>`;
+}
+
 export function materialManagerHtml(today=todayStr(),open=false,completedOpen=false,options={}){
   const catalog=materialCatalog(today);
   const available=catalog.filter(item=>studyMaterialStatus(item.id)!=='completed');
@@ -70,8 +77,8 @@ export function materialManagerHtml(today=todayStr(),open=false,completedOpen=fa
   });
   const query=options.search || '';
   return `<details class="materialManager" id="materialManager"${open?' open':''}>
-    <summary>学習する単元を選ぶ<span>${available.length}単元</span></summary>
-    <p class="muted">「二次関数」や「Week 1」など、いま学ぶ単元を「学習中にする」で上に並べよう。単元内の全ステージをクリアするか「学習完了にする」を押すと、メニューから隠れるよ。</p>
+    <summary>${materialManagerLabel()}<span>${available.length}単元</span></summary>
+    <p class="muted">選ばなくても、上の「すぐ始める」と教材一覧からそのまま学習できるよ。よく使う単元を「学習中にする」と、ホームの上に固定できる。単元内の全ステージをクリアするか「学習完了にする」を押すと、メニューから隠れるよ。</p>
     ${available.length?`<label class="materialSearchLabel" for="materialSearch">単元を検索</label>
       <input class="materialSearch" id="materialSearch" type="search" value="${escapeAttr(query)}" placeholder="二次関数、Week 1 など" autocomplete="off">
       <p class="materialEmpty" id="materialSearchEmpty" role="status" hidden>一致する単元がないよ。教科名や短い言葉でも探してみてね。</p>
