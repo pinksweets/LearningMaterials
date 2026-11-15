@@ -7,6 +7,7 @@ import { snapshotSession } from '../js/session.js';
 import { startStage, resumePanel, finishQuestion, renderQuestion } from '../js/views/quiz.js';
 import { renderLesson } from '../js/views/lesson.js';
 import { renderHome } from '../js/views/home.js';
+import { startCandidates } from '../js/views/start.js';
 import { renderLeapSpeedResult } from '../js/views/leap.js';
 import { createLeapSession, finishLeapSession } from '../js/leap-study.js';
 import { renderResult, renderBossDefeat, renderBossVictory } from '../js/views/results.js';
@@ -59,9 +60,11 @@ beforeEach(()=>{
 });
 
 test('単元未指定のホームは選ばなくてもすぐ始められ、指定後は学習中メニューをログ・設定より先に置く（DOMスタブ）',()=>{
+  const first=startCandidates(todayStr())[0];
+  assert.ok(first,'未指定でも開始候補がある');
   renderHome();
   // 何も指定していなくても、1タップで始めるボタンと教材一覧が出る。単元の整理欄は閉じたまま。
-  assert.match(screen.innerHTML,/<a class="startMain" data-start="next" href="#\/stage\/m1s1\/1"/);
+  assert.ok(screen.innerHTML.includes(`<a class="startMain" data-start="next" href="${first.href}"`));
   assert.match(screen.innerHTML,/class="shelfCard"/);
   assert.doesNotMatch(/<details\b[^>]*id="materialManager"[^>]*>/.exec(screen.innerHTML)[0],/\bopen\b/);
   assert.doesNotMatch(screen.innerHTML,/class="studyMaterials"/);

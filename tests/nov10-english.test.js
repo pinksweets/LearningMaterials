@@ -10,13 +10,14 @@ import {examResultHtml} from '../js/views/results.js';
 import {snapshotSession,restoreSession} from '../js/session.js';
 import {createLocalStorage} from './helpers/env.js';
 
-test('11/10の入口は追加順の先頭、当日まで有効で6ステージへ進める',()=>{
+test('11/10の入口は当日まで有効で、新しい対策の追加後も6ステージへ進める',()=>{
   const category=date=>testPrepCategories(date).find(c=>c.subject==='📅 11/10 英語小テスト対策');
   assert.equal(category('2026-11-09').status,'これからのテスト');
   assert.equal(category('2026-11-10').status,'今日のテスト');
   assert.equal(category('2026-11-10').past,false);
   assert.equal(category('2026-11-11').past,true);
-  assert.equal(testPrepCategories('2026-11-09')[0].subject,category('2026-11-09').subject);
+  const categories=testPrepCategories('2026-11-09');
+  assert.ok(categories.findIndex(c=>c.added===12)<categories.findIndex(c=>c.added===11));
   assert.ok(renderTestPrepPanel('2026-11-09').includes(category('2026-11-09').href));
   assert.equal(stagesOfSubject(category('2026-11-09').subject).length,6);
 });

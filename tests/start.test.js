@@ -11,6 +11,8 @@ import {
 import { createLocalStorage } from './helpers/env.js';
 
 const TODAY='2026-11-11';
+// 履歴の日付判定と、テスト対策を優先しない通常候補の検証日を分ける。
+const AFTER_TESTS='2026-11-18';
 const at=(date,hour=12)=>{const [y,m,d]=date.split('-').map(Number);return new Date(y,m-1,d,hour).getTime();};
 function session(sid,i=0){
   return {sid,mode:'stage',title:QUESTIONS[sid].title,list:QUESTIONS[sid].data.map((q,index)=>({...q,_key:sid+'-'+index})),i,correct:0,score:0,combo:0,maxCombo:0,feverGauge:0,feverLeft:0,feverCount:0,weakHits:0,wrongThisRun:[]};
@@ -24,17 +26,17 @@ beforeEach(()=>{
 });
 
 test('何も指定していない初回でも、最初の候補と教材一覧が出て1タップで始められる',()=>{
-  const candidates=startCandidates(TODAY);
+  const candidates=startCandidates(AFTER_TESTS);
   assert.ok(candidates.length>=1 && candidates.length<=4);
   assert.equal(candidates[0].reason,'new');
   assert.equal(candidates[0].sid,'m1s1');
   assert.equal(candidates[0].href,'#/stage/m1s1/1');
   assert.equal(new Set(candidates.map(item=>item.subjectTitle)).size,candidates.length,'初回は教科を重ねずに並べる');
-  const html=startPanelHtml(TODAY,0);
+  const html=startPanelHtml(AFTER_TESTS,0);
   assert.match(html,/<a class="startMain" data-start="next" href="#\/stage\/m1s1\/1"/);
   assert.doesNotMatch(html,/id="reviewBtn"/);
-  assert.match(startPanelHtml(TODAY,7),/id="reviewBtn"[^>]*>🔁 今日の復習（7問）/);
-  const shelf=subjectShelfHtml(TODAY);
+  assert.match(startPanelHtml(AFTER_TESTS,7),/id="reviewBtn"[^>]*>🔁 今日の復習（7問）/);
+  const shelf=subjectShelfHtml(AFTER_TESTS);
   assert.ok(shelf.includes(`href="${subjectHash('📐 数学Ⅰ')}"`));
   assert.ok(shelf.includes(`href="${subjectHash('📘 LEAP Basic 必携英単語')}"`));
 });
@@ -43,7 +45,7 @@ test('最近取り組んだ単元の続きが先頭に来て、クリア済み�
   state.stageCleared.tr2=true;
   markStageStudied('tr2',at('2026-11-10'));
   markStageStudied('qi1',at('2026-11-05'));state.stageCleared.qi1=true;
-  const [first,second]=startCandidates(TODAY);
+  const [first,second]=startCandidates(AFTER_TESTS);
   assert.equal(first.id,'math1:trigonometry');
   assert.equal(first.sid,'tr3','クリアした②の次へ進む');
   assert.equal(first.reason,'recent');
@@ -52,7 +54,7 @@ test('最近取り組んだ単元の続きが先頭に来て、クリア済み�
   // 途中のステージ（未クリア）が最新なら、そのステージをもう一度。
   markStageStudied('tr5',at('2026-11-11',9));
   assert.equal(unitNextStage(studyUnitById('math1:trigonometry')),'tr5');
-  assert.match(startPanelHtml(TODAY,0),/data-start="next" href="#\/(?:stage\/tr5\/1|lesson\/tr5)"/);
+  assert.match(startPanelHtml(AFTER_TESTS,0),/data-start="next" href="#\/(?:stage\/tr5\/1|lesson\/tr5)"/);
 });
 
 test('レッスン未読のステージは「まなぶ」から、既読なら問題から始まる',()=>{
@@ -68,14 +70,14 @@ test('単元を終えた教科は次の単元へ進み、完了した単元・�
   state.stageCleared.lbp1c1w1=true;markStageStudied('lbp1c1w1',at('2026-11-10'));
   // 過去のテスト対策（11/10 英語小テスト）は、取り組んだ履歴があっても候補にしない。
   markStageStudied('nov10e1',at('2026-11-10',18));
-  const candidates=startCandidates(TODAY);
+  const candidates=startCandidates(AFTER_TESTS);
   assert.equal(candidates[0].id,'stage:lbp1c1w2');
   assert.equal(candidates[0].reason,'next');
   assert.ok(candidates.every(item=>!item.sid.startsWith('nov10')));
   assert.ok(candidates.every(item=>item.id!=='stage:lbp1c1w1'));
   // 手動で完了にした単元も出さない。
   setStudyMaterialStatus('stage:lbp1c1w2','completed');
-  assert.ok(startCandidates(TODAY).every(item=>item.id!=='stage:lbp1c1w2'));
+  assert.ok(startCandidates(AFTER_TESTS).every(item=>item.id!=='stage:lbp1c1w2'));
 });
 
 test('これから・期間中のテスト対策は最優先で、終わったら過去のテスト対策へ移る',()=>{
@@ -85,30 +87,33 @@ test('これから・期間中のテスト対策は最優先で、終わった�
   assert.equal(before[0].subjectTitle,'11/10 英語小テスト対策');
   assert.ok(before[0].sid.startsWith('nov10'));
   assert.equal(startCandidates('2026-11-10')[0].reason,'test','当日も対象');
-  assert.equal(startCandidates(TODAY)[0].id,'math1:trigonometry');
-  const during=subjectShelf('2026-11-09'), after=subjectShelf(TODAY);
-  assert.deepEqual(during.tests.map(entry=>entry.title),['11/10 英語小テスト対策']);
+  assert.equal(startCandidates('2026-11-17')[0].reason,'test','11/17当日も対象');
+  assert.equal(startCandidates('2026-11-17')[0].subjectTitle,'11/17 英語小テスト対策');
+  assert.equal(startCandidates(AFTER_TESTS)[0].id,'math1:trigonometry');
+  const during=subjectShelf('2026-11-09'), after=subjectShelf(AFTER_TESTS);
+  assert.deepEqual(during.tests.map(entry=>entry.title),['11/10 英語小テスト対策','11/17 英語小テスト対策']);
   assert.equal(after.tests.length,0);
   assert.ok(after.past.some(entry=>entry.title==='11/10 英語小テスト対策'));
+  assert.ok(after.past.some(entry=>entry.title==='11/17 英語小テスト対策'));
   assert.ok(after.past.every(entry=>!entry.test.hidden),'非表示にした9月の対策は一覧にも出さない');
-  assert.match(subjectShelfHtml(TODAY),/<details class="shelfPast">/);
+  assert.match(subjectShelfHtml(AFTER_TESTS),/<details class="shelfPast">/);
 });
 
 test('「学習中にする」で指定した単元は候補に入り、途中のステージがあれば「続きから」が最優先',()=>{
   setStudyMaterialStatus('group:e1s1','studying');
   markStageStudied('tr2',at('2026-11-10'));
-  const ids=startCandidates(TODAY).map(item=>item.id);
+  const ids=startCandidates(AFTER_TESTS).map(item=>item.id);
   assert.ok(ids.includes('group:e1s1'));
   assert.equal(ids[0],'math1:trigonometry','新しく取り組んだ単元が先');
   state.cur=session('njz1',2);
   assert.equal(resumableSession().sid,'njz1');
-  const html=startPanelHtml(TODAY,0);
+  const html=startPanelHtml(AFTER_TESTS,0);
   assert.match(html,/<a class="startMain" data-start="resume" href="#\/stage\/njz1\/3"/);
   assert.match(html,/3問目から再開/);
   // 完了にした単元の途中経過はホームに出さない。
   setStudyMaterialStatus('math1:quadratics','completed');
   assert.equal(resumableSession(),null);
-  assert.match(startPanelHtml(TODAY,0),/data-start="next"/);
+  assert.match(startPanelHtml(AFTER_TESTS,0),/data-start="next"/);
 });
 
 test('結果画面の「次へ」は同じ単元の未クリア、なければ次のおすすめを返す',()=>{

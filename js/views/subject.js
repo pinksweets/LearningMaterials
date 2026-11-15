@@ -122,6 +122,14 @@ export function renderSubjectHome(subject,unitId=''){
     ${unit?`<div class="sub">${escapeHtml(subject)}${unit.group && unit.group!==unit.title?'　｜　'+escapeHtml(unit.group):''}</div>`:''}
     ${resumePanel(subject,unit?.id)}
     <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">← ホームへ</button>
+    ${subject==='📅 11/17 英語小テスト対策'?`<section class="sepPlan">
+      <strong>11/17に向けて｜意味→つづり→例文で確かめよう</strong>
+      <p>範囲は写真4枚のp.78〜85、No.225〜251の27項目。意味27問・つづり27問・語法27問を練習しよう。練習は時間制限なし。</p>
+      <ol><li>①の4ステージで、意味とつづりを練習。答えを見る前に、声に出して思い出そう。</li><li>②の3ステージで、decide to、busy doing、good at doing、tired fromとtired of、different fromなどを確認。fall・break・chooseの活用も確かめてね。</li><li>仕上げに復習模擬34問・100点。目安20分を自分で計ろう。正解と解説は終了後に表示するよ。</li><li>結果の分野別リンクから苦手を練習し直そう。11/16に復習したら、11/17の朝にもう一度、間違えた語を書いてみよう。</li></ol>
+      <p>目標80点・時間・配点は学習用の目安。模擬は練習から選んだ復習用で、学校の実際の出題形式・配点は未確認だよ。</p>
+      <a class="btn secondary" href="#/stage/nov17e1/1">意味とつづりの練習を始める</a>
+      <a class="btn" href="#/stage/nov17mock1/1">11/17英語の100点模擬テストを始める</a>
+    </section>`:''}
     ${subject==='📅 11/10 英語小テスト対策'?`<section class="sepPlan">
       <strong>11/10に向けて｜20項目を思い出して、書いてみよう</strong>
       <p>範囲は写真のp.72〜77、No.205〜224。まず意味20問、次につづり20問、最後に語法20問を練習しよう。練習は時間制限なしだよ。</p>
