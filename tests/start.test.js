@@ -3,7 +3,8 @@ import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { state, save, load, SAVE_KEY, setStudyMaterialStatus, deriveStageLastAt, normalizeStageLastAt, markStageStudied, stageLastStudied } from '../js/state.js';
 import { QUESTIONS, studyUnitById } from '../js/content.js';
-import { studyUnitHash, subjectHash } from '../js/utils.js';
+import { studyUnitHash, subjectHash, addDays } from '../js/utils.js';
+import { testPrepCategories } from '../js/views/home.js';
 import {
   startCandidates, startPanelHtml, subjectShelf, subjectShelfHtml, unitNextStage, stageStartHash,
   nextStageAfter, daysAgoLabel, resumableSession
@@ -12,7 +13,8 @@ import { createLocalStorage } from './helpers/env.js';
 
 const TODAY='2026-11-11';
 // 履歴の日付判定と、テスト対策を優先しない通常候補の検証日を分ける。
-const AFTER_TESTS='2026-11-18';
+const AFTER_TESTS=addDays(testPrepCategories(TODAY).filter(item=>!item.evergreen)
+  .map(item=>item.endDate||item.date).sort().at(-1),1);
 const at=(date,hour=12)=>{const [y,m,d]=date.split('-').map(Number);return new Date(y,m-1,d,hour).getTime();};
 function session(sid,i=0){
   return {sid,mode:'stage',title:QUESTIONS[sid].title,list:QUESTIONS[sid].data.map((q,index)=>({...q,_key:sid+'-'+index})),i,correct:0,score:0,combo:0,maxCombo:0,feverGauge:0,feverLeft:0,feverCount:0,weakHits:0,wrongThisRun:[]};
@@ -89,12 +91,17 @@ test('これから・期間中のテスト対策は最優先で、終わった�
   assert.equal(startCandidates('2026-11-10')[0].reason,'test','当日も対象');
   assert.equal(startCandidates('2026-11-17')[0].reason,'test','11/17当日も対象');
   assert.equal(startCandidates('2026-11-17')[0].subjectTitle,'11/17 英語小テスト対策');
+  assert.equal(startCandidates('2026-11-18')[0].subjectTitle,'11/24 英語小テスト対策','11/17終了後は次の試験へ');
+  assert.equal(startCandidates('2026-11-24')[0].reason,'test','11/24当日も対象');
+  assert.equal(startCandidates('2026-11-24')[0].subjectTitle,'11/24 英語小テスト対策');
   assert.equal(startCandidates(AFTER_TESTS)[0].id,'math1:trigonometry');
   const during=subjectShelf('2026-11-09'), after=subjectShelf(AFTER_TESTS);
-  assert.deepEqual(during.tests.map(entry=>entry.title),['11/10 英語小テスト対策','11/17 英語小テスト対策']);
+  const expected=['11/10 英語小テスト対策','11/17 英語小テスト対策','11/24 英語小テスト対策'];
+  assert.deepEqual(during.tests.filter(entry=>expected.includes(entry.title)).map(entry=>entry.title),expected);
   assert.equal(after.tests.length,0);
   assert.ok(after.past.some(entry=>entry.title==='11/10 英語小テスト対策'));
   assert.ok(after.past.some(entry=>entry.title==='11/17 英語小テスト対策'));
+  assert.ok(after.past.some(entry=>entry.title==='11/24 英語小テスト対策'));
   assert.ok(after.past.every(entry=>!entry.test.hidden),'非表示にした9月の対策は一覧にも出さない');
   assert.match(subjectShelfHtml(AFTER_TESTS),/<details class="shelfPast">/);
 });

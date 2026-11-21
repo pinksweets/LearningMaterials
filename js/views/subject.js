@@ -122,6 +122,14 @@ export function renderSubjectHome(subject,unitId=''){
     ${unit?`<div class="sub">${escapeHtml(subject)}${unit.group && unit.group!==unit.title?'　｜　'+escapeHtml(unit.group):''}</div>`:''}
     ${resumePanel(subject,unit?.id)}
     <button class="btn secondary small" id="subjectBackBtn" style="margin-bottom:10px">← ホームへ</button>
+    ${subject==='📅 11/24 英語小テスト対策'?`<section class="sepPlan">
+      <strong>11/24に向けて｜英語を読んで、日本語の意味をつかもう</strong>
+      <p>範囲は写真3枚のp.84〜89、No.245〜265の21項目。単語・熟語の意味21問と、短い英文の理解42問を練習しよう。日本語の選択肢から答える形式で、練習は時間制限なしだよ。</p>
+      <ol><li>①の3ステージで、英語を見て意味を思い出そう。選択肢を見る前に、日本語で言ってみてね。</li><li>②の3ステージで、文全体の意味を確認。true・wrong・different・only・evenの意味の違い、large family、each other、eitherとneitherにも注目しよう。</li><li>仕上げに復習模擬34問・100点。目安20分を自分で計ろう。正解と解説は終了後にまとめて表示するよ。</li><li>結果の分野別リンクから苦手を練習し直そう。11/23に復習したら、11/24の朝にもう一度、間違えた英語の意味を思い出してみてね。</li></ol>
+      <p>目標80点・時間・配点は学習用の目安。模擬は練習から選んだ復習用で、学校の細かな出題形式・配点は未確認だよ。</p>
+      <a class="btn secondary" href="#/stage/nov24e1/1">英語→日本語の練習を始める</a>
+      <a class="btn" href="#/stage/nov24mock1/1">11/24英語の100点模擬テストを始める</a>
+    </section>`:''}
     ${subject==='📅 11/17 英語小テスト対策'?`<section class="sepPlan">
       <strong>11/17に向けて｜意味→つづり→例文で確かめよう</strong>
       <p>範囲は写真4枚のp.78〜85、No.225〜251の27項目。意味27問・つづり27問・語法27問を練習しよう。練習は時間制限なし。</p>

@@ -14,13 +14,14 @@ const subject='📅 11/17 英語小テスト対策';
 const numbers=Array.from({length:27},(_,i)=>225+i);
 const words=['problem','solve','do well','decide','choose','break','break down','fall','drop','busy','free','careful','kind','poor','shy','be good at','be able to do','be tired from','easy','difficult','quiet','safe','true','wrong','different','be covered with','be full of'];
 
-test('11/17の入口を先頭に追加し、当日まで有効な8ステージへ進める',()=>{
+test('11/17の入口は当日まで有効で、新しい対策の追加後も8ステージへ進める',()=>{
   const category=date=>testPrepCategories(date).find(c=>c.subject===subject);
   assert.equal(category('2026-11-16').status,'これからのテスト');
   assert.equal(category('2026-11-17').status,'今日のテスト');
   assert.equal(category('2026-11-17').past,false);
   assert.equal(category('2026-11-18').past,true);
-  assert.equal(testPrepCategories('2026-11-15')[0].subject,subject);
+  const categories=testPrepCategories('2026-11-15');
+  assert.ok(categories.findIndex(c=>c.added===13)<categories.findIndex(c=>c.added===12));
   assert.ok(renderTestPrepPanel('2026-11-15').includes(category('2026-11-15').href));
   assert.deepEqual(stagesOfSubject(subject),['nov17e1','nov17e2','nov17e3','nov17e4','nov17e5','nov17e6','nov17e7','nov17mock1']);
 });
