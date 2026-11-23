@@ -2,8 +2,8 @@
    学習する単元を先に指定しなくても、開いてすぐ1タップで始められるようにする。
    候補は「近いテスト → 学習中に指定した単元・最近取り組んだ単元 → まだの教科の最初の単元」の順。 */
 import { escapeAttr, escapeHtml, todayStr, subjectHash } from '../utils.js';
-import { state, stageLastStudied, subjectList, subjectClearedCount, subjectMastery, stagesOfSubject, isLessonSeen, studyMaterialStatus } from '../state.js';
-import { QUESTIONS, studyUnitList, studyUnitForStage } from '../content.js';
+import { state, stageLastStudied, subjectList, subjectClearedCount, subjectMastery, stagesOfSubject, isLessonSeen, studyMaterialStatus, studyMaterialProgress } from '../state.js';
+import { QUESTIONS, studyUnitList, studyUnitForStage, studyUnitById } from '../content.js';
 import { hasLesson } from '../lesson.js';
 import { sessionHash, restoreSession } from '../session.js';
 import { materialCatalog } from './materials.js';
@@ -150,7 +150,13 @@ export function startPanelHtml(today=todayStr(),dueCount=0){
 /* 教材一覧。単元を指定しなくても、教科カードからいつでも開ける。 */
 export function subjectShelf(today=todayStr()){
   const categories=testPrepCategories(today);
-  const category=new Map(categories.map(item=>[item.subject,item]));
+  const category=new Map(categories.filter(item=>!item.unitId).map(item=>[item.subject,item]));
+  const unitEntries=categories.filter(item=>item.unitId && !item.hidden).flatMap(item=>{
+    const unit=studyUnitById(item.unitId);
+    if(!unit || !unitIsOpen(unit))return [];
+    return [{subject:unit.subject,test:item,kind:'subject',title:item.title,range:item.range,href:item.href,
+      open:true,lastAt:unitLastStudied(unit),focus:false,...studyMaterialProgress(unit.id)}];
+  });
   const entries=subjectList().map((subject,index)=>{
     const item=category.get(subject);
     const sids=stagesOfSubject(subject);
@@ -165,7 +171,7 @@ export function subjectShelf(today=todayStr()){
   }).filter(entry=>entry.open && entry.kind!=='hidden');
   return {
     tests:entries.filter(entry=>entry.kind==='test').sort((a,b)=>a.test.date<b.test.date?-1:a.test.date>b.test.date?1:b.test.added-a.test.added),
-    main:entries.filter(entry=>entry.kind==='subject'),
+    main:[...unitEntries,...entries.filter(entry=>entry.kind==='subject')],
     past:entries.filter(entry=>entry.kind==='past').sort((a,b)=>b.test.added-a.test.added)
   };
 }

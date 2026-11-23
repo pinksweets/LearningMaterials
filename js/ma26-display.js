@@ -1,5 +1,6 @@
 // 数学A対策の問題条件だけを描く模式図。解答値は含めない。
 export function mathADiagram(spec){
+  if(spec?.kind==='geometry')return geometryDiagram(spec);
   if(!spec || !['internal','external','parallel','inner','outer','circum','right'].includes(spec.kind))return '';
   const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const t=(x,y,v)=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="18">${esc(v)}</text>`;
@@ -25,4 +26,29 @@ export function mathADiagram(spec){
   }
   const labels=(spec.labels||[]).map(esc).join(' ／ ');
   return `<figure data-ma-diagram="${spec.kind}" style="margin:12px 0;background:#f4f7fc;color:#243650;border-radius:12px;padding:8px"><svg viewBox="0 0 500 260" role="img" aria-label="${labels}" style="width:100%;max-width:500px;display:block;margin:auto"><title>${labels}</title><g fill="#243650">${drawing}</g></svg><figcaption style="text-align:center;font-size:.85rem">${labels}<br>位置関係を示す図だよ。長さ・角度は問題の条件を使おう。</figcaption></figure>`;
+}
+
+// 点と線分を指定する図形教材用。描くのは位置関係と問題の条件だけ。
+function geometryDiagram(spec){
+  const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const pair=value=>Array.isArray(value)&&value.length===2&&value.every(Number.isFinite);
+  if(!spec.points || typeof spec.points!=='object' || Array.isArray(spec.points))return '';
+  const points=new Map(Object.entries(spec.points).filter(([,p])=>pair(p)));
+  if(points.size<2)return '';
+  const labels=Array.isArray(spec.labels)?spec.labels.filter(value=>['string','number'].includes(typeof value)).map(esc):[];
+  const caption=labels.join(' ／ ');
+  const description=caption || '問題の点と線分の位置関係';
+  const circles=(Array.isArray(spec.circles)?spec.circles:[])
+    .filter(c=>c&&[c.cx,c.cy,c.r].every(Number.isFinite)&&c.r>0)
+    .map(c=>`<circle cx="${c.cx}" cy="${c.cy}" r="${c.r}" fill="none" stroke="#7287a6" stroke-width="2"/>`).join('');
+  const segments=(Array.isArray(spec.segments)?spec.segments:[])
+    .filter(s=>Array.isArray(s)&&s.length===2&&s.every(name=>points.has(name)))
+    .map(([a,b])=>{const p=points.get(a),q=points.get(b);return `<path d="M${p[0]} ${p[1]} L${q[0]} ${q[1]}" fill="none" stroke="#344968" stroke-width="2.5"/>`;}).join('');
+  const vertices=[...points].map(([name,[x,y]])=>{
+    const offset=spec.pointOffsets?.[name];
+    const [dx,dy]=pair(offset)?offset:[x<250?-14:14,y<150?-12:22];
+    const tx=Math.max(12,Math.min(488,x+dx)),ty=Math.max(22,Math.min(288,y+dy));
+    return `<circle cx="${x}" cy="${y}" r="3" fill="#243650"/><text x="${tx}" y="${ty}" text-anchor="middle" font-size="20" fill="#243650" stroke="#f4f7fc" stroke-width="4" paint-order="stroke">${esc(name)}</text>`;
+  }).join('');
+  return `<figure data-ma-diagram="geometry" style="margin:12px 0;background:#f4f7fc;color:#243650;border-radius:12px;padding:8px"><svg viewBox="0 0 500 300" role="img" aria-label="${description}" style="width:100%;max-width:500px;display:block;margin:auto"><title>${description}</title><desc>点の位置と線分のつながりを示す模式図。長さや角度は問題文の条件を使います。</desc>${circles}${segments}${vertices}</svg><figcaption style="text-align:center;font-size:.85rem">${caption?caption+'<br>':''}位置関係を示す図だよ。長さ・角度は問題の条件を使おう。</figcaption></figure>`;
 }

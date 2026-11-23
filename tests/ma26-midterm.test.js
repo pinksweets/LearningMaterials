@@ -100,7 +100,7 @@ test('模試は独立した固定34問100点・全12通常分野に復習リン�
  for(const q of list){const u=practice.find(u=>u.id===q.sourceStage);assert.ok(u);assert.ok(!u.group.includes('発展'));assert.ok(QUESTIONS[q.sourceStage]);assert.ok(u.questions.some(p=>p.q===q.q&&correct(p)===correct(q)));assert.ok(!q.hint);}
 });
 test('数学Aの入口・期間表示・通常カードの維持',()=>{
- const item=date=>testPrepCategories(date).find(c=>c.subject==='📐 数学A');
+ const item=date=>testPrepCategories(date).find(c=>c.subject==='📐 数学A' && c.added===9);
  assert.ok(item('2026-10-08').keepSubject);assert.equal(item('2026-10-08').status,'これからのテスト');
  for(const date of ['2026-10-13','2026-10-19'])assert.equal(item(date).status,'テスト期間中');
  assert.equal(item('2026-10-20').status,'過去のテスト');assert.ok(renderTestPrepPanel('2026-10-08').includes(item('2026-10-08').href));

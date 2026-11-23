@@ -16,13 +16,13 @@ const numbers=Array.from({length:21},(_,i)=>245+i);
 const words=['quiet','safe','true','wrong','different','be covered with','be full of','important','necessary','large','small','tall','short','only','even','each','other','another','each other','either A or B','neither A nor B'];
 const meanings=[/静か/,/安全/,/真実|本当/,/間違/,/異な/,/覆/,/いっぱい/,/重要/,/必要/,/大き/,/小さ/,/高い/,/短い/,/だけ|すぎない|唯一/,/さえ|さらに/,/それぞれ|各/,/ほか/,/ほか|もう/,/お互い/,/どちらか/,/どちらも|も.*も.*ない/];
 
-test('11/24の入口は新しい順の先頭で、当日まで有効な7ステージへ進める',()=>{
+test('11/24の入口は当日まで有効な7ステージへ進め、追加順を保つ',()=>{
   const category=date=>testPrepCategories(date).find(c=>c.subject===subject);
   assert.equal(category('2026-11-23').status,'これからのテスト');
   assert.equal(category('2026-11-24').status,'今日のテスト');
   assert.equal(category('2026-11-24').past,false);
   assert.equal(category('2026-11-25').past,true);
-  assert.equal(testPrepCategories('2026-11-21')[0].subject,subject);
+  assert.equal(testPrepCategories('2026-11-21').find(c=>c.added===14).subject,subject);
   assert.ok(renderTestPrepPanel('2026-11-21').includes(category('2026-11-21').href));
   assert.deepEqual(stagesOfSubject(subject),['nov24e1','nov24e2','nov24e3','nov24e4','nov24e5','nov24e6','nov24mock1']);
 });

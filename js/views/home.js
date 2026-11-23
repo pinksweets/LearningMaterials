@@ -9,6 +9,7 @@ import {
   evalTitle,
   dueList,
   subjectClearedCount,
+  studyMaterialProgress,
   studyMaterialStatus,
   getStudyDay,
   normalizeDailyGoal,
@@ -30,6 +31,7 @@ import { september15Subject } from "./september15.js";
 export function testPrepCategories(today=todayStr()){
   // 追加順を明示し、新しく追加した対策から表示する。日付は年も固定する。
   return [
+    {subject:'📐 数学A',title:'期末テスト対策｜数学A',evergreen:true,added:15,keepSubject:true,unitId:'group:mafs1',href:'#/unit/'+encodeURIComponent('group:mafs1'),range:'写真p.53〜61｜内心・重心・チェバ・メネラウス・辺と角・円周角・内接四角形｜解き方レッスン＋練習70問＋復習模擬34問・100点'},
     {subject:'📅 11/24 英語小テスト対策',title:'11/24 英語小テスト対策',date:'2026-11-24',added:14,href:subjectHash('📅 11/24 英語小テスト対策'),range:'写真p.84〜89｜No.245〜265の21項目｜英語→日本語：意味21問・英文理解42問＋復習模擬34問・100点'},
     {subject:'📅 11/17 英語小テスト対策',title:'11/17 英語小テスト対策',date:'2026-11-17',added:13,href:subjectHash('📅 11/17 英語小テスト対策'),range:'写真p.78〜85｜No.225〜251の27項目｜意味・英語入力・語法81問＋復習模擬34問・100点'},
     {subject:'📅 11/10 英語小テスト対策',title:'11/10 英語小テスト対策',date:'2026-11-10',added:12,href:subjectHash('📅 11/10 英語小テスト対策'),range:'写真p.72〜77｜No.205〜224の20項目｜意味・英語入力・語法60問＋復習模擬34問・100点'},
@@ -49,11 +51,11 @@ export function testPrepCategories(today=todayStr()){
 export function renderTestPrepPanel(today=todayStr()){
   // 既定は閉じた状態（<details>）。クリックで開く。開閉状態は保存しない（毎回閉じて始まる）。
   // 非表示の対策も登録は残し、通常の教科カードへ再表示されるのを防ぐ。
-  const items=testPrepCategories(today).filter(item=>!item.hidden && studyUnitList(item.subject).some(unit=>studyMaterialStatus(unit.id)!=='completed'));
+  const items=testPrepCategories(today).filter(item=>!item.hidden && studyUnitList(item.subject).some(unit=>(!item.unitId || unit.id===item.unitId) && studyMaterialStatus(unit.id)!=='completed'));
   return `<details class="testPrepPanel"><summary id="testPrepHeading"><span>📅 テスト対策</span><span class="testPrepToggle">${items.length}件　</span></summary>
     <p class="muted">受けるテストを選んでね。新しく追加した対策から並んでいるよ。</p>
     <div class="testPrepCategories">${items.map(item=>{
-      const {cleared,total}=subjectClearedCount(item.subject);
+      const {cleared,total}=item.unitId?studyMaterialProgress(item.unitId):subjectClearedCount(item.subject);
       return `<a class="testPrepCard${item.past?' isPast':''}" href="${escapeAttr(item.href||`#test/${item.date}`)}">
         <span class="testPrepStatus">${item.status}</span><strong>${item.title}</strong>
         <span>${item.range}</span><small>クリア ${cleared}/${total}　→</small></a>`;
