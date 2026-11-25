@@ -19,7 +19,7 @@ test('テスト対策は追加順の降順、当日は過去扱いにしない',
   assert.ok(testPrepCategories('2027-01-01').filter(c=>!c.evergreen).every(c=>c.past));
 });
 test('中間テストは期間の最終日まで開催中で、化学の教科へ移動できる',()=>{
-  const first=date=>testPrepCategories(date).find(c=>c.subject==='🧪 化学基礎');
+  const first=date=>testPrepCategories(date).find(c=>c.subject==='🧪 化学基礎' && c.date==='2026-10-13');
   assert.equal(first('2026-10-12').status,'これからのテスト');
   for(const date of ['2026-10-13','2026-10-16','2026-10-19']){
     assert.equal(first(date).status,'テスト期間中');
@@ -28,15 +28,15 @@ test('中間テストは期間の最終日まで開催中で、化学の教科�
   assert.equal(first('2026-10-20').past,true);
   assert.equal(first('2026-10-20').status,'過去のテスト');
   assert.equal(first('2026-09-25').keepSubject,true);
-  assert.equal(stagesOfSubject(first('2026-09-25').subject).length,14);
+  assert.equal(stagesOfSubject(first('2026-09-25').subject).filter(sid=>sid.startsWith('ch1')).length,14);
   assert.ok(renderTestPrepPanel('2026-09-25').includes(`href="${first('2026-09-25').href}"`));
 });
 test('指定した9月の3カテゴリを非表示にし、既存単元IDと残りの入口を維持する',()=>{
   const html=renderTestPrepPanel('2026-09-12');
   const categories=testPrepCategories('2026-09-12');
   assert.deepEqual(categories.filter(c=>c.hidden).map(c=>c.title),['9/16 実力テスト対策','9/15 英語小テスト対策','9/11 小テスト対策']);
-  assert.match(html,/12件/);
-  assert.equal((html.match(/class="testPrepCard/g)||[]).length,12);
+  assert.match(html,/13件/);
+  assert.equal((html.match(/class="testPrepCard/g)||[]).length,13);
   assert.doesNotMatch(html,/disabled/);
   for(const item of categories){
     if(item.hidden){

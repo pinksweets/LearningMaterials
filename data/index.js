@@ -64,8 +64,10 @@ import * as nov24Mock from './nov24_english_mock.js';
 import * as maFinalTriangles from './ma_final_triangles.js';
 import * as maFinalCircles from './ma_final_circles.js';
 import * as maFinalMock from './ma_final_mock.js';
+import * as chFinalAmount from './ch_final_amount.js';
+import * as chFinalMock from './ch_final_mock.js';
 
-const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5, lbq, sep, sep15, sep16Ja, sep16Ma, sep16En, njz, ecz, ch1, chMock, chFormula, h26, h26Mock, e26, e26Mock, ec26, ec26Mock, ec26Text, ec26TextMock, b26, ma26, ma26Mock, mqSupport, mqMock, oct27En, oct27Mock, qi, tr, nov10En, nov10Mock, nov17En, nov17Mock, nov24En, nov24Mock, maFinalTriangles, maFinalCircles, maFinalMock];
+const MODULES = [s1, s2, s3, m1, m2, m3, e1, e2, b1, b2, ec1, ma1, lb1, lb2, lb3, lb4, lb5, lbq, sep, sep15, sep16Ja, sep16Ma, sep16En, njz, ecz, ch1, chMock, chFormula, h26, h26Mock, e26, e26Mock, ec26, ec26Mock, ec26Text, ec26TextMock, b26, ma26, ma26Mock, mqSupport, mqMock, oct27En, oct27Mock, qi, tr, nov10En, nov10Mock, nov17En, nov17Mock, nov24En, nov24Mock, maFinalTriangles, maFinalCircles, maFinalMock, chFinalAmount, chFinalMock];
 
 /* 全単元（登録順） */
 export const units = MODULES.flatMap(m => m.units);
