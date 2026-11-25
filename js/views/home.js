@@ -31,6 +31,7 @@ import { september15Subject } from "./september15.js";
 export function testPrepCategories(today=todayStr()){
   // 追加順を明示し、新しく追加した対策から表示する。日付は年も固定する。
   return [
+    {subject:'📜 歴史総合',title:'期末テスト対策｜歴史',evergreen:true,added:17,keepSubject:true,unitId:'group:hfs1',href:'#/unit/'+encodeURIComponent('group:hfs1'),range:'項目40〜42｜第二次世界大戦の開始・終結、戦後の国連と経済体制｜要点レッスン＋練習60問＋復習模試34問・100点'},
     {subject:'🧪 化学基礎',title:'期末テスト対策｜化学',evergreen:true,added:16,keepSubject:true,unitId:'group:chfs1',href:'#/unit/'+encodeURIComponent('group:chfs1'),range:'写真p.96〜107｜原子量・分子量・式量・物質量の計算｜解き方レッスン＋練習70問＋復習模擬34問・100点'},
     {subject:'📐 数学A',title:'期末テスト対策｜数学A',evergreen:true,added:15,keepSubject:true,unitId:'group:mafs1',href:'#/unit/'+encodeURIComponent('group:mafs1'),range:'写真p.53〜61｜内心・重心・チェバ・メネラウス・辺と角・円周角・内接四角形｜解き方レッスン＋練習70問＋復習模擬34問・100点'},
     {subject:'📅 11/24 英語小テスト対策',title:'11/24 英語小テスト対策',date:'2026-11-24',added:14,href:subjectHash('📅 11/24 英語小テスト対策'),range:'写真p.84〜89｜No.245〜265の21項目｜英語→日本語：意味21問・英文理解42問＋復習模擬34問・100点'},

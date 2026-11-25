@@ -11,12 +11,13 @@ import {snapshotSession,restoreSession} from '../js/session.js';
 import {createLocalStorage} from './helpers/env.js';
 
 test('歴史の中間対策は期間内に選べ、写真4分野の練習60問と固定模擬100点へつながる',()=>{
+  const midterm=date=>testPrepCategories(date).find(c=>c.subject==='📜 歴史総合' && c.date==='2026-10-13');
   for(const date of ['2026-10-13','2026-10-19']){
-    const category=testPrepCategories(date).find(c=>c.subject==='📜 歴史総合');
+    const category=midterm(date);
     assert.equal(category.status,'テスト期間中');
     assert.ok(renderTestPrepPanel(date).includes(`href="${category.href}"`));
   }
-  assert.equal(testPrepCategories('2026-10-20').find(c=>c.subject==='📜 歴史総合').past,true);
+  assert.equal(midterm('2026-10-20').past,true);
   assert.deepEqual(practice.map(u=>u.questions.length),[15,15,15,15]);
   const paper=papers[0];
   assert.equal(paper.questions.length,34);
