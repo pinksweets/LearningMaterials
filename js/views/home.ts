@@ -1,0 +1,335 @@
+import type { MaterialSubjectPanel } from "../types.js";
+import { el, app, toast, escapeAttr, escapeHtml, todayStr, addDays, syncScreenHash, subjectHash, studyUnitHash } from "../utils.js";
+import { stopTimer } from "../timer.js";
+import { appendReportingSettings } from './reporting.js';
+import { stopBossTension, stopSpeech, playAnswerSound, BGM, startYouTubeBgm, stopYouTubeBgm } from "../audio.js";
+import {
+  DAILY_GOAL_OPTIONS,
+  state,
+  save,
+  evalTitle,
+  dueList,
+  subjectClearedCount,
+  studyMaterialProgress,
+  studyMaterialStatus,
+  getStudyDay,
+  normalizeDailyGoal,
+  studyVolumeLevel,
+  weeklyStudySummary,
+  leapSessionsOn,
+  stagesOfSubject,
+  stageLastStudied
+} from "../state.js";
+import { CARDS, totalQuestionCount, MATH1_PREP_SUBJECT, studyUnitList } from "../content.js";
+import { LEAP_DAILY_TARGET, LEAP_BASIC_SUBJECT } from "../leap-study.js";
+import { activeStudyMaterials, studyMaterialsHtml, materialManagerHtml, materialManagerClosedHtml, bindMaterialActions } from './materials.js';
+import { renderCollection } from "./collection.js";
+import { startReview } from "./quiz.js";
+import { startPanelHtml, subjectShelfHtml } from './start.js';
+import { septemberSubject } from "./september.js";
+import { september15Subject } from "./september15.js";
+
+export function testPrepCategories(today=todayStr()){
+  // 追加順を明示し、新しく追加した対策から表示する。日付は年も固定する。
+  return [
+    {subject:'📐 数学Ⅰ 期末テスト対策',title:'期末テスト対策｜数学Ⅰ',evergreen:true,added:18,href:studyUnitHash('group:mifs1'),range:'写真p.81〜102｜2次不等式・三角比｜解き方レッスン＋練習80問＋復習模試34問・100点'},
+    {subject:'📜 歴史総合',title:'期末テスト対策｜歴史',evergreen:true,added:17,keepSubject:true,unitId:'group:hfs1',href:'#/unit/'+encodeURIComponent('group:hfs1'),range:'項目40〜42｜第二次世界大戦の開始・終結、戦後の国連と経済体制｜要点レッスン＋練習60問＋復習模試34問・100点'},
+    {subject:'🧪 化学基礎',title:'期末テスト対策｜化学',evergreen:true,added:16,keepSubject:true,unitId:'group:chfs1',href:'#/unit/'+encodeURIComponent('group:chfs1'),range:'写真p.96〜107｜原子量・分子量・式量・物質量の計算｜解き方レッスン＋練習70問＋復習模擬34問・100点'},
+    {subject:'📐 数学A',title:'期末テスト対策｜数学A',evergreen:true,added:15,keepSubject:true,unitId:'group:mafs1',href:'#/unit/'+encodeURIComponent('group:mafs1'),range:'写真p.53〜61｜内心・重心・チェバ・メネラウス・辺と角・円周角・内接四角形｜解き方レッスン＋練習70問＋復習模擬34問・100点'},
+    {subject:'📅 11/24 英語小テスト対策',title:'11/24 英語小テスト対策',date:'2026-11-24',added:14,href:subjectHash('📅 11/24 英語小テスト対策'),range:'写真p.84〜89｜No.245〜265の21項目｜英語→日本語：意味21問・英文理解42問＋復習模擬34問・100点'},
+    {subject:'📅 11/17 英語小テスト対策',title:'11/17 英語小テスト対策',date:'2026-11-17',added:13,href:subjectHash('📅 11/17 英語小テスト対策'),range:'写真p.78〜85｜No.225〜251の27項目｜意味・英語入力・語法81問＋復習模擬34問・100点'},
+    {subject:'📅 11/10 英語小テスト対策',title:'11/10 英語小テスト対策',date:'2026-11-10',added:12,href:subjectHash('📅 11/10 英語小テスト対策'),range:'写真p.72〜77｜No.205〜224の20項目｜意味・英語入力・語法60問＋復習模擬34問・100点'},
+    {subject:'📅 10/27 英語小テスト対策',title:'10/27 英語小テスト対策',date:'2026-10-27',added:11,href:subjectHash('📅 10/27 英語小テスト対策'),range:'写真p.67・69・71｜No.184〜204の21項目｜意味・つづり・使い分け60問＋復習模擬34問・100点'},
+    {subject:MATH1_PREP_SUBJECT,title:'数学Ⅰ｜二次関数のテスト対策',evergreen:true,added:10,href:subjectHash(MATH1_PREP_SUBJECT),range:'平方完成→グラフ→移動→最大・最小→c｜一行ずつの例題＋練習90問＋模擬34問・100点'},
+    {subject:'📐 数学A',title:'10/13〜19 中間テスト対策｜数学A',date:'2026-10-13',endDate:'2026-10-19',added:9,keepSubject:true,href:subjectHash('📐 数学A'),range:'p.54〜79｜確率・三角形の比・外心｜練習120問＋発展20問＋模擬34問・100点'},
+    {subject:'🧬 生物基礎 visual',title:'10/13〜19 中間テスト対策｜生物基礎',date:'2026-10-13',endDate:'2026-10-19',added:8,keepSubject:true,href:subjectHash('🧬 生物基礎 visual'),range:'p.80〜89｜体内環境・体液・循環・肝臓・腎臓｜図解付き60問'},
+    {subject:'⚡ 中間テスト電気回路',title:'10/13〜19 中間テスト対策｜電気回路',date:'2026-10-13',endDate:'2026-10-19',added:7,href:subjectHash('⚡ 中間テスト電気回路'),range:'電力と熱・抵抗率・電池・計算｜練習126問＋模擬2回・各100点'},
+    {subject:'🇬🇧 中間テスト英語',title:'10/13〜19 中間テスト対策｜英語',date:'2026-10-13',endDate:'2026-10-19',added:6,href:subjectHash('🇬🇧 中間テスト英語'),range:'教科書6ページ＋プリント40項目｜基礎100問＋模擬34問・100点'},
+    {subject:septemberSubject(),title:'9/11 小テスト対策',date:'2026-09-11',added:1,hidden:true,range:'英語｜p.42〜47・No.103〜122'},
+    {subject:september15Subject(),title:'9/15 英語小テスト対策',date:'2026-09-15',added:2,hidden:true,range:'英語｜p.48〜53・No.123〜142'},
+    {subject:'📅 9/16 実力テスト対策',title:'9/16 実力テスト対策',date:'2026-09-16',added:3,hidden:true,range:'国語・数学・英語｜各50問・写真の範囲を練習'},
+    {subject:'📜 歴史総合',title:'10/13〜19 中間テスト対策｜歴史',date:'2026-10-13',endDate:'2026-10-19',added:5,keepSubject:true,href:subjectHash('📜 歴史総合'),range:'項目36〜39｜世界恐慌〜日中戦争｜練習60問＋模擬34問・100点'},
+    {subject:'🧪 化学基礎',title:'10/13〜19 中間テスト対策｜化学',date:'2026-10-13',endDate:'2026-10-19',added:4,keepSubject:true,href:subjectHash('🧪 化学基礎'),range:'ニューサポート 新編化学基礎｜第7・8・9・11節｜練習80問＋模擬34問・100点'}
+  ].sort((a,b)=>b.added-a.added).map(item=>({...item,past:!item.evergreen&&(item.endDate||item.date)<today,status:item.evergreen?'基礎から確認':(item.endDate||item.date)<today?'過去のテスト':item.endDate&&item.date<=today?'テスト期間中':item.date===today?'今日のテスト':'これからのテスト'}));
+}
+export function renderTestPrepPanel(today=todayStr()){
+  // 既定は閉じた状態（<details>）。クリックで開く。開閉状態は保存しない（毎回閉じて始まる）。
+  // 非表示の対策も登録は残し、通常の教科カードへ再表示されるのを防ぐ。
+  const items=testPrepCategories(today).filter(item=>!item.hidden && studyUnitList(item.subject).some(unit=>(!item.unitId || unit.id===item.unitId) && studyMaterialStatus(unit.id)!=='completed'));
+  return `<details class="testPrepPanel"><summary id="testPrepHeading"><span>📅 テスト対策</span><span class="testPrepToggle">${items.length}件　</span></summary>
+    <p class="muted">受けるテストを選んでね。新しく追加した対策から並んでいるよ。</p>
+    <div class="testPrepCategories">${items.map(item=>{
+      const {cleared,total}=item.unitId?studyMaterialProgress(item.unitId):subjectClearedCount(item.subject);
+      return `<a class="testPrepCard${item.past?' isPast':''}" href="${escapeAttr(item.href||`#test/${item.date}`)}">
+        <span class="testPrepStatus">${item.status}</span><strong>${item.title}</strong>
+        <span>${item.range}</span><small>クリア ${cleared}/${total}　→</small></a>`;
+    }).join('')}</div></details>`;
+}
+
+export function dateParts(dateStr){
+  return dateStr.split('-').map(Number);
+}
+export function dayOfWeek(dateStr){
+  const [y,m,d]=dateParts(dateStr);
+  return new Date(y,m-1,d).getDay();
+}
+export function formatDateShort(dateStr){
+  const [,m,d]=dateParts(dateStr);
+  return m+'/'+d;
+}
+export function formatDateLong(dateStr){
+  const [,m,d]=dateParts(dateStr);
+  return m+'月'+d+'日';
+}
+export function accuracyLabel(day){
+  return day.answered ? Math.round(day.correct/day.answered*100)+'%' : '-';
+}
+export function subjectSummary(subjects: Record<string, number>){
+  const entries=Object.entries(subjects||{}).sort((a,b)=>b[1]-a[1]);
+  if(!entries.length)return "科目記録なし";
+  return entries.slice(0,3).map(([name,count])=>name+' '+count+'問').join('、');
+}
+export function studyDetailHtml(dateStr,day){
+  return `<div class="studyDetailDate">${formatDateLong(dateStr)}</div>
+    <div>回答 ${day.answered}問　正解 ${day.correct}問　正答率 ${accuracyLabel(day)}</div>
+    <div>${escapeHtml(subjectSummary(day.subjects))}</div>`;
+}
+export function renderStudyGrass(today){
+  const weeks=14;
+  const start=addDays(today,-((weeks-1)*7+dayOfWeek(today)));
+  let cells="";
+  for(let i=0;i<weeks*7;i++){
+    const date=addDays(start,i);
+    const future=date>today;
+    const day=future ? {answered:0,correct:0,subjects:{},modes:{}} : getStudyDay(date);
+    const level=studyVolumeLevel(day.answered);
+    const label=future
+      ? `${formatDateShort(date)} これから`
+      : `${formatDateShort(date)} ${day.answered}問 正答率 ${accuracyLabel(day)}`;
+    cells += `<button class="grassDay l${level}${date===today?' today selected':''}${future?' future':''}" type="button"
+        data-study-date="${date}" title="${escapeAttr(label)}" aria-label="${escapeAttr(label)}"${future?' disabled':''}></button>`;
+  }
+  return `<div class="grassWrap">
+      <div class="grassGrid" aria-label="直近14週間の学習量">${cells}</div>
+      <div class="grassLegend"><span>少</span><i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i><span>多</span></div>
+    </div>`;
+}
+export function renderStudyPanel(){
+  const today=todayStr();
+  const todayLog=getStudyDay(today);
+  const goal=normalizeDailyGoal(state.settings&&state.settings.dailyGoal);
+  const goalPct=Math.min(100,Math.round(todayLog.answered/goal*100));
+  const week=weeklyStudySummary(today);
+  const weekGoal=goal*7;
+  const weekPct=Math.min(100,Math.round(week.answered/weekGoal*100));
+  const goalButtons=DAILY_GOAL_OPTIONS.map(value=>
+    `<button class="goalChoice ${value===goal?'active':''}" type="button" data-goal="${value}">${value}問</button>`
+  ).join("");
+  return `<section class="studyPanel" aria-label="学習ログ">
+    <div class="studyPanelTop">
+      <div>
+        <div class="studyLabel">今日の目標</div>
+        <div class="studyMain">${todayLog.answered}<span>/${goal}問</span></div>
+      </div>
+      <div class="goalChoices">${goalButtons}</div>
+    </div>
+    <div class="goalBar"><i style="width:${goalPct}%"></i></div>
+    <div class="weeklyBar"><span>今週 ${week.answered}/${weekGoal}問</span><i style="width:${weekPct}%"></i></div>
+    <div class="weeklyStats">
+      <div><b>${week.answered}</b><span>回答</span></div>
+      <div><b>${week.activeDays}</b><span>学習日</span></div>
+      <div><b>${week.accuracy}%</b><span>正答率</span></div>
+    </div>
+    ${renderStudyGrass(today)}
+    <div class="studyDetail" id="studyLogDetail">${studyDetailHtml(today,todayLog)}</div>
+  </section>`;
+}
+
+/* ============================================================
+   ホーム：開いてすぐ1タップで始められる画面
+   上から「すぐ始める（続き・おすすめ）」→ 教材一覧 → 学習ログ・設定。
+   単元の「学習中にする／完了にする」は任意の整理機能として下に置く。
+============================================================ */
+export function renderHome(options: { manageMaterials?: boolean; completedMaterials?: boolean; search?: string; openSubjects?: string[] }={}){
+  syncScreenHash('#home');
+  stopTimer(); // ホームに戻る全経路でタイマーを確実に止める（防御的）
+  stopBossTension();
+  stopSpeech();
+  if(!state.title)evalTitle();   // 初回は現在の称号を確定
+  const settingsOpen=!!document.querySelector<HTMLDetailsElement>('.homeSettings')?.open;
+  const activeMaterials=activeStudyMaterials();
+
+  const today=todayStr();
+  const dueN=dueList().length;
+
+  const collBtn = `<button class="btn secondary" id="collBtn">📖 学習図鑑（${state.cards.size}/${CARDS.length}）</button>`;
+
+  const badgesHtml = state.badges.size
+    ? `<div class="badges">${[...state.badges].map(b=>`<div class="badge">🏅 ${b}</div>`).join("")}</div>` : "";
+  const studyPanelHtml = renderStudyPanel();
+  const leapToday=leapSessionsOn();
+  const leapComplete=leapToday>=LEAP_DAILY_TARGET;
+  // LEAPの日課は、Weekを学習中に指定しているか、直近2週間に取り組んでいれば出す。
+  const leapRecent=stagesOfSubject(LEAP_BASIC_SUBJECT).some(sid=>stageLastStudied(sid)>Date.now()-14*86400000);
+  const leapGoalHtml=activeMaterials.some(item=>item.subject===LEAP_BASIC_SUBJECT) || leapRecent?`<section class="leapDailyPanel" aria-label="LEAP Basic 今日の高速周回ノルマ">
+    <div class="leapDailyTop"><div><strong>⚡ LEAP Basic 3分×3</strong><span>毎日短時間で、思い出す練習を積もう</span></div><b>${Math.min(leapToday,LEAP_DAILY_TARGET)}/${LEAP_DAILY_TARGET}回</b></div>
+    <div class="leapDailyBar"><i style="width:${Math.min(100,Math.round(leapToday/LEAP_DAILY_TARGET*100))}%"></i></div>
+    <div class="leapDailyMessage">${leapComplete?'🎊 今日の3回達成！すごい継続力だね。':'LEAP Basicの教科ホームで、Weekごとの「⚡ 高速」から始められるよ。'}</div>
+  </section>`:'';
+
+  // 追加機能：眠気対策の設定トグル（タイムアタック／記述モード／サウンド）
+  const ta = !!(state.settings&&state.settings.timeAttack);
+  const im = !!(state.settings&&state.settings.inputMode);
+  const se = !!(state.settings&&state.settings.sound);
+  const speech = !!(state.settings&&state.settings.englishSpeech);
+  const bgmUrl = (state.settings&&state.settings.bgmUrl) || "";
+  const bgmStatus = BGM.playing ? "再生中" : (bgmUrl ? "設定済み" : "未設定");
+  const settingsHtml = `<div class="settingsRow">
+      <div class="toggleChip ${ta?'on':''}" id="toggleTimeAttack">⏱ タイムアタック<span class="st">${ta?'ON':'OFF'}</span></div>
+      <div class="toggleChip ${im?'on':''}" id="toggleInputMode">✍️ 記述モード<span class="st">${im?'ON':'OFF'}</span></div>
+      <div class="toggleChip ${se?'on':''}" id="toggleSound">🔊 サウンド<span class="st">${se?'ON':'OFF'}</span></div>
+      <div class="toggleChip ${speech?'on':''}" id="toggleSpeech">🗣️ 英語の自動発音<span class="st">${speech?'ON':'OFF'}</span></div>
+    </div>`;
+  const bgmHtml = `<div class="bgmSettings">
+      <div class="bgmTop"><span>🎵 YouTube BGM</span><span>${bgmStatus}</span></div>
+      <div class="bgmForm">
+        <input type="url" id="bgmUrlInput" value="${escapeAttr(bgmUrl)}" placeholder="YouTube URL">
+        <button class="btn secondary small" id="bgmSaveBtn" type="button">保存</button>
+        <button class="btn small" id="bgmPlayBtn" type="button">再生</button>
+        <button class="btn secondary small" id="bgmStopBtn" type="button">停止</button>
+      </div>
+    </div>`;
+
+  const todayLog=getStudyDay(today);
+  const goal=normalizeDailyGoal(state.settings&&state.settings.dailyGoal);
+  app().innerHTML = "";
+  app().appendChild(el(`<div class="homeScreen">
+    <header class="homeHead">
+      <h1>🏰 学習クエスト</h1>
+      <div class="homeHud">
+        <span class="titleBadge">🎖 ${state.title}</span>
+        <span class="chip"><span class="fire">🔥</span> 連続 <span class="em">${state.streak}</span>日</span>
+        <span class="chip">今日 <span class="em">${todayLog.answered}</span>/${goal}問</span>
+      </div>
+    </header>
+    ${startPanelHtml(today,dueN)}
+    ${activeMaterials.length?studyMaterialsHtml(today):''}
+    ${subjectShelfHtml(today)}
+    <div class="card homeStats">
+      <div class="hud">
+        <span class="chip">合計スコア <span class="em">${state.totalScore}</span></span>
+        <span class="chip"><span class="fire">🔥</span> 連続 <span class="em">${state.streak}</span>日</span>
+        <span class="chip">バッジ <span class="em">${state.badges.size}</span></span>
+      </div>
+      <div class="muted">まちがえた問題は「今日の復習」でちょうどよいタイミングにまた出るから大丈夫！</div>
+      ${studyPanelHtml}
+      ${leapGoalHtml}
+      ${collBtn}
+      ${badgesHtml}
+      <details class="homeSettings"${settingsOpen?' open':''}><summary>⚙️ 学習の設定</summary>${settingsHtml}${bgmHtml}</details>
+      <div class="sub homeAbout">高校6教科＋英単語をゲーム感覚で攻略｜全${totalQuestionCount()}問／基礎から発展まで　解説つき</div>
+    </div>
+    ${options.manageMaterials?materialManagerHtml(today,true,!!options.completedMaterials,options):materialManagerClosedHtml()}
+  </div>`));
+  const closedManager=options.manageMaterials?null:(document.getElementById('materialManager') as HTMLDetailsElement | null);
+  if(closedManager)closedManager.addEventListener('toggle',()=>{if(closedManager.open)renderHome({manageMaterials:true});});
+
+  appendReportingSettings();
+  bindMaterialActions(({id,status})=>{
+    const completedMaterials=!!(document.getElementById('completedMaterials') as HTMLDetailsElement | null)?.open;
+    const search=(document.getElementById('materialSearch') as HTMLInputElement | null)?.value || '';
+    const openSubjects=[...document.querySelectorAll<MaterialSubjectPanel>('[data-material-subject-panel]')].filter(panel=>panel._materialSearchActive?panel._materialWasOpen:panel.open).map(panel=>panel.dataset.materialSubjectPanel);
+    renderHome({manageMaterials:true,completedMaterials,search,openSubjects});
+    const manager=(document.getElementById('materialManager') as HTMLDetailsElement | null);
+    const nextAction=status==='studying'?'remove':'study';
+    const buttons=[...document.querySelectorAll<HTMLElement>('[data-material-action]')];
+    const focus=buttons.find(button=>button.dataset.materialId===id && button.dataset.materialAction===nextAction && !button.closest?.('[hidden]'));
+    if(focus){
+      const panel=focus.closest?.<MaterialSubjectPanel>('[data-material-subject-panel]');
+      if(panel)panel.open=true;
+      focus.focus();
+    }
+    else manager?.querySelector('summary')?.focus();
+  });
+  const rb=document.getElementById('reviewBtn');
+  if(rb) rb.addEventListener('click',startReview);
+  const cb=document.getElementById('collBtn');
+  if(cb) cb.addEventListener('click',renderCollection);
+  document.querySelectorAll<HTMLElement>('[data-goal]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      state.settings.dailyGoal=normalizeDailyGoal(btn.dataset.goal);
+      save();
+      renderHome();
+    });
+  });
+  document.querySelectorAll<HTMLElement>('[data-study-date]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const date=btn.dataset.studyDate;
+      document.querySelectorAll('.grassDay.selected').forEach(node=>node.classList.remove('selected'));
+      btn.classList.add('selected');
+      const detail=document.getElementById('studyLogDetail');
+      if(detail)detail.innerHTML=studyDetailHtml(date,getStudyDay(date));
+    });
+  });
+
+  // 追加機能：設定トグルのイベント（トグル→保存→教科選択再描画）
+  const ttBtn=document.getElementById('toggleTimeAttack');
+  if(ttBtn) ttBtn.addEventListener('click',()=>{
+    state.settings.timeAttack=!state.settings.timeAttack;
+    save();
+    renderHome();
+  });
+  const imBtn=document.getElementById('toggleInputMode');
+  if(imBtn) imBtn.addEventListener('click',()=>{
+    state.settings.inputMode=!state.settings.inputMode;
+    save();
+    renderHome();
+  });
+  const seBtn=document.getElementById('toggleSound');
+  if(seBtn) seBtn.addEventListener('click',()=>{
+    state.settings.sound=!state.settings.sound;
+    if(!state.settings.sound)stopBossTension();
+    else playAnswerSound(true);
+    save();
+    renderHome();
+  });
+  const speechBtn=document.getElementById('toggleSpeech');
+  if(speechBtn) speechBtn.addEventListener('click',()=>{
+    state.settings.englishSpeech=!state.settings.englishSpeech;
+    if(!state.settings.englishSpeech)stopSpeech();
+    save();
+    renderHome();
+  });
+  const bgmInput=(document.getElementById('bgmUrlInput') as HTMLInputElement | null);
+  const saveBgmInput=()=>{
+    const value=bgmInput?bgmInput.value.trim():"";
+    state.settings.bgmUrl=value;
+    if(!value)stopYouTubeBgm();
+    save();
+    return value;
+  };
+  const bgmSaveBtn=document.getElementById('bgmSaveBtn');
+  if(bgmSaveBtn)bgmSaveBtn.addEventListener('click',()=>{
+    const value=saveBgmInput();
+    toast(value?'BGM URLを保存しました':'BGM URLをクリアしました');
+    renderHome();
+  });
+  const bgmPlayBtn=document.getElementById('bgmPlayBtn');
+  if(bgmPlayBtn)bgmPlayBtn.addEventListener('click',()=>{
+    const value=saveBgmInput();
+    if(!value){toast('YouTube URLを入力してね');return;}
+    if(startYouTubeBgm(value))renderHome();
+  });
+  const bgmStopBtn=document.getElementById('bgmStopBtn');
+  if(bgmStopBtn)bgmStopBtn.addEventListener('click',()=>{
+    stopYouTubeBgm();
+    renderHome();
+  });
+  if(bgmInput)bgmInput.addEventListener('keydown',(e)=>{
+    if(e.key==='Enter'){
+      e.preventDefault();
+      const value=saveBgmInput();
+      if(value&&startYouTubeBgm(value))renderHome();
+    }
+  });
+}

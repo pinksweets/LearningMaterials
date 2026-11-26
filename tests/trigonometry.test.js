@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { units } from '../data/m4_trigonometry.js';
-import { lessonCardHtml } from '../js/lesson.js';
-import { trigDiagram } from '../js/trig-display.js';
-import { MATH1_CHAPTERS } from '../js/content.js';
+import { units } from '../_site/data/m4_trigonometry.js';
+import { lessonCardHtml } from '../_site/js/lesson.js';
+import { trigDiagram } from '../_site/js/trig-display.js';
+import { MATH1_CHAPTERS } from '../_site/js/content.js';
 
 const sin=d=>Math.sin(d*Math.PI/180);
 const cos=d=>Math.cos(d*Math.PI/180);

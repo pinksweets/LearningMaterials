@@ -1,13 +1,13 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {units as practice} from '../data/h26_midterm.js';
-import {units as papers} from '../data/h26_mock.js';
-import {testPrepCategories,renderTestPrepPanel} from '../js/views/home.js';
-import {state} from '../js/state.js';
-import {finishQuestion} from '../js/views/quiz.js';
-import {examTotal,examBreakdown,isMockExam} from '../js/mock-exam.js';
-import {examResultHtml} from '../js/views/results.js';
-import {snapshotSession,restoreSession} from '../js/session.js';
+import {units as practice} from '../_site/data/h26_midterm.js';
+import {units as papers} from '../_site/data/h26_mock.js';
+import {testPrepCategories,renderTestPrepPanel} from '../_site/js/views/home.js';
+import {state} from '../_site/js/state.js';
+import {finishQuestion} from '../_site/js/views/quiz.js';
+import {examTotal,examBreakdown,isMockExam} from '../_site/js/mock-exam.js';
+import {examResultHtml} from '../_site/js/views/results.js';
+import {snapshotSession,restoreSession} from '../_site/js/session.js';
 import {createLocalStorage} from './helpers/env.js';
 
 test('歴史の中間対策は期間内に選べ、写真4分野の練習60問と固定模擬100点へつながる',()=>{

@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { units as practice } from '../data/h_final_history.js';
-import { units as papers } from '../data/h_final_mock.js';
-import { studyUnitById } from '../js/content.js';
-import { examBreakdown, examTotal, isMockExam } from '../js/mock-exam.js';
-import { renderTestPrepPanel, testPrepCategories } from '../js/views/home.js';
-import { examResultHtml } from '../js/views/results.js';
+import { units as practice } from '../_site/data/h_final_history.js';
+import { units as papers } from '../_site/data/h_final_mock.js';
+import { studyUnitById } from '../_site/js/content.js';
+import { examBreakdown, examTotal, isMockExam } from '../_site/js/mock-exam.js';
+import { renderTestPrepPanel, testPrepCategories } from '../_site/js/views/home.js';
+import { examResultHtml } from '../_site/js/views/results.js';
 
 test('歴史の期末対策はホームから範囲ごとの練習と模試に進める', () => {
   const date = '2026-11-25';

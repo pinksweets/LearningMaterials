@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { units } from "../data/index.js";
-import { CARD_BY_ID } from "../js/content.js";
+import { units } from "../_site/data/index.js";
+import { CARD_BY_ID } from "../_site/js/content.js";
 
 const TYPES = ["yon", "maru", "ana", "kumi", "nenpyo", "suji", "fill", "junban"];
 

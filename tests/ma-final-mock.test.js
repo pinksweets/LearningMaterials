@@ -1,16 +1,16 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {units as triangles} from '../data/ma_final_triangles.js';
-import {units as circles} from '../data/ma_final_circles.js';
-import {units as papers} from '../data/ma_final_mock.js';
-import {QUESTIONS, studyUnitById} from '../js/content.js';
-import {isMockExam, examTotal, examBreakdown} from '../js/mock-exam.js';
-import {snapshotSession, restoreSession} from '../js/session.js';
-import {state} from '../js/state.js';
-import {finishQuestion, renderSavedAnswer} from '../js/views/quiz.js';
-import {examResultHtml} from '../js/views/results.js';
-import {testPrepCategories, renderTestPrepPanel} from '../js/views/home.js';
-import {subjectShelfHtml} from '../js/views/start.js';
+import {units as triangles} from '../_site/data/ma_final_triangles.js';
+import {units as circles} from '../_site/data/ma_final_circles.js';
+import {units as papers} from '../_site/data/ma_final_mock.js';
+import {QUESTIONS, studyUnitById} from '../_site/js/content.js';
+import {isMockExam, examTotal, examBreakdown} from '../_site/js/mock-exam.js';
+import {snapshotSession, restoreSession} from '../_site/js/session.js';
+import {state} from '../_site/js/state.js';
+import {finishQuestion, renderSavedAnswer} from '../_site/js/views/quiz.js';
+import {examResultHtml} from '../_site/js/views/results.js';
+import {testPrepCategories, renderTestPrepPanel} from '../_site/js/views/home.js';
+import {subjectShelfHtml} from '../_site/js/views/start.js';
 import {createLocalStorage} from './helpers/env.js';
 
 const practice=[...triangles,...circles];

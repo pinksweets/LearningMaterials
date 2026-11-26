@@ -1,13 +1,13 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {units as practice} from '../data/nov10_english.js';
-import {units as papers} from '../data/nov10_english_mock.js';
-import {testPrepCategories,renderTestPrepPanel} from '../js/views/home.js';
-import {state,stagesOfSubject} from '../js/state.js';
-import {finishQuestion,checkInput} from '../js/views/quiz.js';
-import {examTotal,examBreakdown,isMockExam} from '../js/mock-exam.js';
-import {examResultHtml} from '../js/views/results.js';
-import {snapshotSession,restoreSession} from '../js/session.js';
+import {units as practice} from '../_site/data/nov10_english.js';
+import {units as papers} from '../_site/data/nov10_english_mock.js';
+import {testPrepCategories,renderTestPrepPanel} from '../_site/js/views/home.js';
+import {state,stagesOfSubject} from '../_site/js/state.js';
+import {finishQuestion,checkInput} from '../_site/js/views/quiz.js';
+import {examTotal,examBreakdown,isMockExam} from '../_site/js/mock-exam.js';
+import {examResultHtml} from '../_site/js/views/results.js';
+import {snapshotSession,restoreSession} from '../_site/js/session.js';
 import {createLocalStorage} from './helpers/env.js';
 
 test('11/10の入口は当日まで有効で、新しい対策の追加後も6ステージへ進める',()=>{

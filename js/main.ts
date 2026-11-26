@@ -1,0 +1,119 @@
+/* ============================================================
+   起動エントリ
+============================================================ */
+import { load, touchStreak, state } from "./state.js";
+import { renderHome } from "./views/home.js";
+import { renderSeptemberHome, renderSeptemberLearn } from "./views/september.js";
+import { renderSeptember15Home, renderSeptember15Learn } from "./views/september15.js";
+import { renderSubjectHome, renderStageHome } from "./views/subject.js";
+import { renderMathHome, mathChapterForStage } from './views/math.js';
+import { renderLesson } from "./views/lesson.js";
+import { parseRoute, NAV, toast, subjectHash, mathChapterHash } from "./utils.js";
+import { QUESTIONS, MATH1_CHAPTERS, MATH1_SUBJECT, MATH1_PREP_SUBJECT, displaySubjectForStage, studyUnitById } from './content.js';
+import { sessionHash, restoreSession } from './session.js';
+import { startStage, renderQuestion, saveQuestionDraft } from './views/quiz.js';
+import { renderResult, renderBossVictory, renderBossDefeat } from './views/results.js';
+import { renderCollection } from './views/collection.js';
+import { stopLeapClock } from './views/leap.js';
+import { stopTimer } from './timer.js';
+import { stopSpeech, stopBossTension } from './audio.js';
+import { flushReports } from './reporting.js';
+import { updateReportingStatus } from './views/reporting.js';
+
+export function renderUrlScreen(initial=false){
+  const hash=window.location.hash;
+  if(!initial && NAV.current===hash)return;
+  if(!initial){NAV.scroll[NAV.current]=window.scrollY;saveQuestionDraft();}
+  NAV.current=hash;
+  stopTimer();stopSpeech();stopBossTension();
+  if(state.cur?.leapSession)stopLeapClock(state.cur.leapSession);
+  NAV.restoring=true;
+  const route=parseRoute(hash);
+  if(initial && (route.type==='practice-result' || (route.type==='question' && isReload()))){
+    try{const practice=restoreSession(JSON.parse(sessionStorage.getItem('learning-quest-shared-practice')));if(practice && sessionHash(practice)===hash)state.cur=practice;}catch{/* A broken draft must not prevent opening a link. */}
+  }
+  let invalid=false;
+  try{
+    if(route.type==='september16')renderSubjectHome('📅 9/16 実力テスト対策');
+    else if(route.type==='september15')renderSeptember15Home(true);
+    else if(route.type==='september')renderSeptemberHome(true);
+    else if(route.type==='subject' && (route.subject===MATH1_PREP_SUBJECT || Object.values(QUESTIONS).some(s=>s.subject===route.subject)))renderSubjectHome(route.subject);
+    else if(route.type==='unit'){
+      const unit=studyUnitById(route.unit);
+      if(unit)renderSubjectHome(unit.subject,unit.id);
+      else {invalid=true;renderHome();}
+    }
+    else if(route.type==='math-chapter'){
+      if(MATH1_CHAPTERS.some(chapter=>chapter.id===route.chapter))renderMathHome(route.chapter);
+      else {invalid=true;renderMathHome();}
+    }
+    else if(route.type==='collection')renderCollection();
+    else if(route.type==='lesson'){ if(QUESTIONS[route.sid]?.lesson)renderLesson(route.sid); else {invalid=true;renderHome();} }
+    else if(route.type==='learn'){
+      if(route.date==='2026-09-15')renderSeptember15Learn(route.group,route.index);
+      else renderSeptemberLearn(route.group,route.index);
+    }
+    else if(['stage','question','session','result','practice-result'].includes(route.type)){
+      if(state.cur?.mode==='practice' && !['question','practice-result'].includes(route.type)){
+        const personal=restoreSession(state.resumeSession);
+        if(personal && sessionHash(personal)===hash)state.cur=personal;
+      }
+      const c=state.cur;
+      const reload=isReload();
+      const canResume=c && sessionHash(c)===hash && !(initial && route.type==='question' && !reload);
+      if(canResume){
+        if(c.result==='victory')renderBossVictory();
+        else if(c.result==='defeat')renderBossDefeat();
+        else if(c.result)renderResult();
+        else renderQuestion();
+      }else if(['question','stage'].includes(route.type) && QUESTIONS[route.sid]?.data[route.index]){
+        startStage(route.sid,route.index,route.type==='question');
+      }else{
+        invalid=true;
+        if(QUESTIONS[route.sid])renderStageHome(route.sid);else renderHome();
+      }
+    }else{invalid=route.type!=='home';renderHome();}
+  }finally{NAV.restoring=false;}
+  if(invalid){
+    toast('この問題や途中経過は見つからなかったよ。一覧から選び直してね。');
+    const chapter=mathChapterForStage(route.sid);
+    const fallback=QUESTIONS[route.sid]
+      ? chapter?mathChapterHash(chapter.id):subjectHash(displaySubjectForStage(route.sid))
+      : route.type==='math-chapter'?subjectHash(MATH1_SUBJECT):'#home';
+    window.history.replaceState(null,'',fallback);NAV.current=fallback;
+  }
+  const mathChapter=route.type==='math-chapter' && MATH1_CHAPTERS.find(chapter=>chapter.id===route.chapter);
+  const unit=route.type==='unit' && studyUnitById(route.unit);
+  document.title=(unit?unit.subject+'｜'+unit.title:mathChapter?'数学Ⅰ｜'+mathChapter.title:document.querySelector('h1')?.textContent || (route.type==='lesson' && QUESTIONS[route.sid]?.title) || state.cur?.title || '学習クエスト')+'｜学習クエスト';
+  window.scrollTo(0,NAV.scroll[hash]||0);
+}
+
+function isReload(){
+  return (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined)?.type==='reload';
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  load();
+  window.addEventListener('reportingchange',updateReportingStatus);
+  window.addEventListener('online',()=>{void flushReports();});
+  window.addEventListener('storage',updateReportingStatus);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)void flushReports();});
+  setInterval(()=>{if(!document.hidden)void flushReports();},60000);
+  void flushReports();
+  touchStreak();
+  renderUrlScreen(true);
+  window.history.scrollRestoration='manual';
+  window.addEventListener('hashchange',()=>renderUrlScreen());
+  window.addEventListener('popstate',()=>renderUrlScreen());
+  window.addEventListener('pagehide',saveQuestionDraft);
+});
+
+/* Service Worker 登録（https または localhost のみ。GitHub Pages のサブパス配信でも
+   ドキュメント基準の相対 URL で正しいスコープに解決される） */
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator &&
+    typeof location !== 'undefined' &&
+    (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}

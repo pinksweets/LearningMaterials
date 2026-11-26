@@ -1,13 +1,13 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {units as practice} from '../data/ec26_midterm.js';
-import {units as papers} from '../data/ec26_mock.js';
-import {testPrepCategories,renderTestPrepPanel} from '../js/views/home.js';
-import {state,stagesOfSubject} from '../js/state.js';
-import {finishQuestion,checkSuji} from '../js/views/quiz.js';
-import {examTotal,examBreakdown,isMockExam} from '../js/mock-exam.js';
-import {examResultHtml} from '../js/views/results.js';
-import {snapshotSession,restoreSession} from '../js/session.js';
+import {units as practice} from '../_site/data/ec26_midterm.js';
+import {units as papers} from '../_site/data/ec26_mock.js';
+import {testPrepCategories,renderTestPrepPanel} from '../_site/js/views/home.js';
+import {state,stagesOfSubject} from '../_site/js/state.js';
+import {finishQuestion,checkSuji} from '../_site/js/views/quiz.js';
+import {examTotal,examBreakdown,isMockExam} from '../_site/js/mock-exam.js';
+import {examResultHtml} from '../_site/js/views/results.js';
+import {snapshotSession,restoreSession} from '../_site/js/session.js';
 import {createLocalStorage} from './helpers/env.js';
 
 test('電気回路は10/13〜19の専用入口から練習66問と100点模擬へ進める',()=>{

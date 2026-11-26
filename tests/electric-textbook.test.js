@@ -1,12 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {units as practice} from '../data/ec26_textbook.js';
-import {units as papers} from '../data/ec26_textbook_mock.js';
-import {state} from '../js/state.js';
-import {finishQuestion,checkSuji} from '../js/views/quiz.js';
-import {examTotal,examBreakdown} from '../js/mock-exam.js';
-import {examResultHtml} from '../js/views/results.js';
-import {snapshotSession,restoreSession} from '../js/session.js';
+import {units as practice} from '../_site/data/ec26_textbook.js';
+import {units as papers} from '../_site/data/ec26_textbook_mock.js';
+import {state} from '../_site/js/state.js';
+import {finishQuestion,checkSuji} from '../_site/js/views/quiz.js';
+import {examTotal,examBreakdown} from '../_site/js/mock-exam.js';
+import {examResultHtml} from '../_site/js/views/results.js';
+import {snapshotSession,restoreSession} from '../_site/js/session.js';
 import {createLocalStorage} from './helpers/env.js';
 
 test('教科書写真の6分野は練習60問・固定模擬34問100点で全分野をカバー',()=>{

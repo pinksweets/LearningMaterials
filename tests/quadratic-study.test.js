@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createGuidedSession, submitGuidedStep, nextGuidedHint, guidedStudyHtml, explorerSpec, explorerOutput, rangeFacts, translationGraphSvg } from '../js/quadratic-study.js';
-import { units } from '../data/mq_quadratic_support.js';
-import { state } from '../js/state.js';
-import { checkSuji, checkFill, finishQuestion, renderSavedAnswer } from '../js/views/quiz.js';
-import { snapshotSession, restoreSession } from '../js/session.js';
+import { createGuidedSession, submitGuidedStep, nextGuidedHint, guidedStudyHtml, explorerSpec, explorerOutput, rangeFacts, translationGraphSvg } from '../_site/js/quadratic-study.js';
+import { units } from '../_site/data/mq_quadratic_support.js';
+import { state } from '../_site/js/state.js';
+import { checkSuji, checkFill, finishQuestion, renderSavedAnswer } from '../_site/js/views/quiz.js';
+import { snapshotSession, restoreSession } from '../_site/js/session.js';
 import { createLocalStorage } from './helpers/env.js';
 
 const example={title:'平方完成',intro:'y＝x²−4x＋6',steps:[

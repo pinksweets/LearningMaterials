@@ -11,7 +11,7 @@ test('通信が応答しなくても待ち時間後にキャッシュから教�
     setTimeout(fn,ms){assert.equal(ms,3000);queueMicrotask(fn);return 1;},clearTimeout(){},
     fetch(request,{signal}){calls++;usedSignal=true;return new Promise((resolve,reject)=>signal.addEventListener('abort',()=>reject(new Error('offline'))));}
   };
-  vm.runInNewContext(readFileSync(new URL('../sw.js',import.meta.url),'utf8'),context);
+  vm.runInNewContext(readFileSync(new URL('../_site/sw.js',import.meta.url),'utf8'),context);
   let result;
   handlers.fetch({request:{url:'https://example.test/LearningMaterials/js/main.js',method:'GET'},respondWith(p){result=p;}});
   assert.equal(await (await result).text(),'cached lesson');assert.equal(usedSignal,true);
@@ -21,7 +21,7 @@ test('通信が応答しなくても待ち時間後にキャッシュから教�
 
 test('キャッシュ保存が失敗してもオンラインの教材を返す',async()=>{
   const handlers={};
-  vm.runInNewContext(readFileSync(new URL('../sw.js',import.meta.url),'utf8'),{
+  vm.runInNewContext(readFileSync(new URL('../_site/sw.js',import.meta.url),'utf8'),{
     self:{location:{origin:'https://example.test'},addEventListener(name,fn){handlers[name]=fn;}},
     caches:{open:async()=>({put:async()=>{throw new Error('quota');}})},URL,Response,AbortController,setTimeout,clearTimeout,
     fetch:async()=>new Response('latest lesson')

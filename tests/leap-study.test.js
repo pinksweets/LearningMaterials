@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { units } from "../data/index.js";
+import { units } from "../_site/data/index.js";
 import {
   createLeapSession,
   countsAsLeapDailySession,
@@ -10,10 +10,10 @@ import {
   judgeLeapCard,
   remainingLeapCount,
   shouldShowLeapWordBeforeAnswer
-} from "../js/leap-study.js";
-import { normalizeSpeechText } from "../js/audio.js";
+} from "../_site/js/leap-study.js";
+import { normalizeSpeechText } from "../_site/js/audio.js";
 import { createLocalStorage } from "./helpers/env.js";
-import { leapSessionsOn, normalizeLeapDailySessions, recordLeapSession, state } from "../js/state.js";
+import { leapSessionsOn, normalizeLeapDailySessions, recordLeapSession, state } from "../_site/js/state.js";
 
 globalThis.localStorage=createLocalStorage();
 

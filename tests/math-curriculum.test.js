@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import {
   QUESTIONS, STAGE_ORDER, MATH1_SUBJECT, MATH1_ZERO_SUBJECT, MATH1_PREP_SUBJECT,
   MATH1_CHAPTERS, canonicalSubject, displaySubjectForStage, displayStagesOfSubject
-} from '../js/content.js';
+} from '../_site/js/content.js';
 import {
   state, save, load, SAVE_KEY, subjectList, stagesOfSubject, subjectMastery,
   subjectClearedCount, weakestStage, dueList, cleanupStaleQStats
-} from '../js/state.js';
+} from '../_site/js/state.js';
 import { createLocalStorage } from './helpers/env.js';
 
 beforeEach(()=>{

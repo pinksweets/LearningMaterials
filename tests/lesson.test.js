@@ -8,11 +8,11 @@ import { createLocalStorage } from "./helpers/env.js";
 
 globalThis.localStorage = createLocalStorage();
 
-import { units } from "../data/index.js";
-import { QUESTIONS } from "../js/content.js";
-import { state, save, load, SAVE_KEY, isLessonSeen, markLessonSeen } from "../js/state.js";
-import { hasLesson, lessonCardHtml, lessonCardsHtml, lessonBodyHtml, LESSON_CARD_COUNT, LESSON_KINDS } from "../js/lesson.js";
-import { parseRoute } from "../js/utils.js";
+import { units } from "../_site/data/index.js";
+import { QUESTIONS } from "../_site/js/content.js";
+import { state, save, load, SAVE_KEY, isLessonSeen, markLessonSeen } from "../_site/js/state.js";
+import { hasLesson, lessonCardHtml, lessonCardsHtml, lessonBodyHtml, LESSON_CARD_COUNT, LESSON_KINDS } from "../_site/js/lesson.js";
+import { parseRoute } from "../_site/js/utils.js";
 
 test("hasLesson: lesson 配列が非空のときだけ真", () => {
   assert.equal(hasLesson(null), false);

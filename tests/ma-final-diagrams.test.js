@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mathADiagram} from '../js/ma26-display.js';
+import {mathADiagram} from '../_site/js/ma26-display.js';
 
 const geometry={
   kind:'geometry',

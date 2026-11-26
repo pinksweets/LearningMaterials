@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { units as practice } from '../data/ch_final_amount.js';
-import { units as papers } from '../data/ch_final_mock.js';
-import { studyUnitById } from '../js/content.js';
-import { examNumericMatch, examTotal, isMockExam } from '../js/mock-exam.js';
-import { testPrepCategories, renderTestPrepPanel } from '../js/views/home.js';
-import { subjectShelfHtml } from '../js/views/start.js';
+import { units as practice } from '../_site/data/ch_final_amount.js';
+import { units as papers } from '../_site/data/ch_final_mock.js';
+import { studyUnitById } from '../_site/js/content.js';
+import { examNumericMatch, examTotal, isMockExam } from '../_site/js/mock-exam.js';
+import { testPrepCategories, renderTestPrepPanel } from '../_site/js/views/home.js';
+import { subjectShelfHtml } from '../_site/js/views/start.js';
 
 test('化学期末の入口は日付を固定せず、練習7ステージと模試に直接つながる', () => {
   const date = '2026-11-25';

@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { units } from '../data/sep15_english.js';
-import { state, save, load, updateQStat } from '../js/state.js';
-import { checkInput } from '../js/views/quiz.js';
-import { renderSubjectHome } from '../js/views/subject.js';
-import { renderSeptember15Learn, september15Mistakes, september15Subject } from '../js/views/september15.js';
-import { septemberMistakes } from '../js/views/september.js';
+import { units } from '../_site/data/sep15_english.js';
+import { state, save, load, updateQStat } from '../_site/js/state.js';
+import { checkInput } from '../_site/js/views/quiz.js';
+import { renderSubjectHome } from '../_site/js/views/subject.js';
+import { renderSeptember15Learn, september15Mistakes, september15Subject } from '../_site/js/views/september15.js';
+import { septemberMistakes } from '../_site/js/views/september.js';
 import { createLocalStorage } from './helpers/env.js';
 
 globalThis.localStorage=createLocalStorage();

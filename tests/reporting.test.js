@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { createLocalStorage } from './helpers/env.js';
-import { REPORTING, REPORT_ENDPOINT, reportConfig, reportCodeIsAuto, autoLearnerCode, configureReporting, queueReport, pendingReports, flushReports, sendReport, reportingStatus } from '../js/reporting.js';
-import { reportCompletion } from '../js/views/reporting.js';
-import { snapshotSession, restoreSession, questionFromKey } from '../js/session.js';
+import { REPORTING, REPORT_ENDPOINT, reportConfig, reportCodeIsAuto, autoLearnerCode, configureReporting, queueReport, pendingReports, flushReports, sendReport, reportingStatus } from '../_site/js/reporting.js';
+import { reportCompletion } from '../_site/js/views/reporting.js';
+import { snapshotSession, restoreSession, questionFromKey } from '../_site/js/session.js';
 
 const endpoint='https://script.google.com/macros/s/TEST/exec';
 const fields={mode:'stage',stage:'sep16Ma1',title:'数学',subject:'数学Ⅰ',outcome:'normal',partial:false,answered:10,correct:8,score:80,learned:null,elapsedSeconds:null};

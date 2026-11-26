@@ -1,10 +1,10 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {isChemicalFormulaMatch} from '../js/answers.js';
-import {units} from '../data/ch1_formula.js';
-import {state} from '../js/state.js';
-import {checkInput} from '../js/views/quiz.js';
-import {isMockExam,examTotal} from '../js/mock-exam.js';
+import {isChemicalFormulaMatch} from '../_site/js/answers.js';
+import {units} from '../_site/data/ch1_formula.js';
+import {state} from '../_site/js/state.js';
+import {checkInput} from '../_site/js/views/quiz.js';
+import {isMockExam,examTotal} from '../_site/js/mock-exam.js';
 import {createLocalStorage} from './helpers/env.js';
 
 test('化学式は大小文字を区別し、普通の数字・全角・下付き数字を許容する',()=>{

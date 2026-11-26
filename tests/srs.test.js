@@ -15,9 +15,9 @@ import {
   cleanupStaleQStats,
   state,
   SRS_INTERVAL,
-} from "../js/state.js";
-import { STAGE_ORDER, QUESTIONS } from "../js/content.js";
-import { todayStr, addDays } from "../js/utils.js";
+} from "../_site/js/state.js";
+import { STAGE_ORDER, QUESTIONS } from "../_site/js/content.js";
+import { todayStr, addDays } from "../_site/js/utils.js";
 
 beforeEach(() => {
   // state はモジュールシングルトンなので、テストごとに qStats を直接クリアする。

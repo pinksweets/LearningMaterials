@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { units } from '../data/qi_quadratic_inequalities.js';
-import { displayStagesOfSubject, MATH1_SUBJECT } from '../js/content.js';
-import { lessonCardsHtml } from '../js/lesson.js';
-import { quadraticFacts, graphSvg } from '../js/math-display.js';
-import { snapshotSession, restoreSession } from '../js/session.js';
+import { units } from '../_site/data/qi_quadratic_inequalities.js';
+import { displayStagesOfSubject, MATH1_SUBJECT } from '../_site/js/content.js';
+import { lessonCardsHtml } from '../_site/js/lesson.js';
+import { quadraticFacts, graphSvg } from '../_site/js/math-display.js';
+import { snapshotSession, restoreSession } from '../_site/js/session.js';
 
 test('2次不等式は基礎から応用まで10単元各10問、全単元に解説・図・確認がある',()=>{
   assert.equal(units.length,10);

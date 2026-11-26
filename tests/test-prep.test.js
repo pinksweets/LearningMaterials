@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { testPrepCategories, renderTestPrepPanel } from '../js/views/home.js';
-import { septemberSubject } from '../js/views/september.js';
-import { stagesOfSubject } from '../js/state.js';
-import { syncScreenHash, testPrepRoute } from '../js/utils.js';
-import { MATH1_SUBJECT, MATH1_PREP_SUBJECT } from '../js/content.js';
+import { testPrepCategories, renderTestPrepPanel } from '../_site/js/views/home.js';
+import { septemberSubject } from '../_site/js/views/september.js';
+import { stagesOfSubject } from '../_site/js/state.js';
+import { syncScreenHash, testPrepRoute } from '../_site/js/utils.js';
+import { MATH1_SUBJECT, MATH1_PREP_SUBJECT } from '../_site/js/content.js';
 
 test('テスト対策は追加順の降順、当日は過去扱いにしない',()=>{
   const oldCategories=date=>testPrepCategories(date).filter(c=>c.added<=3);

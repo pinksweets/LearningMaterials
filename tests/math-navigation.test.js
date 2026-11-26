@@ -1,16 +1,16 @@
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { MATH1_SUBJECT, MATH1_ZERO_SUBJECT, MATH1_PREP_SUBJECT, QUESTIONS, studyUnitById, studyUnitList } from '../js/content.js';
-import { mathChapterHash, subjectHash, studyUnitHash, parseRoute, todayStr, NAV } from '../js/utils.js';
-import { state, save, load, studyMaterialStatus, setStudyMaterialStatus } from '../js/state.js';
-import { snapshotSession } from '../js/session.js';
-import { startStage, resumePanel, finishQuestion, renderQuestion } from '../js/views/quiz.js';
-import { renderLesson } from '../js/views/lesson.js';
-import { renderHome } from '../js/views/home.js';
-import { startCandidates } from '../js/views/start.js';
-import { renderLeapSpeedResult } from '../js/views/leap.js';
-import { createLeapSession, finishLeapSession } from '../js/leap-study.js';
-import { renderResult, renderBossDefeat, renderBossVictory } from '../js/views/results.js';
+import { MATH1_SUBJECT, MATH1_ZERO_SUBJECT, MATH1_PREP_SUBJECT, QUESTIONS, studyUnitById, studyUnitList } from '../_site/js/content.js';
+import { mathChapterHash, subjectHash, studyUnitHash, parseRoute, todayStr, NAV } from '../_site/js/utils.js';
+import { state, save, load, studyMaterialStatus, setStudyMaterialStatus } from '../_site/js/state.js';
+import { snapshotSession } from '../_site/js/session.js';
+import { startStage, resumePanel, finishQuestion, renderQuestion } from '../_site/js/views/quiz.js';
+import { renderLesson } from '../_site/js/views/lesson.js';
+import { renderHome } from '../_site/js/views/home.js';
+import { startCandidates } from '../_site/js/views/start.js';
+import { renderLeapSpeedResult } from '../_site/js/views/leap.js';
+import { createLeapSession, finishLeapSession } from '../_site/js/leap-study.js';
+import { renderResult, renderBossDefeat, renderBossVictory } from '../_site/js/views/results.js';
 import { createLocalStorage } from './helpers/env.js';
 
 // 最小DOMスタブで、実画面が登録した戻るイベントを実行する。ブラウザの描画検証は別途行う。
@@ -107,7 +107,7 @@ test('単元の指定を保存・復元すると、ホームで同じ二次関�
 });
 
 test('完了した単元はホームと全体の再開欄から隠れ、教科の再開欄と直リンクは使える（DOMスタブ）',async()=>{
-  const {renderUrlScreen}=await import('../js/main.js');
+  const {renderUrlScreen}=await import('../_site/js/main.js');
   for(const completion of ['manual','all-stages']){
     state.studyMaterials={};state.stageCleared={};
     state.cur=session('njz1');state.cur.i=2;
@@ -160,7 +160,7 @@ test('LEAPの日課はWeekを学習中に指定した間だけホームに表示
 });
 
 test('単元URLは指定Week・Courseだけを開き、グループ・数学章へ進め、未知単元はホームへ戻る（DOMスタブ）',async()=>{
-  const {renderUrlScreen}=await import('../js/main.js');
+  const {renderUrlScreen}=await import('../_site/js/main.js');
   for(const id of ['stage:lbp1c1w1','group:e1s1']){
     window.location.hash=studyUnitHash(id);renderUrlScreen(true);
     const ids=[...screen.innerHTML.matchAll(/class="stage" data-stage="([^"]+)"/g)].map(match=>match[1]);
@@ -205,7 +205,7 @@ test('選択したLEAPのWeekを終えるとホームへ戻り、別WeekやCours
 });
 
 test('化学の単元URLには選んだ節のステージだけを出し、教科全体のプランや模試を混ぜない（DOMスタブ）',async()=>{
-  const {renderUrlScreen}=await import('../js/main.js');
+  const {renderUrlScreen}=await import('../_site/js/main.js');
   const id='group:ch1s1';
   window.location.hash=studyUnitHash(id);renderUrlScreen(true);
   const ids=[...screen.innerHTML.matchAll(/class="stage" data-stage="([^"]+)"/g)].map(match=>match[1]);
@@ -216,7 +216,7 @@ test('化学の単元URLには選んだ節のステージだけを出し、教�
 });
 
 test('数学の章の再開欄はその章の個人セッションだけを出し、共有練習中も個人の再開先を使う（DOMスタブ）',async()=>{
-  const {renderMathHome}=await import('../js/views/math.js');
+  const {renderMathHome}=await import('../_site/js/views/math.js');
   const personal=session('njz1');personal.i=2;
   state.cur=personal;
   renderMathHome('expressions');
@@ -234,7 +234,7 @@ test('数学の章の再開欄はその章の個人セッションだけを出�
 });
 
 test('数学の完了した章は一覧・他章ナビ・案内から隠れ、直接開いた復習は残る（DOMスタブ）',async()=>{
-  const {renderMathHome}=await import('../js/views/math.js');
+  const {renderMathHome}=await import('../_site/js/views/math.js');
   setStudyMaterialStatus('math1:quadratics','completed');
   renderMathHome();
   assert.ok(!screen.innerHTML.includes(`href="${mathChapterHash('quadratics')}"`));
@@ -283,7 +283,7 @@ test('章URLは直接開ける形式を保ち、不正なエンコードや余�
 });
 
 test('三角比は②から開始し、図つき問題の採点・保存復元・結果から章へ戻れる（DOMスタブ）',async()=>{
-  const {renderMathHome}=await import('../js/views/math.js');
+  const {renderMathHome}=await import('../_site/js/views/math.js');
   renderMathHome('trigonometry');
   assert.match(screen.innerHTML,/data-math-stage="tr2"/);
   assert.match(screen.innerHTML,/9ステージ・90問/);
@@ -388,7 +388,7 @@ test('通常統合は回答履歴の元教科名を変えず、教科横断復�
 
 test('直リンク・旧教科URL・範囲外番号を同じ数学Ⅰと対策ホームへ解決する',async()=>{
   // mainは起動イベントを登録するため、DOMスタブを用意してから読み込む。
-  const {renderUrlScreen}=await import('../js/main.js');
+  const {renderUrlScreen}=await import('../_site/js/main.js');
   for(const hash of [mathChapterHash('expressions'),subjectHash(MATH1_ZERO_SUBJECT),subjectHash(MATH1_PREP_SUBJECT)]){
     window.location.hash=hash;renderUrlScreen(true);
     assert.match(screen.innerHTML,/数学Ⅰ/);

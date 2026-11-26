@@ -11,7 +11,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.join(__dirname, "..");
+const ROOT = path.join(__dirname, "..", "_site");
 
 function listJsRecursive(dir, prefix) {
   const out = [];
@@ -30,7 +30,7 @@ test("sw.js の ASSETS が、キャッシュすべき全アセットと過不足
   const swPath = path.join(ROOT, "sw.js");
   assert.ok(
     existsSync(swPath),
-    "sw.js が存在しません（PWA構築が未完了の可能性。担当エージェントの完了後に再実行してください）"
+    "公開用の sw.js がありません。npm run build で生成してください"
   );
   const src = readFileSync(swPath, "utf8");
 
@@ -66,4 +66,16 @@ test("sw.js の ASSETS が、キャッシュすべき全アセットと過不足
   const missing = [...expected].filter((a) => !assets.has(a)).sort();
   const extra = [...assets].filter((a) => !expected.has(a)).sort();
   assert.deepEqual({ missing, extra }, { missing: [], extra: [] });
+});
+
+test("公開ディレクトリには Service Worker とプリキャッシュ対象のファイルだけがある", () => {
+  const source = readFileSync(path.join(ROOT, "sw.js"), "utf8");
+  const [, precache] = source.match(/const\s+ASSETS\s*=\s*\[([\s\S]*?)\];/);
+  const expected = [...precache.matchAll(/['"]\.\/([^'"]+)['"]/g)].map((match) => match[1]);
+  expected.push("sw.js");
+  const entries = readdirSync(ROOT, { recursive: true, withFileTypes: true });
+  assert.ok(entries.every((entry) => entry.isFile() || entry.isDirectory()));
+  const files = entries.filter((entry) => entry.isFile()).map((entry) =>
+    path.relative(ROOT, path.join(entry.parentPath, entry.name)).split(path.sep).join("/"));
+  assert.deepEqual(files.sort(), expected.sort());
 });

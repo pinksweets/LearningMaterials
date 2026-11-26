@@ -1,14 +1,14 @@
 /* tests/start.test.js — ホームの「すぐ始める」（単元を指定しなくても1タップで始められる）の検証 */
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { state, save, load, SAVE_KEY, setStudyMaterialStatus, deriveStageLastAt, normalizeStageLastAt, markStageStudied, stageLastStudied } from '../js/state.js';
-import { QUESTIONS, studyUnitById } from '../js/content.js';
-import { studyUnitHash, subjectHash, addDays } from '../js/utils.js';
-import { testPrepCategories } from '../js/views/home.js';
+import { state, save, load, SAVE_KEY, setStudyMaterialStatus, deriveStageLastAt, normalizeStageLastAt, markStageStudied, stageLastStudied } from '../_site/js/state.js';
+import { QUESTIONS, studyUnitById } from '../_site/js/content.js';
+import { studyUnitHash, subjectHash, addDays } from '../_site/js/utils.js';
+import { testPrepCategories } from '../_site/js/views/home.js';
 import {
   startCandidates, startPanelHtml, subjectShelf, subjectShelfHtml, unitNextStage, stageStartHash,
   nextStageAfter, daysAgoLabel, resumableSession
-} from '../js/views/start.js';
+} from '../_site/js/views/start.js';
 import { createLocalStorage } from './helpers/env.js';
 
 const TODAY='2026-11-11';

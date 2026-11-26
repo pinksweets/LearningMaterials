@@ -9,7 +9,7 @@ function f(q, answer, exp) {
 function u(id,title,lesson,questions){
   HQ.registerUnit({id,subject:'🧪 化学基礎',group:'化学式を覚える｜1日6問',title,
     desc:'時間制限なし｜数字は普通の数字で入力してOK｜大文字・小文字に注意',
-    order:10309+HQ.units.length,lesson,questions,cards:[]});
+    order:10309+HQ.units.length,...(lesson === undefined ? {} : {lesson}),questions,cards:[]});
 }
 u('ch1f1','① 基本分子｜名前・式・形をつなぐ',[
   {title:'まず4つだけ覚えよう',body:'水・二酸化炭素・アンモニア・メタンを、原子のまとまりとして見よう。\n水はHが2個とOが1個。紙にH−O−Hを折れ線形で描いてみよう。'},

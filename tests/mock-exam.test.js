@@ -1,12 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {units} from '../data/ch1_mock.js';
-import {QUESTIONS} from '../js/content.js';
-import {isMockExam,examTotal,examBreakdown,examNumericMatch} from '../js/mock-exam.js';
-import {snapshotSession,restoreSession} from '../js/session.js';
-import {state} from '../js/state.js';
-import {finishQuestion,answer,renderSavedAnswer} from '../js/views/quiz.js';
-import {examResultHtml} from '../js/views/results.js';
+import {units} from '../_site/data/ch1_mock.js';
+import {QUESTIONS} from '../_site/js/content.js';
+import {isMockExam,examTotal,examBreakdown,examNumericMatch} from '../_site/js/mock-exam.js';
+import {snapshotSession,restoreSession} from '../_site/js/session.js';
+import {state} from '../_site/js/state.js';
+import {finishQuestion,answer,renderSavedAnswer} from '../_site/js/views/quiz.js';
+import {examResultHtml} from '../_site/js/views/results.js';
 import {createLocalStorage} from './helpers/env.js';
 
 function session(){

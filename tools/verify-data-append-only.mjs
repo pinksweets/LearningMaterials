@@ -36,7 +36,9 @@ const REPO_ROOT = execFileSync("git", ["rev-parse", "--show-toplevel"], { cwd: _
 async function loadOldData(ref) {
   const dir = mkdtempSync(path.join(tmpdir(), "lq-data-"));
   try {
-    execFileSync("sh", ["-c", `git archive "${ref}" data | tar -x -C "${dir}"`], { cwd: REPO_ROOT, stdio: ["ignore", "ignore", "pipe"] });
+    const commit = execFileSync("git", ["rev-parse", "--verify", "--end-of-options", `${ref}^{commit}`], { cwd: REPO_ROOT, encoding: "utf8" }).trim();
+    const archive = execFileSync("git", ["archive", "--format=tar", commit, "data"], { cwd: REPO_ROOT, maxBuffer: 64 * 1024 * 1024 });
+    execFileSync("tar", ["-xf", "-", "-C", dir], { input: archive });
   } catch (e) {
     rmSync(dir, { recursive: true, force: true });
     throw new Error(`ref "${ref}" の data/ を取り出せません（ref が存在しないか、shallow clone の可能性）: ${String(e.stderr || e.message).trim()}`);

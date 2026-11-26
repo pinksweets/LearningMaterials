@@ -1,12 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseRoute, subjectHash, studyUnitHash, mathChapterHash, syncScreenHash, NAV } from '../js/utils.js';
-import { QUESTIONS, STAGE_ORDER, MATH1_SUBJECT, MATH1_ZERO_SUBJECT, MATH1_CHAPTERS, displaySubjectForStage, displayStagesOfSubject, studyUnitList, studyUnitById, studyUnitForStage } from '../js/content.js';
-import { snapshotSession, restoreSession, sessionHash, questionFromKey } from '../js/session.js';
-import { mathMarkup, mathText, mathVisual, quadraticSpec, quadraticFacts } from '../js/math-display.js';
-import { state, save, load, SAVE_KEY } from '../js/state.js';
-import { finishQuestion, renderSavedAnswer } from '../js/views/quiz.js';
-import { renderResult } from '../js/views/results.js';
+import { parseRoute, subjectHash, studyUnitHash, mathChapterHash, syncScreenHash, NAV } from '../_site/js/utils.js';
+import { QUESTIONS, STAGE_ORDER, MATH1_SUBJECT, MATH1_ZERO_SUBJECT, MATH1_CHAPTERS, displaySubjectForStage, displayStagesOfSubject, studyUnitList, studyUnitById, studyUnitForStage } from '../_site/js/content.js';
+import { snapshotSession, restoreSession, sessionHash, questionFromKey } from '../_site/js/session.js';
+import { mathMarkup, mathText, mathVisual, quadraticSpec, quadraticFacts } from '../_site/js/math-display.js';
+import { state, save, load, SAVE_KEY } from '../_site/js/state.js';
+import { finishQuestion, renderSavedAnswer } from '../_site/js/views/quiz.js';
+import { renderResult } from '../_site/js/views/results.js';
 import { createLocalStorage } from './helpers/env.js';
 
 function session(){return {sid:'sep16Ma1',mode:'stage',title:'数学①',list:[questionFromKey('sep16Ma1-0'),questionFromKey('sep16Ma1-1')],i:0,correct:0,combo:0,maxCombo:0,score:0,wrongThisRun:[],feverGauge:0,feverLeft:0,feverCount:0,weakHits:0};}

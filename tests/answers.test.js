@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { normalizeAnswer, isAnswerMatch, isAnyAnswerMatch } from "../js/answers.js";
+import { normalizeAnswer, isAnswerMatch, isAnyAnswerMatch } from "../_site/js/answers.js";
 
 /* 以下は実装の実挙動を node -e で確認したうえで固定した assert 群。
    直感と異なる箇所には注記を付けてある。 */

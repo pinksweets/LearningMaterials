@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { pad2, todayStr, addDays } from "../js/utils.js";
+import { pad2, todayStr, addDays } from "../_site/js/utils.js";
 
 test("pad2: 1桁は0埋め、2桁以上はそのまま", () => {
   assert.equal(pad2(0), "00");

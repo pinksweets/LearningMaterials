@@ -12,7 +12,7 @@ import {
   DEFAULT_SETTINGS,
   isSubjectGroupCollapsed,
   setSubjectGroupCollapsed,
-} from "../js/state.js";
+} from "../_site/js/state.js";
 
 test("SAVE_KEY はリネームされていない（旧セーブデータとの互換性を保つ命綱）", () => {
   assert.equal(SAVE_KEY, "rekishi-quest-v1");

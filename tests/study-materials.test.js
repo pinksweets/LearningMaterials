@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import {
   state, load, SAVE_KEY, normalizeStudyMaterials, studyMaterialStatus,
   studyMaterialProgress, setStudyMaterialStatus
-} from '../js/state.js';
-import { QUESTIONS, STAGE_ORDER, MATH1_SUBJECT, MATH1_ZERO_SUBJECT, studyUnitList, studyUnitById, studyUnitForStage } from '../js/content.js';
+} from '../_site/js/state.js';
+import { QUESTIONS, STAGE_ORDER, MATH1_SUBJECT, MATH1_ZERO_SUBJECT, studyUnitList, studyUnitById, studyUnitForStage } from '../_site/js/content.js';
 import {
   materialCatalog, activeStudyMaterials, studyMaterialsHtml, materialManagerHtml,
   materialChoiceHtml, bindMaterialActions
-} from '../js/views/materials.js';
+} from '../_site/js/views/materials.js';
 import { createLocalStorage } from './helpers/env.js';
 
 const QUADRATICS='math1:quadratics';

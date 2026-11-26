@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {units} from '../data/ma_final_circles.js';
+import {units} from '../_site/data/ma_final_circles.js';
 
 const answer=q=>q.type==='yon'?q.choices[q.a]:q.type==='maru'?q.a:Number(q.a[0]);
 const descending=(values,names)=>values.map((v,i)=>({v,name:names[i]})).sort((a,b)=>b.v-a.v).map(x=>x.name).join(' ＞ ');

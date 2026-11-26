@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {units} from '../data/ma_final_triangles.js';
+import {units} from '../_site/data/ma_final_triangles.js';
 
 const answer=q=>q.type==='suji'?Number(q.a[0]):q.type==='maru'?q.a:q.choices[q.a];
 const distance=(A,B)=>Math.hypot(A[0]-B[0],A[1]-B[1]);

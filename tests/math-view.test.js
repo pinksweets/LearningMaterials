@@ -1,9 +1,9 @@
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { QUESTIONS, MATH1_CHAPTERS } from '../js/content.js';
-import { state } from '../js/state.js';
-import { lessonCardsHtml } from '../js/lesson.js';
-import { mathChapterForStage, mathChapterProgress, mathChapterCardsHtml, mathStageHtml } from '../js/views/math.js';
+import { QUESTIONS, MATH1_CHAPTERS } from '../_site/js/content.js';
+import { state } from '../_site/js/state.js';
+import { lessonCardsHtml } from '../_site/js/lesson.js';
+import { mathChapterForStage, mathChapterProgress, mathChapterCardsHtml, mathStageHtml } from '../_site/js/views/math.js';
 
 // 表示用のHTMLと集計を検証する。実ブラウザの操作・描画確認とは別の確認。
 beforeEach(()=>{

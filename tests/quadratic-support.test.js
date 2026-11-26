@@ -1,13 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { units as practice } from '../data/mq_quadratic_support.js';
-import { units as papers } from '../data/mq_quadratic_mock.js';
-import { QUESTIONS } from '../js/content.js';
-import { examTotal, examBreakdown, isMockExam, examNumericMatch } from '../js/mock-exam.js';
-import { snapshotSession, restoreSession } from '../js/session.js';
-import { state } from '../js/state.js';
-import { finishQuestion, answer, renderSavedAnswer } from '../js/views/quiz.js';
-import { examResultHtml } from '../js/views/results.js';
+import { units as practice } from '../_site/data/mq_quadratic_support.js';
+import { units as papers } from '../_site/data/mq_quadratic_mock.js';
+import { QUESTIONS } from '../_site/js/content.js';
+import { examTotal, examBreakdown, isMockExam, examNumericMatch } from '../_site/js/mock-exam.js';
+import { snapshotSession, restoreSession } from '../_site/js/session.js';
+import { state } from '../_site/js/state.js';
+import { finishQuestion, answer, renderSavedAnswer } from '../_site/js/views/quiz.js';
+import { examResultHtml } from '../_site/js/views/results.js';
 import { createLocalStorage } from './helpers/env.js';
 
 const correct = q => q.type === 'yon' || q.type === 'ana' ? q.choices[q.a] : q.type === 'maru' ? q.a : q.a[0];

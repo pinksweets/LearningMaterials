@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { units } from '../data/sep_english.js';
-import { state, save, load, updateQStat } from '../js/state.js';
-import { checkInput } from '../js/views/quiz.js';
-import { septemberMistakes } from '../js/views/september.js';
-import { speakEnglish } from '../js/audio.js';
+import { units } from '../_site/data/sep_english.js';
+import { state, save, load, updateQStat } from '../_site/js/state.js';
+import { checkInput } from '../_site/js/views/quiz.js';
+import { septemberMistakes } from '../_site/js/views/september.js';
+import { speakEnglish } from '../_site/js/audio.js';
 import { createLocalStorage } from './helpers/env.js';
 
 globalThis.localStorage=createLocalStorage();

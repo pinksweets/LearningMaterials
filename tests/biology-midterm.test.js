@@ -1,13 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { units } from '../data/b26_midterm.js';
-import { QUESTIONS, STAGE_ORDER } from '../js/content.js';
-import { lessonCardHtml } from '../js/lesson.js';
-import { bioDiagram } from '../js/bio-display.js';
-import { testPrepCategories, renderTestPrepPanel } from '../js/views/home.js';
-import { state } from '../js/state.js';
-import { finishQuestion, renderSavedAnswer } from '../js/views/quiz.js';
-import { snapshotSession, restoreSession } from '../js/session.js';
+import { units } from '../_site/data/b26_midterm.js';
+import { QUESTIONS, STAGE_ORDER } from '../_site/js/content.js';
+import { lessonCardHtml } from '../_site/js/lesson.js';
+import { bioDiagram } from '../_site/js/bio-display.js';
+import { testPrepCategories, renderTestPrepPanel } from '../_site/js/views/home.js';
+import { state } from '../_site/js/state.js';
+import { finishQuestion, renderSavedAnswer } from '../_site/js/views/quiz.js';
+import { snapshotSession, restoreSession } from '../_site/js/session.js';
 import { createLocalStorage } from './helpers/env.js';
 
 test('写真の範囲を6ステージ各10問・計60問、既存生物単元の後ろに追加',()=>{

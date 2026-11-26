@@ -8,7 +8,7 @@ import {
   applyFeverProgress,
   bossWeakRemain,
   initRewardProgress,
-} from "../js/fever.js";
+} from "../_site/js/fever.js";
 
 test("initRewardProgress: 未設定フィールドを既定値(0)で初期化する", () => {
   const c = {};

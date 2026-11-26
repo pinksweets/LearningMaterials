@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { units as ja } from '../data/sep16_japanese.js';
-import { units as ma } from '../data/sep16_math.js';
-import { units as en } from '../data/sep16_english.js';
-import { state } from '../js/state.js';
-import { checkInput } from '../js/views/quiz.js';
+import { units as ja } from '../_site/data/sep16_japanese.js';
+import { units as ma } from '../_site/data/sep16_math.js';
+import { units as en } from '../_site/data/sep16_english.js';
+import { state } from '../_site/js/state.js';
+import { checkInput } from '../_site/js/views/quiz.js';
 import { createLocalStorage } from './helpers/env.js';
 
 test('9/16: 写真の15分野を各10問、3教科各50問で登録する',()=>{
