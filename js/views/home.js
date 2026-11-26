@@ -1,4 +1,4 @@
-import { el, app, toast, escapeAttr, escapeHtml, todayStr, addDays, syncScreenHash, subjectHash } from "../utils.js";
+import { el, app, toast, escapeAttr, escapeHtml, todayStr, addDays, syncScreenHash, subjectHash, studyUnitHash } from "../utils.js";
 import { stopTimer } from "../timer.js";
 import { appendReportingSettings } from './reporting.js';
 import { stopBossTension, stopSpeech, playAnswerSound, BGM, startYouTubeBgm, stopYouTubeBgm } from "../audio.js";
@@ -31,6 +31,7 @@ import { september15Subject } from "./september15.js";
 export function testPrepCategories(today=todayStr()){
   // 追加順を明示し、新しく追加した対策から表示する。日付は年も固定する。
   return [
+    {subject:'📐 数学Ⅰ 期末テスト対策',title:'期末テスト対策｜数学Ⅰ',evergreen:true,added:18,href:studyUnitHash('group:mifs1'),range:'写真p.81〜102｜2次不等式・三角比｜解き方レッスン＋練習80問＋復習模試34問・100点'},
     {subject:'📜 歴史総合',title:'期末テスト対策｜歴史',evergreen:true,added:17,keepSubject:true,unitId:'group:hfs1',href:'#/unit/'+encodeURIComponent('group:hfs1'),range:'項目40〜42｜第二次世界大戦の開始・終結、戦後の国連と経済体制｜要点レッスン＋練習60問＋復習模試34問・100点'},
     {subject:'🧪 化学基礎',title:'期末テスト対策｜化学',evergreen:true,added:16,keepSubject:true,unitId:'group:chfs1',href:'#/unit/'+encodeURIComponent('group:chfs1'),range:'写真p.96〜107｜原子量・分子量・式量・物質量の計算｜解き方レッスン＋練習70問＋復習模擬34問・100点'},
     {subject:'📐 数学A',title:'期末テスト対策｜数学A',evergreen:true,added:15,keepSubject:true,unitId:'group:mafs1',href:'#/unit/'+encodeURIComponent('group:mafs1'),range:'写真p.53〜61｜内心・重心・チェバ・メネラウス・辺と角・円周角・内接四角形｜解き方レッスン＋練習70問＋復習模擬34問・100点'},

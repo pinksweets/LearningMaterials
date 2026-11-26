@@ -153,6 +153,15 @@ export function renderSubjectHome(subject,unitId=''){
       <a class="btn" href="#/lesson/mqs1">一行ずつの例題から始める</a>
       <a class="btn secondary" href="#/lesson/mqs2">平方完成から学び直す</a>
       <a class="btn secondary" href="#/stage/mqmock1/1">100点の確認模擬テストへ</a></section>`:''}
+    ${sids.includes('mifs1')?`<section class="sepPlan"><strong>2次不等式と三角比</strong>
+      <p>写真p.81〜102の範囲から、各10問の8ステージ。まず「まなぶ」で例題の途中式を見てから、紙に式や図を書いて解いてみよう。</p>
+      <ol><li>2次不等式：解の境界と等号 → 重解・判別式 → 連立と文章題 → 区間内の最大・最小。</li>
+      <li>三角比：直角三角形と表 → 辺の長さ・相互関係 → 鈍角の符号 → 角度や残りの比を求める問題。</li>
+      <li>仕上げは練習から選んだ復習模試34問・100点。目安45分は自分で計ろう。目標は80点だよ。</li>
+      <li>模試の終了後に解説を読み、分野別のリンクから苦手な問題を練習して、翌日に再挑戦しよう。</li></ol>
+      <a class="btn" href="#/lesson/mifs1">2次不等式から まなぶ</a>
+      <a class="btn secondary" href="#/lesson/mifs5">三角比から まなぶ</a>
+      <a class="btn secondary" href="#/stage/mifmock1/1">期末の100点模試を始める</a></section>`:''}
     ${subject==='📐 数学A' && (!unit || unit.sids.includes('mafs1'))?`<section class="sepPlan"><strong>期末テスト｜数学A 図形の性質</strong>
       <p>写真p.53〜61の7分野を、解き方から練習しよう。各ステージの「まなぶ」で、使う定理・例題の計算・間違えやすい点を確認できるよ。</p>
       <ol><li>内心・重心：角の二等分と、頂点側が2になる比を確認しよう。</li><li>チェバ・メネラウス：交わる3本か、一直線上の3点かを見分けよう。外側の点では、線分全体と一部分を区別してね。</li><li>辺と角・円周角・内接四角形：向かい合う辺と角、同じ弧、対角の和に注目しよう。</li><li>練習70問の後は、復習模擬34問・100点へ。結果の分野別リンクで復習し、翌日もう一度挑戦しよう。</li></ol>

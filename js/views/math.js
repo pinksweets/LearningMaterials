@@ -1,4 +1,4 @@
-import { app, el, escapeHtml, escapeAttr, syncScreenHash, subjectHash, mathChapterHash } from '../utils.js';
+import { app, el, escapeHtml, escapeAttr, syncScreenHash, subjectHash, mathChapterHash, studyUnitHash } from '../utils.js';
 import { QUESTIONS, MATH1_SUBJECT, MATH1_PREP_SUBJECT, MATH1_CHAPTERS, studyUnitList } from '../content.js';
 import { state, stageMastery, subjectMastery, subjectClearedCount, isLessonSeen, isStageUnlockedForBoss, studyMaterialStatus } from '../state.js';
 import { stopTimer } from '../timer.js';
@@ -84,6 +84,8 @@ export function renderMathHome(chapterId=''){
   app().appendChild(el(`<div class="mathCourse"><nav class="quizBreadcrumb" aria-label="現在地"><a href="#home">ホーム</a><span>›</span>${chapter?`<a href="${subjectHash(MATH1_SUBJECT)}">数学Ⅰ</a><span>› ${escapeHtml(chapter.title)}</span>`:'<span>数学Ⅰ</span>'}</nav>
     <button class="btn secondary small" id="mathBack" type="button">${chapter?'← 数学Ⅰの章一覧へ':'← ホームへ'}</button>
     ${resumePanel(MATH1_SUBJECT,chapter?'math1:'+chapter.id:undefined)}${body}
+    ${!chapter && studyMaterialStatus('group:mifs1')!=='completed'?`<aside class="mathPrepLink"><strong>期末テスト対策</strong><p>2次不等式と三角比の練習80問・復習模試34問に取り組もう。</p>
+      <a href="${studyUnitHash('group:mifs1')}">数学Ⅰの期末テスト対策を開く →</a></aside>`:''}
     ${prepAvailable?`<aside class="mathPrepLink"><strong>テスト対策</strong><p>一行ずつの例題と補習90問・100点の模擬テストは、別の入口から取り組めるよ。</p>
       <a href="${subjectHash(MATH1_PREP_SUBJECT)}">数学Ⅰのテスト対策を開く →</a></aside>`:''}
   </div>`));
