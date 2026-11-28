@@ -153,6 +153,15 @@ export function renderSubjectHome(subject,unitId=''){
       <a class="btn" href="#/lesson/mqs1">一行ずつの例題から始める</a>
       <a class="btn secondary" href="#/lesson/mqs2">平方完成から学び直す</a>
       <a class="btn secondary" href="#/stage/mqmock1/1">100点の確認模擬テストへ</a></section>`:''}
+    ${sids.includes('efs1')?`<section class="sepPlan"><strong>完了形と助動詞</strong>
+      <p>写真p.20〜29の Lesson 6〜10 を、1レッスン10問ずつ練習しよう。「まなぶ」で例文を確認してから、英文選択・穴埋め・語順の問題に進めるよ。</p>
+      <ol><li>Lesson 6〜8：文が今とつながるのか、過去のある時点につながるのかを確かめよう。</li>
+      <li>Lesson 9〜10：同じ助動詞でも意味が変わるよ。日本語の意味や前後の文を手がかりに選ぼう。</li>
+      <li>仕上げは練習から選んだ復習模試35問・100点。目安35分は自分で計ろう。学習目標は80点だよ。</li>
+      <li>模試の後は解説と分野別得点を見て、苦手なレッスンを復習しよう。翌日に解き直してみてね。</li></ol>
+      <a class="btn" href="#/lesson/efs1">現在完了から まなぶ</a>
+      <a class="btn secondary" href="#/lesson/efs4">助動詞から まなぶ</a>
+      <a class="btn secondary" href="#/stage/efmock1/1">英語の100点模試を始める</a></section>`:''}
     ${sids.includes('mifs1')?`<section class="sepPlan"><strong>2次不等式と三角比</strong>
       <p>写真p.81〜102の範囲から、各10問の8ステージ。まず「まなぶ」で例題の途中式を見てから、紙に式や図を書いて解いてみよう。</p>
       <ol><li>2次不等式：解の境界と等号 → 重解・判別式 → 連立と文章題 → 区間内の最大・最小。</li>

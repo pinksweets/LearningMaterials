@@ -32,6 +32,7 @@ import { september15Subject } from "./september15.js";
 export function testPrepCategories(today=todayStr()){
   // 追加順を明示し、新しく追加した対策から表示する。日付は年も固定する。
   return [
+    {subject:'🇬🇧 英語 期末テスト対策',title:'期末テスト対策｜英語',evergreen:true,added:19,href:studyUnitHash('group:efs1'),range:'Lesson 6〜10（写真p.20〜29）｜完了形・助動詞｜要点レッスン＋練習50問＋復習模試35問・100点'},
     {subject:'📐 数学Ⅰ 期末テスト対策',title:'期末テスト対策｜数学Ⅰ',evergreen:true,added:18,href:studyUnitHash('group:mifs1'),range:'写真p.81〜102｜2次不等式・三角比｜解き方レッスン＋練習80問＋復習模試34問・100点'},
     {subject:'📜 歴史総合',title:'期末テスト対策｜歴史',evergreen:true,added:17,keepSubject:true,unitId:'group:hfs1',href:'#/unit/'+encodeURIComponent('group:hfs1'),range:'項目40〜42｜第二次世界大戦の開始・終結、戦後の国連と経済体制｜要点レッスン＋練習60問＋復習模試34問・100点'},
     {subject:'🧪 化学基礎',title:'期末テスト対策｜化学',evergreen:true,added:16,keepSubject:true,unitId:'group:chfs1',href:'#/unit/'+encodeURIComponent('group:chfs1'),range:'写真p.96〜107｜原子量・分子量・式量・物質量の計算｜解き方レッスン＋練習70問＋復習模擬34問・100点'},

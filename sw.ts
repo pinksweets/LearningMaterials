@@ -15,7 +15,7 @@
      （バンプを忘れると古いキャッシュがいつまでも残り続ける）。
 ============================================================ */
 
-const CACHE_NAME = 'gakushu-quest-v43';
+const CACHE_NAME = 'gakushu-quest-v44';
 const worker = self as unknown as ServiceWorkerGlobalScope;
 let cacheFallbackUntil = 0;
 
@@ -90,6 +90,8 @@ const ASSETS = [
   './data/h_final_mock.js',
   './data/m1_final_practice.js',
   './data/m1_final_mock.js',
+  './data/e_final_grammar.js',
+  './data/e_final_mock.js',
   './data/e26_midterm.js',
   './data/e26_mock.js',
   './data/ec26_midterm.js',
